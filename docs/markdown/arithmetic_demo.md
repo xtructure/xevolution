@@ -76,7 +76,7 @@ from examples.arithmetic import decode, expression
 
 bits = "0111001001100100"
 print(expression(bits))  # 7 + 9 * 4
-print(decode(bits))      # 64
+print(decode(bits))  # 64
 ```
 
 The text returned by `expression()` does not add parentheses. Read it using
