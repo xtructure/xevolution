@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Porting notes The source baseline is the generic Java xevolution subproject at commit 509c673e502f0c27daa6b91f39cc298404b59ae2. The implementation follows the repository&#x27;s port spe">
+<title>Porting notes · xevolution documentation</title>
+<link rel="stylesheet" href="assets/docs.css">
+<script defer src="assets/search-index.js"></script>
+<script defer src="assets/docs.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#xevo-main">Skip to content</a>
+<header class="site-header"><div class="header-inner">
+<a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">x</span><span class="brand-name">xevolution<span class="brand-note">Evolutionary computation · Python</span></span></a>
+<div class="header-right"><span class="version">v0.1.1</span>
+<div class="search-wrap" id="xevo-search" role="search" hidden>
+<label class="sr-only" for="xevo-search-input">Search documentation</label>
+<input id="xevo-search-input" type="search" placeholder="Search the documentation" autocomplete="off" aria-controls="xevo-search-results" aria-expanded="false">
+<kbd class="search-key" aria-hidden="true">/</kbd>
+<div id="xevo-search-results" class="search-results" role="region" aria-label="Search results" aria-live="polite" hidden></div>
+</div></div></div></header>
+<div class="layout">
+<details class="sidebar" id="xevo-navigation" open><summary>Browse documentation</summary>
+<nav aria-label="Documentation"><section class="nav-group"><h2 class="nav-heading">Start here</h2><ul><li><a href="index.html">Documentation home</a></li><li><a href="overview.html">Package overview</a></li><li><a href="examples.html">Choose an example</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Example projects</h2><ul><li><a href="arithmetic_demo.html">Arithmetic expressions</a></li><li><a href="batch_demo.html">Shared resources</a></li><li><a href="digits_demo.html">Digits MLP</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Reference</h2><ul><li><a href="configuration.html">JSON configuration</a></li><li><a href="cli.html">Command line</a></li><li><a href="extensions.html">Application extensions</a></li><li><a href="architecture.html">Architecture &amp; ownership</a></li><li><a href="checkpointing.html">Checkpoints &amp; recovery</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Project</h2><ul><li><a href="porting_notes.html" aria-current="page">Porting notes</a></li><li><a href="verification.html">Release verification</a></li><li><a href="port_specification.html">Port specification</a></li><li><a href="contributing.html">Contributing</a></li><li><a href="building_docs.html">Building these docs</a></li></ul></section></nav>
+<div class="sidebar-footer">Version 0.1.1<br>Offline reference documentation.<br>Markdown is the editable source.</div>
+</details>
+<main class="content" id="xevo-main"><div class="document-grid">
+<div class="article-column">
+<div class="page-meta"><div class="breadcrumb"><a href="index.html">Docs</a><span>/</span>Project</div><a class="source-link" href="../markdown/porting_notes.md">Markdown source</a></div>
+<details class="compact-toc"><summary>On this page</summary><ul class="toc-list"><li><a href="#scope-and-mapping">Scope and mapping</a></li><li><a href="#intended-algorithmic-behavior-retained">Intended algorithmic behavior retained</a></li><li><a href="#deliberate-corrections-and-changes">Deliberate corrections and changes</a></li></ul></details>
+<article class="document"><h1 id="porting-notes">Porting notes</h1>
+<p>The source baseline is the generic Java <a href="https://github.com/xtructure/xnet-public/tree/509c673e502f0c27daa6b91f39cc298404b59ae2/xnet/xevolution"><code>xevolution</code> subproject at commit <code>509c673e502f0c27daa6b91f39cc298404b59ae2</code></a>. The implementation follows the repository's <a href="port_specification.html">port specification</a>.</p>
+<h2 id="scope-and-mapping">Scope and mapping</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Java responsibility</th>
+<th>Python owner</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Genome, population, attributes, and identity</td>
+<td><code>models.py</code>, with explicit IDs, typed core fields, and named metrics</td>
+</tr>
+<tr class="even">
+<td>Genetics factories and genome decoders</td>
+<td>Application initialization, cloning, codecs, and optional decoding composed in <code>experiment.py</code></td>
+</tr>
+<tr class="odd">
+<td>Evolution strategy</td>
+<td><code>engine.py</code></td>
+</tr>
+<tr class="even">
+<td>Evaluation strategies</td>
+<td><code>evaluation.py</code> and application evaluation hooks</td>
+</tr>
+<tr class="odd">
+<td>Parent selection and survival filters</td>
+<td>Separate policies in <code>selection.py</code></td>
+</tr>
+<tr class="even">
+<td>Mutation, crossover, and operator selection</td>
+<td><code>operators.py</code> and <code>reproduction.py</code></td>
+</tr>
+<tr class="odd">
+<td>Configuration, ranges, and stopping conditions</td>
+<td><code>config.py</code> and <code>termination.py</code></td>
+</tr>
+<tr class="even">
+<td>XML persistence</td>
+<td>Explicit versioned representations in <code>serialization.py</code> and durable file operations in <code>storage.py</code></td>
+</tr>
+<tr class="odd">
+<td>Population statistics and genealogy tools</td>
+<td><code>tracking.py</code> and the <code>inspect</code>/<code>analyze</code> commands</td>
+</tr>
+<tr class="even">
+<td>Logging and command-line option wrappers</td>
+<td>Python <code>logging</code> and <code>argparse</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Needed <code>xutil</code> behavior is incorporated where it belongs. Collection builders, getter/setter wrappers, lazy-construction holders, and Java interface/abstract/ implementation hierarchies are not reproduced as parallel Python hierarchies.</p>
+<p>NEAT, simulation implementations, batch-simulation infrastructure, all graphical interfaces, screenshot tools, and the unfinished operator workbench are excluded. Application evaluators may use their own simulators, numerical libraries, or execution backends. The framework itself has no such runtime dependencies.</p>
+<h2 id="intended-algorithmic-behavior-retained">Intended algorithmic behavior retained</h2>
+<ul>
+<li>Generation 0 is the evaluated initial population.</li>
+<li>Parent selection and survivor selection are separate. The complete previous population remains eligible for parent selection, including nonsurvivors.</li>
+<li>Complete replacement is the default. Every member of the resulting population, including a retained survivor, is evaluated each generation.</li>
+<li>The mutation probability chooses mutation <strong>or</strong> crossover for one offspring. It does not schedule a second mutation stage after crossover.</li>
+<li>The objective is one finite scalar fitness, maximized by default. Additional named measurements support analysis without becoming extra objectives.</li>
+<li>Whole-population evaluation is a first-class application hook. It may depend jointly on all candidates rather than reproduce a loop of independent scores.</li>
+</ul>
+<p>The <a href="https://github.com/xtructure/xnet-public/blob/509c673e502f0c27daa6b91f39cc298404b59ae2/xnet/xevolution/src/main/java/com/xtructure/xevolution/evolution/impl/AbstractEvolutionStrategy.java#L243-L265">Java generation lifecycle</a> and the <a href="https://github.com/xtructure/xnet-public/blob/509c673e502f0c27daa6b91f39cc298404b59ae2/xnet/demos/src/main/java/com/xtructure/xnet/demos/oned/OneDEvaluationStrategyImpl.java#L94-L147">application batch-evaluation example</a> establish these extension and lifecycle boundaries.</p>
+<h2 id="deliberate-corrections-and-changes">Deliberate corrections and changes</h2>
+<ol type="1">
+<li><strong>Explicit JSON state replaces Java serialization.</strong> Configuration, checkpoints, and scientific history have versioned representations. Application codecs preserve genotype semantics. Java files and Java random trajectories are not compatibility targets.</li>
+<li><strong>Fresh creation and restoration are separate operations.</strong> The Java runner <a href="https://github.com/xtructure/xnet-public/blob/509c673e502f0c27daa6b91f39cc298404b59ae2/xnet/xevolution/src/main/java/com/xtructure/xevolution/evolution/impl/AbstractEvolutionExperiment.java#L154-L169">loads the most recently modified XML file in its output directory</a>. Python resumes only the explicit authoritative checkpoint and does not initialize or reevaluate its saved population.</li>
+<li><strong>Reproduction is bounded.</strong> Positive-weight operators are tried without replacement within an attempt, followed by explicit fallbacks. Each child has a finite attempt budget. Only the defined inapplicability condition is recoverable; programming failures propagate.</li>
+<li><strong>Selection weights are validated.</strong> Direct roulette weights must be finite and nonnegative. All-zero weights select uniformly. Negative fitness is valid data but requires a compatible selector or an explicit weight transformation; it does not silently remove selection pressure.</li>
+<li><strong>Saved counters allocate identities.</strong> Removed individuals cannot cause an ID to be reused after restoration. Genotype comparison and hashing do not determine identity.</li>
+<li><strong>Newborn age is zero.</strong> Age is the current generation minus birth generation, rather than a separately mutable field.</li>
+<li><strong>Missing measurements remain missing.</strong> Each metric's statistics include its own contributing count. Missing values are not replaced by zero or divided by the full population size.</li>
+<li><strong>Historical observations are independent.</strong> Retained best individuals and scientific records cannot be rewritten by later mutation or reevaluation of live candidates. Equal fitness under a different ID is not an improvement.</li>
+<li><strong>The framework owns accepted-evaluation accounting.</strong> Evaluators return results. The coordinator validates complete ID coverage before applying any scores or incrementing counts.</li>
+<li><strong>Scientific history shares the checkpoint boundary.</strong> Only the committed journal prefix contributes to reports. A resumed writer discards an uncommitted tail before appending; missing or corrupt committed data is an error.</li>
+</ol>
+<p>The <a href="https://github.com/xtructure/xnet-public/blob/509c673e502f0c27daa6b91f39cc298404b59ae2/xnet/xevolution/src/main/java/com/xtructure/xevolution/evolution/impl/AbstractReproductionStrategy.java#L156-L265">original reproduction loop</a>, <a href="https://github.com/xtructure/xnet-public/blob/509c673e502f0c27daa6b91f39cc298404b59ae2/xnet/xevolution/src/main/java/com/xtructure/xevolution/operator/impl/AbstractOperatorSelecter.java#L90-L183">operator-selection reset behavior</a>, <a href="https://github.com/xtructure/xnet-public/blob/509c673e502f0c27daa6b91f39cc298404b59ae2/xnet/xutil/src/main/java/com/xtructure/xutil/RandomUtil.java#L562-L578">weight normalization</a>, and <a href="https://github.com/xtructure/xnet-public/blob/509c673e502f0c27daa6b91f39cc298404b59ae2/xnet/xevolution/src/main/java/com/xtructure/xevolution/genetics/impl/AbstractPopulation.java#L537-L579">population statistics</a> are the reference points for the corresponding corrections.</p>
+<p>Exact continuation is a contract for compatible application code, data, state, and numerical execution. It does not imply cross-version or cross-platform numerical equivalence, or exactly-once external side effects. See <a href="checkpointing.html">checkpointing</a>.</p>
+</article>
+<nav class="pagination" aria-label="Previous and next articles"><a class="previous" href="checkpointing.html"><small>Previous</small><strong>Checkpoints &amp; recovery</strong></a><a class="next" href="verification.html"><small>Next</small><strong>Release verification</strong></a></nav>
+<footer class="page-footer">xevolution 0.1.1 documentation · <a href="building_docs.html">Build and edit these docs</a><br>Framework behavior is documented for the supplied Python port. See <a href="verification.html">release verification</a> for the scope of executed checks.</footer>
+</div>
+<aside class="page-toc"><nav aria-label="On this page"><div class="toc-title">On this page</div><ul class="toc-list"><li><a href="#scope-and-mapping">Scope and mapping</a></li><li><a href="#intended-algorithmic-behavior-retained">Intended algorithmic behavior retained</a></li><li><a href="#deliberate-corrections-and-changes">Deliberate corrections and changes</a></li></ul></nav></aside>
+</div></main></div>
+</body></html>

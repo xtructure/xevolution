@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Shared resources and population evaluation This example models candidates choosing among resources whose quality must be shared. A candidate receives a larger share when fewer popu">
+<title>Shared resources and population evaluation · xevolution documentation</title>
+<link rel="stylesheet" href="assets/docs.css">
+<script defer src="assets/search-index.js"></script>
+<script defer src="assets/docs.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#xevo-main">Skip to content</a>
+<header class="site-header"><div class="header-inner">
+<a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">x</span><span class="brand-name">xevolution<span class="brand-note">Evolutionary computation · Python</span></span></a>
+<div class="header-right"><span class="version">v0.1.1</span>
+<div class="search-wrap" id="xevo-search" role="search" hidden>
+<label class="sr-only" for="xevo-search-input">Search documentation</label>
+<input id="xevo-search-input" type="search" placeholder="Search the documentation" autocomplete="off" aria-controls="xevo-search-results" aria-expanded="false">
+<kbd class="search-key" aria-hidden="true">/</kbd>
+<div id="xevo-search-results" class="search-results" role="region" aria-label="Search results" aria-live="polite" hidden></div>
+</div></div></div></header>
+<div class="layout">
+<details class="sidebar" id="xevo-navigation" open><summary>Browse documentation</summary>
+<nav aria-label="Documentation"><section class="nav-group"><h2 class="nav-heading">Start here</h2><ul><li><a href="index.html">Documentation home</a></li><li><a href="overview.html">Package overview</a></li><li><a href="examples.html">Choose an example</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Example projects</h2><ul><li><a href="arithmetic_demo.html">Arithmetic expressions</a></li><li><a href="batch_demo.html" aria-current="page">Shared resources</a></li><li><a href="digits_demo.html">Digits MLP</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Reference</h2><ul><li><a href="configuration.html">JSON configuration</a></li><li><a href="cli.html">Command line</a></li><li><a href="extensions.html">Application extensions</a></li><li><a href="architecture.html">Architecture &amp; ownership</a></li><li><a href="checkpointing.html">Checkpoints &amp; recovery</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Project</h2><ul><li><a href="porting_notes.html">Porting notes</a></li><li><a href="verification.html">Release verification</a></li><li><a href="port_specification.html">Port specification</a></li><li><a href="contributing.html">Contributing</a></li><li><a href="building_docs.html">Building these docs</a></li></ul></section></nav>
+<div class="sidebar-footer">Version 0.1.1<br>Offline reference documentation.<br>Markdown is the editable source.</div>
+</details>
+<main class="content" id="xevo-main"><div class="document-grid">
+<div class="article-column">
+<div class="page-meta"><div class="breadcrumb"><a href="index.html">Docs</a><span>/</span>Example projects</div><a class="source-link" href="../markdown/batch_demo.md">Markdown source</a></div>
+<details class="compact-toc"><summary>On this page</summary><ul class="toc-list"><li><a href="#run-the-supplied-preset">Run the supplied preset</a></li><li><a href="#genotype-and-fitness">Genotype and fitness</a></li><li class="subsection"><a href="#a-small-worked-example">A small worked example</a></li><li><a href="#how-the-application-uses-the-framework">How the application uses the framework</a></li><li><a href="#initialization-and-variation">Initialization and variation</a></li><li><a href="#configuration-and-evaluation-counts">Configuration and evaluation counts</a></li><li><a href="#interpret-history-in-its-population-context">Interpret history in its population context</a></li><li><a href="#pause-continue-and-change-the-experiment">Pause, continue, and change the experiment</a></li></ul></details>
+<article class="document"><h1 id="shared-resources-and-population-evaluation">Shared resources and population evaluation</h1>
+<p>This example models candidates choosing among resources whose quality must be shared. A candidate receives a larger share when fewer population members choose the same resource. Its fitness therefore depends on both its own choice and the choices made by the rest of the population.</p>
+<p>The example demonstrates xevolution's <strong>whole-population evaluation hook</strong>. The framework passes the complete population to the application, which computes all the related scores together and returns them with individual IDs. The <a href="overview.html">package overview</a> explains where evaluation fits into a run; the <a href="examples.html">examples guide</a> compares the three applications.</p>
+<h2 id="run-the-supplied-preset">Run the supplied preset</h2>
+<p>The application is <code>examples/batch_problem.py</code>, configured by <code>examples/batch_problem.json</code>. Run these commands from the project root containing <code>pyproject.toml</code> and the <code>examples/</code> package:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> python install 3.12</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> sync <span class="at">--locked</span> <span class="at">--group</span> dev</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> python <span class="at">-m</span> xevolution run <span class="at">--config</span> examples/batch_problem.json <span class="at">--output</span> runs/shared-resources</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> python <span class="at">-m</span> xevolution inspect runs/shared-resources</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> python <span class="at">-m</span> xevolution analyze runs/shared-resources <span class="at">--output</span> reports/shared-resources</span></code></pre></div>
+<p>The project uses a local virtual environment managed by uv. Keep <code>UV_PROJECT_ENVIRONMENT</code> unset or pointing to its <code>.venv</code>. This application uses only the Python standard library; it needs no external dataset or numerical package. The example factory is supplied by the source project, rather than installed inside the core wheel.</p>
+<p>The output run directory must be new or empty. The analysis command writes <code>reports/shared-resources/analysis.json</code>. It reads the committed history and does not run another population evaluation.</p>
+<h2 id="genotype-and-fitness">Genotype and fitness</h2>
+<p>Each genotype is one integer: a zero-based index into the configured <code>resource_quality</code> list. The preset contains four resources:</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Resource index</th>
+<th style="text-align: right;">Quality</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td style="text-align: right;">1.0</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td style="text-align: right;">1.8</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td style="text-align: right;">3.0</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td style="text-align: right;">5.0</td>
+</tr>
+</tbody>
+</table></div>
+<p>For each resource, the application counts how many population members chose it. Every candidate at that resource receives the same share:</p>
+<pre class="text"><code>fitness = resource_quality[choice] / occupancy[choice]</code></pre>
+<p>The highest-quality resource is not automatically the best choice in a particular population. For example, quality 5 shared by ten candidates gives each fitness 0.5; quality 1.8 shared by two gives each fitness 0.9.</p>
+<p>Each result also contains two metrics:</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Metric</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>resource</code></td>
+<td>The candidate's chosen resource index, recorded as a float</td>
+</tr>
+<tr class="even">
+<td><code>crowding</code></td>
+<td>The number of candidates sharing that resource, including itself</td>
+</tr>
+</tbody>
+</table></div>
+<p>All configured qualities are positive and finite. Every evaluated candidate contributes to the count at its own resource, so the denominator is at least one. Resources with no occupants contribute no individual evaluations.</p>
+<h3 id="a-small-worked-example">A small worked example</h3>
+<p>Consider two resources with qualities <code>[6.0, 2.0]</code> and three candidates. These qualities are chosen to make the arithmetic clear; they differ from the four-resource preset.</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Candidate label</th>
+<th style="text-align: right;">First choice</th>
+<th style="text-align: right;">First fitness</th>
+<th style="text-align: right;">Choice after B moves</th>
+<th style="text-align: right;">New fitness</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">6 / 2 = 3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">6 / 1 = 6</td>
+</tr>
+<tr class="even">
+<td>B</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">6 / 2 = 3</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2 / 2 = 1</td>
+</tr>
+<tr class="odd">
+<td>C</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2 / 1 = 2</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2 / 2 = 1</td>
+</tr>
+</tbody>
+</table></div>
+<p>Only B changed its choice, yet all three scores changed. A's unchanged genotype cannot be assigned a correct score without knowing the population. The letters label two hypothetical population arrangements. They are separate from resource indices and literal framework IDs; an actual evolutionary child receives a new integer ID.</p>
+<h2 id="how-the-application-uses-the-framework">How the application uses the framework</h2>
+<p><code>build_experiment()</code> supplies <code>evaluate_population=application.evaluate_population</code>. It does not supply the individual <code>evaluate</code> hook. For every generation the population evaluator:</p>
+<ol type="1">
+<li>Counts resource occupancy using the entire population.</li>
+<li>Calculates each candidate's share and descriptive metrics.</li>
+<li>Returns one <code>(individual_id, EvaluationResult)</code> pair for every individual.</li>
+</ol>
+<p>The implementation deliberately returns these pairs in reverse population order. xevolution associates them by explicit ID, validates complete coverage, and applies accepted results in its deterministic population order. Applications must not assume that the position of a result identifies its candidate.</p>
+<p>This is joint scoring performed once for the complete population. The framework does not also call an individual evaluator or count accepted evaluations twice. A population of 48 still contributes 48 accepted individual evaluations to the framework's counter, even though one population-hook call produced all 48 results. See <a href="extensions.html">evaluation contracts</a> for result validation and the choice between the two hooks.</p>
+<h2 id="initialization-and-variation">Initialization and variation</h2>
+<p>Initialization chooses a resource uniformly with the run-owned random generator. Mutation also chooses uniformly from all resource indices, so it can select the current resource again. Crossover chooses one of the two parents' resource indices with equal probability. This representation has one gene; crossover therefore inherits a complete parental choice.</p>
+<p>The mutation result records <code>previous_resource</code> and <code>resource</code> in its lineage details. Crossover records <code>selected_parent</code>, either 0 or 1. Offspring receive fresh framework IDs even when their resource choice matches a parent's.</p>
+<p>An integer is immutable, so cloning can return the existing value safely. <code>ResourceCodec</code> encodes the integer directly and validates its range on restoration. A boolean is rejected as a resource ID despite Python's treatment of booleans as a kind of integer.</p>
+<h2 id="configuration-and-evaluation-counts">Configuration and evaluation counts</h2>
+<p>The application accepts one parameter under <code>experiment.parameters</code>:</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Default and supplied value</th>
+<th>Validation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>resource_quality</code></td>
+<td><code>[1.0, 1.8, 3.0, 5.0]</code></td>
+<td>A nonempty list of positive finite numbers; booleans are rejected</td>
+</tr>
+</tbody>
+</table></div>
+<p>The list's length determines the number of resources and the legal genotype indices. Unknown application parameters are errors. Resource quality does not evolve; it defines the environment in which resource choices evolve.</p>
+<p>The preset uses the following framework settings:</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Setting</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Evolutionary seed</td>
+<td>24680</td>
+</tr>
+<tr class="even">
+<td>Population size</td>
+<td>48</td>
+</tr>
+<tr class="odd">
+<td>Parent selection</td>
+<td>Roulette using the current population's fitness values</td>
+</tr>
+<tr class="even">
+<td>Survivor policy</td>
+<td>Complete replacement</td>
+</tr>
+<tr class="odd">
+<td>Mutation probability</td>
+<td>0.75; otherwise choose crossover</td>
+</tr>
+<tr class="even">
+<td>Maximum attempts per child</td>
+<td>20</td>
+</tr>
+<tr class="odd">
+<td>Termination</td>
+<td>Maximum generation 12</td>
+</tr>
+</tbody>
+</table></div>
+<p>Generation 0 is the evaluated initial population. With no earlier stopping predicate, a complete preset run evaluates generations 0 through 12: <strong>13 population-hook calls and 624 accepted individual evaluations</strong>. Parents are selected from the entire previous population, using its accepted scores. Every new generation is evaluated as a complete population so that scores reflect the new occupancy.</p>
+<p>For general settings, bounds, and available selection policies, see <a href="configuration.html">JSON configuration</a>.</p>
+<h2 id="interpret-history-in-its-population-context">Interpret history in its population context</h2>
+<p>The run summary and <code>inspect</code> output distinguish the historical best record from the current population's statistics. Here, historical best means <strong>the largest individual share observed in its recorded population context</strong>. It does not mean that the winning resource index has a permanent fitness or will produce that score in a different population.</p>
+<p>Keep the associated generation and <code>crowding</code> metric when interpreting an observation. A historical-best candidate may have left the population, and the same resource can score differently in later generations. The analysis JSON preserves generation membership, individual observation histories, and genealogy so that these relationships can be examined together.</p>
+<p>Population mean fitness also needs care. Summing the shares of all occupants of one resource recovers that resource's quality. Consequently:</p>
+<pre class="text"><code>mean_fitness = sum(qualities of occupied resources) / population_size</code></pre>
+<p>When all four preset resources are occupied, the mean is approximately <code>10.8 / 48 = 0.225</code>, regardless of how those 48 candidates are distributed among them. The allocation can change substantially while the mean stays constant. Inspect occupancy and individual shares alongside summary fitness. The example illustrates coupled evaluation; it does not establish a unique globally optimal allocation.</p>
+<h2 id="pause-continue-and-change-the-experiment">Pause, continue, and change the experiment</h2>
+<p>This preset has a fixed generation limit, making it convenient for seeing checkpoint continuation. Use a fresh directory for the paused run:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> python <span class="at">-m</span> xevolution run <span class="at">--config</span> examples/batch_problem.json <span class="at">--output</span> runs/shared-resources-paused <span class="at">--pause-after-generation</span> 2</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> python <span class="at">-m</span> xevolution inspect runs/shared-resources-paused</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> python <span class="at">-m</span> xevolution resume runs/shared-resources-paused</span></code></pre></div>
+<p>The pause commits generation 2 after three population evaluations, accounting for 144 accepted individual evaluations. Resume continues at the next transition and retains the configured generation-12 limit. It does not rescore the saved generation. Resuming an already terminated run leaves it terminated.</p>
+<p>Save changed qualities, population size, or evolutionary seed in a new configuration and start a new output directory. Resume reconstructs the saved configuration; editing the original JSON does not alter an existing run. Compatible code and explicit random/component state remain part of the <a href="checkpointing.html">checkpoint contract</a>. The <a href="cli.html">CLI reference</a> describes graceful signals and recovery.</p>
+<p>To adapt the example to shared constraints, competition, or a coupled simulation, keep the population hook and replace its scoring model. If each candidate can be scored independently, the <a href="arithmetic_demo.html">arithmetic</a> and <a href="digits_demo.html">Digits</a> examples show the simpler individual hook.</p>
+</article>
+<nav class="pagination" aria-label="Previous and next articles"><a class="previous" href="arithmetic_demo.html"><small>Previous</small><strong>Arithmetic expressions</strong></a><a class="next" href="digits_demo.html"><small>Next</small><strong>Digits MLP</strong></a></nav>
+<footer class="page-footer">xevolution 0.1.1 documentation · <a href="building_docs.html">Build and edit these docs</a><br>Framework behavior is documented for the supplied Python port. See <a href="verification.html">release verification</a> for the scope of executed checks.</footer>
+</div>
+<aside class="page-toc"><nav aria-label="On this page"><div class="toc-title">On this page</div><ul class="toc-list"><li><a href="#run-the-supplied-preset">Run the supplied preset</a></li><li><a href="#genotype-and-fitness">Genotype and fitness</a></li><li class="subsection"><a href="#a-small-worked-example">A small worked example</a></li><li><a href="#how-the-application-uses-the-framework">How the application uses the framework</a></li><li><a href="#initialization-and-variation">Initialization and variation</a></li><li><a href="#configuration-and-evaluation-counts">Configuration and evaluation counts</a></li><li><a href="#interpret-history-in-its-population-context">Interpret history in its population context</a></li><li><a href="#pause-continue-and-change-the-experiment">Pause, continue, and change the experiment</a></li></ul></nav></aside>
+</div></main></div>
+</body></html>

@@ -1,0 +1,552 @@
+{
+  "core_runtime_dependencies": [],
+  "current_release_other_platforms_or_python_versions_executed": false,
+  "development_checks": {
+    "build_sdist": "passed",
+    "build_wheel": "passed",
+    "pytest": {
+      "elapsed_seconds": 11.959,
+      "errors": 0,
+      "failures": 0,
+      "passed": 246,
+      "skipped": 0,
+      "tests": 246
+    },
+    "ruff_format": "passed; 47 files already formatted",
+    "ruff_lint": "passed",
+    "strict_mypy": "passed; src/xevolution and both new example modules, 21 source files"
+  },
+  "digits_demo": {
+    "candidate_measurements": [
+      {
+        "architecture": {
+          "activation": "relu",
+          "hidden_layers": [
+            32
+          ]
+        },
+        "maximum_seconds": 0.10531392500024594,
+        "median_seconds": 0.10498324600030173,
+        "parameter_count": 2410,
+        "seconds": [
+          0.10531392500024594,
+          0.10498324600030173,
+          0.09030377699991732
+        ],
+        "validation_accuracy": [
+          0.8675,
+          0.8675,
+          0.8675
+        ]
+      },
+      {
+        "architecture": {
+          "activation": "relu",
+          "hidden_layers": [
+            64,
+            64,
+            64
+          ]
+        },
+        "maximum_seconds": 0.22276837800018257,
+        "median_seconds": 0.21679818199982037,
+        "parameter_count": 13130,
+        "seconds": [
+          0.19766290600000502,
+          0.21679818199982037,
+          0.22276837800018257
+        ],
+        "validation_accuracy": [
+          0.9475,
+          0.9475,
+          0.9475
+        ]
+      },
+      {
+        "architecture": {
+          "activation": "tanh",
+          "hidden_layers": [
+            64,
+            64,
+            64
+          ]
+        },
+        "maximum_seconds": 0.23539713600030154,
+        "median_seconds": 0.20993579700007103,
+        "parameter_count": 13130,
+        "seconds": [
+          0.23539713600030154,
+          0.19622583899990786,
+          0.20993579700007103
+        ],
+        "validation_accuracy": [
+          0.95,
+          0.95,
+          0.95
+        ]
+      }
+    ],
+    "compatibility": {
+      "application_source_sha256": "135dfbe3254fd2a33ae4617a49ddee1b2a76bf16ac138e68c2671f74073b5218",
+      "blas_backends": [
+        {
+          "architecture": "SkylakeX",
+          "internal_api": "openblas",
+          "num_threads": 1,
+          "prefix": "libscipy_openblas",
+          "threading_layer": "pthreads",
+          "user_api": "blas",
+          "version": "0.3.31.dev"
+        },
+        {
+          "architecture": "SkylakeX",
+          "internal_api": "openblas",
+          "num_threads": 1,
+          "prefix": "libscipy_openblas",
+          "threading_layer": "pthreads",
+          "user_api": "blas",
+          "version": "0.3.34.106.0"
+        }
+      ],
+      "data_sha256": "00aa0ed98a41abf359856846d842a88e52905ae03957825df1817cbd4c4e0057",
+      "python": {
+        "byteorder": "little",
+        "implementation": "CPython",
+        "libc": [
+          "glibc",
+          "2.39"
+        ],
+        "machine": "x86_64",
+        "system": "Linux",
+        "version": "3.12.14"
+      },
+      "settings": {
+        "alpha": 0.0001,
+        "batch_size": 128,
+        "epochs": 30,
+        "learning_rate": 0.001,
+        "split_seed": 17,
+        "test_size": 397,
+        "train_size": 1000,
+        "training_seed": 23,
+        "validation_size": 400
+      },
+      "training_recipe": {
+        "blas_threads": 1,
+        "classes": 10,
+        "dtype": "float64",
+        "early_stopping": false,
+        "effective_batch_size": 128,
+        "epoch_order": "separate numpy PCG64(training_seed) permutations",
+        "fitness": "validation correct_count / validation_size",
+        "initialization": "sklearn RandomState(training_seed), fresh for every model",
+        "input_features": 64,
+        "shuffle": false,
+        "solver": "MLPClassifier Adam; one partial_fit call per epoch",
+        "version": 1
+      },
+      "versions": {
+        "numpy": "2.5.4",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "threadpoolctl": "3.7.0"
+      }
+    },
+    "data_preparation_seconds": 0.013867133999610814,
+    "method": "Three fresh complete evaluator calls per architecture, sequentially, with prepared data and no concurrent project tests. No fitted-model cache or warmup fit.",
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+    "presets": {
+      "normal": {
+        "config": "examples/neural_digits.json",
+        "report": {
+          "baseline": {
+            "architecture": {
+              "activation": "relu",
+              "hidden_layers": [
+                32
+              ]
+            },
+            "parameter_count": 2410,
+            "test": {
+              "accuracy": 0.9219143576826196,
+              "correct": 366,
+              "percent": 92.19143576826197,
+              "total": 397
+            },
+            "validation": {
+              "accuracy": 0.8675,
+              "correct": 347,
+              "percent": 86.75,
+              "total": 400
+            }
+          },
+          "compatibility": {
+            "application_source_sha256": "135dfbe3254fd2a33ae4617a49ddee1b2a76bf16ac138e68c2671f74073b5218",
+            "blas_backends": [
+              {
+                "architecture": "SkylakeX",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libscipy_openblas",
+                "threading_layer": "pthreads",
+                "user_api": "blas",
+                "version": "0.3.31.dev"
+              },
+              {
+                "architecture": "SkylakeX",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libscipy_openblas",
+                "threading_layer": "pthreads",
+                "user_api": "blas",
+                "version": "0.3.34.106.0"
+              }
+            ],
+            "data_sha256": "00aa0ed98a41abf359856846d842a88e52905ae03957825df1817cbd4c4e0057",
+            "python": {
+              "byteorder": "little",
+              "implementation": "CPython",
+              "libc": [
+                "glibc",
+                "2.39"
+              ],
+              "machine": "x86_64",
+              "system": "Linux",
+              "version": "3.12.14"
+            },
+            "settings": {
+              "alpha": 0.0001,
+              "batch_size": 128,
+              "epochs": 30,
+              "learning_rate": 0.001,
+              "split_seed": 17,
+              "test_size": 397,
+              "train_size": 1000,
+              "training_seed": 23,
+              "validation_size": 400
+            },
+            "training_recipe": {
+              "blas_threads": 1,
+              "classes": 10,
+              "dtype": "float64",
+              "early_stopping": false,
+              "effective_batch_size": 128,
+              "epoch_order": "separate numpy PCG64(training_seed) permutations",
+              "fitness": "validation correct_count / validation_size",
+              "initialization": "sklearn RandomState(training_seed), fresh for every model",
+              "input_features": 64,
+              "shuffle": false,
+              "solver": "MLPClassifier Adam; one partial_fit call per epoch",
+              "version": 1
+            },
+            "versions": {
+              "numpy": "2.5.4",
+              "scikit-learn": "1.9.1",
+              "scipy": "1.18.1",
+              "threadpoolctl": "3.7.0"
+            }
+          },
+          "completed_generation": 5,
+          "partitions": {
+            "test": 397,
+            "training": 1000,
+            "validation": 400
+          },
+          "report_evaluations": {
+            "fresh_model_fits": 2,
+            "recorded_in_evolutionary_history": false,
+            "selection_uses_test": false,
+            "test_evaluations": 2,
+            "training_partition": "original training split"
+          },
+          "report_type": "digits_held_out_evaluation",
+          "run_id": "2eed2b7da34f45139a465fac3556c5d4",
+          "schema_version": 1,
+          "search": {
+            "accepted_evaluations": 48,
+            "best_improvement_generation": 5,
+            "historical_best_id": 37,
+            "objective": "validation_accuracy",
+            "saved_best_validation_accuracy": 0.945,
+            "stop_reason": "Maximum generation 5 reached"
+          },
+          "selected": {
+            "architecture": {
+              "activation": "tanh",
+              "hidden_layers": [
+                64,
+                32,
+                64
+              ]
+            },
+            "parameter_count": 9002,
+            "test": {
+              "accuracy": 0.9697732997481109,
+              "correct": 385,
+              "percent": 96.97732997481108,
+              "total": 397
+            },
+            "validation": {
+              "accuracy": 0.945,
+              "correct": 378,
+              "percent": 94.5,
+              "total": 400
+            }
+          },
+          "training_settings": {
+            "alpha": 0.0001,
+            "batch_size": 128,
+            "epochs": 30,
+            "learning_rate": 0.001,
+            "split_seed": 17,
+            "test_size": 397,
+            "train_size": 1000,
+            "training_seed": 23,
+            "validation_size": 400
+          }
+        },
+        "report_seconds": 1.378146698999899,
+        "search_seconds": 7.949372933000177
+      },
+      "quick": {
+        "config": "examples/neural_digits_quick.json",
+        "report": {
+          "baseline": {
+            "architecture": {
+              "activation": "relu",
+              "hidden_layers": [
+                32
+              ]
+            },
+            "parameter_count": 2410,
+            "test": {
+              "accuracy": 0.672544080604534,
+              "correct": 267,
+              "percent": 67.2544080604534,
+              "total": 397
+            },
+            "validation": {
+              "accuracy": 0.65,
+              "correct": 260,
+              "percent": 65.0,
+              "total": 400
+            }
+          },
+          "compatibility": {
+            "application_source_sha256": "135dfbe3254fd2a33ae4617a49ddee1b2a76bf16ac138e68c2671f74073b5218",
+            "blas_backends": [
+              {
+                "architecture": "SkylakeX",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libscipy_openblas",
+                "threading_layer": "pthreads",
+                "user_api": "blas",
+                "version": "0.3.31.dev"
+              },
+              {
+                "architecture": "SkylakeX",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libscipy_openblas",
+                "threading_layer": "pthreads",
+                "user_api": "blas",
+                "version": "0.3.34.106.0"
+              }
+            ],
+            "data_sha256": "b7e8fe201a872f007fb2f3ae06c265b7ba1e1dbf07315dcb3e7833d123d2cf20",
+            "python": {
+              "byteorder": "little",
+              "implementation": "CPython",
+              "libc": [
+                "glibc",
+                "2.39"
+              ],
+              "machine": "x86_64",
+              "system": "Linux",
+              "version": "3.12.14"
+            },
+            "settings": {
+              "alpha": 0.0001,
+              "batch_size": 128,
+              "epochs": 10,
+              "learning_rate": 0.001,
+              "split_seed": 17,
+              "test_size": 397,
+              "train_size": 1000,
+              "training_seed": 23,
+              "validation_size": 400
+            },
+            "training_recipe": {
+              "blas_threads": 1,
+              "classes": 10,
+              "dtype": "float64",
+              "early_stopping": false,
+              "effective_batch_size": 128,
+              "epoch_order": "separate numpy PCG64(training_seed) permutations",
+              "fitness": "validation correct_count / validation_size",
+              "initialization": "sklearn RandomState(training_seed), fresh for every model",
+              "input_features": 64,
+              "shuffle": false,
+              "solver": "MLPClassifier Adam; one partial_fit call per epoch",
+              "version": 1
+            },
+            "versions": {
+              "numpy": "2.5.4",
+              "scikit-learn": "1.9.1",
+              "scipy": "1.18.1",
+              "threadpoolctl": "3.7.0"
+            }
+          },
+          "completed_generation": 3,
+          "partitions": {
+            "test": 397,
+            "training": 1000,
+            "validation": 400
+          },
+          "report_evaluations": {
+            "fresh_model_fits": 2,
+            "recorded_in_evolutionary_history": false,
+            "selection_uses_test": false,
+            "test_evaluations": 2,
+            "training_partition": "original training split"
+          },
+          "report_type": "digits_held_out_evaluation",
+          "run_id": "c58e010565a2488b8ee3e7a5fab8ccfa",
+          "schema_version": 1,
+          "search": {
+            "accepted_evaluations": 24,
+            "best_improvement_generation": 1,
+            "historical_best_id": 6,
+            "objective": "validation_accuracy",
+            "saved_best_validation_accuracy": 0.885,
+            "stop_reason": "Maximum generation 3 reached"
+          },
+          "selected": {
+            "architecture": {
+              "activation": "tanh",
+              "hidden_layers": [
+                64,
+                64
+              ]
+            },
+            "parameter_count": 8970,
+            "test": {
+              "accuracy": 0.906801007556675,
+              "correct": 360,
+              "percent": 90.6801007556675,
+              "total": 397
+            },
+            "validation": {
+              "accuracy": 0.885,
+              "correct": 354,
+              "percent": 88.5,
+              "total": 400
+            }
+          },
+          "training_settings": {
+            "alpha": 0.0001,
+            "batch_size": 128,
+            "epochs": 10,
+            "learning_rate": 0.001,
+            "split_seed": 17,
+            "test_size": 397,
+            "train_size": 1000,
+            "training_seed": 23,
+            "validation_size": 400
+          }
+        },
+        "report_seconds": 1.4487449500002185,
+        "search_seconds": 2.6377205089997915
+      }
+    },
+    "python_version": "3.12.14",
+    "settings": {
+      "alpha": 0.0001,
+      "batch_size": 128,
+      "epochs": 30,
+      "learning_rate": 0.001,
+      "split_seed": 17,
+      "test_size": 397,
+      "train_size": 1000,
+      "training_seed": 23,
+      "validation_size": 400
+    }
+  },
+  "hosted_ci_executed": false,
+  "installed_wheel_verification": {
+    "compared_source_files": 20,
+    "complete_with_neural": {
+      "elapsed_seconds": 13.869,
+      "errors": 0,
+      "failures": 0,
+      "passed": 246,
+      "skipped": 0,
+      "tests": 246
+    },
+    "console_and_module_checks_passed": true,
+    "core_without_neural": {
+      "elapsed_seconds": 4.355,
+      "errors": 0,
+      "failures": 0,
+      "passed": 196,
+      "skipped": 2,
+      "tests": 198
+    },
+    "imported_from_venv_site_packages": true,
+    "method": "The exact built wheel was installed with uv into a disposable uv-created environment. Tests/examples/pyproject were copied to a separate working directory, with no src package. Tests and command smoke checks used the disposable interpreter directly. Pytest and optional numerical dependencies came from hash-verified uv.lock exports. Core tests ran first with NumPy and scikit-learn absent, then the entire suite ran with the neural group installed.",
+    "py_typed_present": true,
+    "python_version": "3.12.14",
+    "source_bytes_match_tested_wheel": true,
+    "source_package_copied": false
+  },
+  "neural_ci_python_versions": [
+    "3.12",
+    "3.13",
+    "3.14"
+  ],
+  "new_example_sha256": {
+    "examples/digits_report.py": "5916341a73972a8d6ee137da521c64671998c4a7e74b0da8ba0317e49d31d80b",
+    "examples/neural_digits.json": "b37e586ea6d14fa2f24f4b2039ab487f1347be873ed8f450cbdf71d668e99b6c",
+    "examples/neural_digits.py": "135dfbe3254fd2a33ae4617a49ddee1b2a76bf16ac138e68c2671f74073b5218",
+    "examples/neural_digits_quick.json": "862cd0c480416a59381455c20549691e8715e5400fbf8d95c2365b6884bb73f7"
+  },
+  "package_version": "0.1.1",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+  "python_version": "3.12.14",
+  "schema_version": 2,
+  "source_baseline_commit": "509c673e502f0c27daa6b91f39cc298404b59ae2",
+  "source_sha256": {
+    "src/xevolution/__init__.py": "e5b72d4da04ad4ac02043eefd73e17a80e1e29ca1b85f720cb744585cabbfe1c",
+    "src/xevolution/__main__.py": "4d7803c0f9e5dfb7f9445f35d0e57b01124bc6c6e9e0744c9cedb4b2caa299bd",
+    "src/xevolution/cli.py": "ee3f2495ecfee0801ad6f122acbe2b296ea5f04338174e90d46a39b5b4ac2e6e",
+    "src/xevolution/config.py": "5cac52f7938d9539ecbf789f43455a2a1f42b6e87d13f3ef65c0d6beb6a7f898",
+    "src/xevolution/engine.py": "d267edd439c8fc374ec7233d4e234aa4ce0b23987101880dbdf78a7457593d2a",
+    "src/xevolution/errors.py": "e4ec9e7d3fad2aa9809449a8a8605aff674ce97c87d9a702cc9605d78aa74f30",
+    "src/xevolution/evaluation.py": "68852fb0980b7d73549a0669bfdc77de14026a0b4731e9ae61567610aaf26c5b",
+    "src/xevolution/experiment.py": "862c590d498e02e0d5c8c43aa18f008565bc311e5ce468791e8d82244fcad96e",
+    "src/xevolution/models.py": "15af2b9e91393f45e78c4ef08d5035f68c6888579fb65afbe71e83380adf3e90",
+    "src/xevolution/operators.py": "36a6b0e0ed041fead091948fee3a0535772fa8522c7f0a943fe1542ad570cb78",
+    "src/xevolution/protocols.py": "e01866426cc46d8b22bcbd7af5df3c5565425b415203fe27d9b24b460c261cbe",
+    "src/xevolution/py.typed": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "src/xevolution/randomness.py": "e67a6cc257dc6e8ee2ab3d34f5b7e51619c7f616964544bf0e4ea75e49ce671e",
+    "src/xevolution/registry.py": "3d20dc0df2a5318114d4d5a4aa9b5c97fc402aba431456624329e54b47b4c119",
+    "src/xevolution/reproduction.py": "1b59e9bf8ec669edd08084b028905f882da36ae9053d8f07e13898cc3c58ad07",
+    "src/xevolution/selection.py": "250e10685f3cc3d82454bc8d563f8a91b0e1c3fd847a635ccf9a481f3930c670",
+    "src/xevolution/serialization.py": "f1a9d15b81854461af5ff762a2b448e8acd1579cd3a63153c9448b0dc0dc62b9",
+    "src/xevolution/storage.py": "9c47889977f76329b3beea7d126430d03d08c854d5843605629c52a1d43340de",
+    "src/xevolution/termination.py": "9a72f4c27f0d7e3e16ea7c66666cf4c6a771734f0067fc3435b9713e9fdcd60a",
+    "src/xevolution/tracking.py": "b62716447c601b499c7248c7abdedda7852278d4e7fb7cbbd47ae35831dd71c8"
+  },
+  "timing_scope": "Measurements describe this Linux x86_64 execution environment, not a laptop guarantee. Data preparation was outside the candidate intervals; each interval included a fresh complete evaluator call. Full preset and report intervals each included separate interpreter startup and file I/O. Timings did not affect selection, checkpoints, or scientific history.",
+  "tools": {
+    "mypy": "2.4.0",
+    "pytest": "9.1.1",
+    "ruff": "0.17.1",
+    "uv": "0.12.23"
+  },
+  "uv_lock_sha256": "2c141e13fc58c8dc83750b16f903653d60e7a77b9e46538ae77f5d0d81c1e2c2",
+  "verified_date": "2026-10-21",
+  "wheel": "xevolution-0.1.1-py3-none-any.whl",
+  "wheel_sha256": "f8f498f503f4742303ffde8c006c3352bd99812ccffdadc017244c1cfd8bd9a6"
+}

@@ -1,0 +1,31 @@
+xevolution Python port
+======================
+
+This distribution ports the generic xevolution framework and required xutil
+utility behavior from Xnet to Python. The original Java sources identify:
+
+    Copyright 2012 Michael Roberts
+
+Original project: https://github.com/xtructure/xnet-public
+Reviewed source revision: 509c673e502f0c27daa6b91f39cc298404b59ae2
+Original subprojects: xnet/xevolution and xnet/xutil
+
+The original sources are distributed under the GNU Lesser General Public
+License, version 3 or (at your option) any later version. This Python port
+preserves that license: LGPL-3.0-or-later.
+
+LICENSE.txt contains the original GNU Lesser General Public License version 3.
+It incorporates the GNU General Public License version 3, whose full text is
+provided in LICENSE-GPL-3.0.txt.
+
+Modification notice, 2026-10-20: the Java implementation has been reimplemented
+as a standalone Python 3.12+ library. Changes include Python protocols and
+explicit records, corrected evolutionary behavior, versioned JSON codecs,
+completed-generation checkpoints, deterministic history and genealogy, and
+headless command-line tools. Java XML compatibility and graphical applications
+are outside this port. See xevolution_python_port_spec.md and
+docs/markdown/porting_notes.md for its scope and behavior changes.
+
+This library is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the license texts for the complete terms.

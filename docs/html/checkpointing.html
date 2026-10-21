@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Checkpoints and continuation A checkpoint restores the same logical evolutionary run when application code, input data, component state, and numerical execution satisfy the documen">
+<title>Checkpoints and continuation · xevolution documentation</title>
+<link rel="stylesheet" href="assets/docs.css">
+<script defer src="assets/search-index.js"></script>
+<script defer src="assets/docs.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#xevo-main">Skip to content</a>
+<header class="site-header"><div class="header-inner">
+<a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">x</span><span class="brand-name">xevolution<span class="brand-note">Evolutionary computation · Python</span></span></a>
+<div class="header-right"><span class="version">v0.1.1</span>
+<div class="search-wrap" id="xevo-search" role="search" hidden>
+<label class="sr-only" for="xevo-search-input">Search documentation</label>
+<input id="xevo-search-input" type="search" placeholder="Search the documentation" autocomplete="off" aria-controls="xevo-search-results" aria-expanded="false">
+<kbd class="search-key" aria-hidden="true">/</kbd>
+<div id="xevo-search-results" class="search-results" role="region" aria-label="Search results" aria-live="polite" hidden></div>
+</div></div></div></header>
+<div class="layout">
+<details class="sidebar" id="xevo-navigation" open><summary>Browse documentation</summary>
+<nav aria-label="Documentation"><section class="nav-group"><h2 class="nav-heading">Start here</h2><ul><li><a href="index.html">Documentation home</a></li><li><a href="overview.html">Package overview</a></li><li><a href="examples.html">Choose an example</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Example projects</h2><ul><li><a href="arithmetic_demo.html">Arithmetic expressions</a></li><li><a href="batch_demo.html">Shared resources</a></li><li><a href="digits_demo.html">Digits MLP</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Reference</h2><ul><li><a href="configuration.html">JSON configuration</a></li><li><a href="cli.html">Command line</a></li><li><a href="extensions.html">Application extensions</a></li><li><a href="architecture.html">Architecture &amp; ownership</a></li><li><a href="checkpointing.html" aria-current="page">Checkpoints &amp; recovery</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Project</h2><ul><li><a href="porting_notes.html">Porting notes</a></li><li><a href="verification.html">Release verification</a></li><li><a href="port_specification.html">Port specification</a></li><li><a href="contributing.html">Contributing</a></li><li><a href="building_docs.html">Building these docs</a></li></ul></section></nav>
+<div class="sidebar-footer">Version 0.1.1<br>Offline reference documentation.<br>Markdown is the editable source.</div>
+</details>
+<main class="content" id="xevo-main"><div class="document-grid">
+<div class="article-column">
+<div class="page-meta"><div class="breadcrumb"><a href="index.html">Docs</a><span>/</span>Reference</div><a class="source-link" href="../markdown/checkpointing.md">Markdown source</a></div>
+<details class="compact-toc"><summary>On this page</summary><ul class="toc-list"><li><a href="#saved-boundary">Saved boundary</a></li><li><a href="#required-state">Required state</a></li><li><a href="#serialization">Serialization</a></li><li><a href="#commit-order-and-visibility">Commit order and visibility</a></li><li><a href="#recovery-and-journal-tails">Recovery and journal tails</a></li><li><a href="#application-and-environment-limits">Application and environment limits</a></li></ul></details>
+<article class="document"><h1 id="checkpoints-and-continuation">Checkpoints and continuation</h1>
+<p>A checkpoint restores the same logical evolutionary run when application code, input data, component state, and numerical execution satisfy the documented contracts. Saving only an initial seed or a list of genotypes is insufficient.</p>
+<h2 id="saved-boundary">Saved boundary</h2>
+<p>Persistent runs checkpoint generation 0 and every completed generation. The saved boundary follows complete evaluation, validation and application of all results, scientific tracking, adaptive updates, and one stopping decision. No evaluation jobs remain in flight. The next action is either a transition to the next generation or no further evolution because the run is terminated.</p>
+<p>Restoration does not rerun initialization, saved-generation evaluation, adaptive updates, or a stateful stopping predicate. A saved terminal decision remains terminal under ordinary <code>resume</code>. An operational pause requests a stop at the boundary and leaves a ready checkpoint unless an evolutionary predicate has independently terminated the run.</p>
+<h2 id="required-state">Required state</h2>
+<p>Checkpoints preserve ordered individuals and genotype payloads; IDs, births, and parentage; fitness and other observations; allocation and evaluation counters; completed-generation and next-transition settings; historical bests and improvement information; stopping decisions; component identities and state; all managed random states; codec and schema versions; and the identity, integrity, and byte length of the committed journal prefix.</p>
+<p>The evolution and evaluation random streams are separate. Stable evaluation contexts derive work identities from logical generation/individual/round/ replicate information, not worker order, process IDs, wall time, Python's randomized hash, or a fresh run identifier.</p>
+<p>Factory-based runs also save the original managed random state immediately after initial parameter sampling and before factory construction, under <code>compatibility.construction_random</code>. Resume installs that snapshot before reconstructing the factory with resolved settings, so random choices made while constructing collaborators can be reproduced. After component-state restoration and genotype decoding, the saved completed-generation random state is installed last. Initialization and evaluation still do not repeat. A programmatic run without a recorded factory requires an explicitly supplied, compatible <code>Experiment</code> when resumed.</p>
+<p>Stateful application objects must export and restore every value affecting future results. This includes adaptive probabilities, stopping windows, application generators, simulator or optimizer state, and meaningful caches. Stateless functions need no payload, but hidden mutable globals or closures do not become checkpointable automatically.</p>
+<h2 id="serialization">Serialization</h2>
+<p>Framework and application records use explicit codecs and versioned JSON. Required genotype semantics must survive encode/decode. Encoding and state export are observational: they must not mutate the run, advance its random generators, or evaluate candidates.</p>
+<p>JSON object keys are strings. Strict boundaries reject duplicate keys, unsupported versions, invalid types, and non-finite numbers, including values that overflow during parsing. Booleans are not numeric settings or fitness values. Tuple-based random state is reconstructed deliberately rather than passed back as nested JSON lists.</p>
+<p>The payload contract allows immutable attachments so application data need not always expand into JSON arrays. Attachment references carry format/version and integrity information. Referenced attachments must be durable before their checkpoint becomes authoritative.</p>
+<p>Storage writes attachment bytes to <code>artifacts/&lt;sha256&gt;.bin</code>. It reserves the JSON object key <code>__xevolution_attachment__</code> for references containing version, SHA-256 digest, byte size, and media type. Use <code>writer.put()</code> and <code>reader.get()</code> instead of constructing these references or writing files from a codec.</p>
+<h2 id="commit-order-and-visibility">Commit order and visibility</h2>
+<p>One coordinator writes a run. Workers return results rather than write history or checkpoints themselves. A commit proceeds in this order:</p>
+<ol type="1">
+<li>Finalize state and prepare independent scientific records and payloads.</li>
+<li>Make required immutable attachments durable.</li>
+<li>Append scientific records to <code>history.jsonl</code>, flush, and synchronize the file.</li>
+<li>Write and synchronize a temporary checkpoint in the run directory. It names the committed history byte offset and integrity information.</li>
+<li>Atomically replace <code>checkpoint.json</code> and synchronize the directory entries required by the platform's local-file durability protocol.</li>
+<li>Report success; any subsequent reports read committed records.</li>
+</ol>
+<p>Atomic replacement establishes visibility to readers in the running system. Power-loss durability additionally depends on successful file and directory synchronization and the filesystem's guarantees. Failure before directory synchronization may leave an older or newer checkpoint after a machine failure; recovery validates whichever checkpoint survived. Generation 0 has no preceding checkpoint to recover if its initial publication did not survive.</p>
+<p>These are local-file guarantees. A remote or unusual filesystem can have weaker semantics. A failure to save is reported as a failure to make the new generation durable, not as a successful evolutionary commit.</p>
+<p>The implementation synchronizes directory entries on POSIX systems. On other platforms it supplies atomic checkpoint publication and process-crash recovery, but does not claim power-loss durability for directory changes. A writable session holds the run's writer lock until <code>close()</code>; use engine/store context managers to release it reliably.</p>
+<h2 id="recovery-and-journal-tails">Recovery and journal tails</h2>
+<p>The active checkpoint determines the authoritative journal prefix. An abrupt failure may leave extra bytes in <code>history.jsonl</code> after that prefix. Read-only inspection and analysis ignore them. A resumed writer truncates or resets the journal to the saved committed offset <strong>before</strong> appending new records.</p>
+<p>Missing or corrupt committed history or attachments is an error. Recovery does not invent replacement observations or reevaluate candidates from an already committed generation. Temporary checkpoint files and arbitrary recently modified files do not supersede <code>checkpoint.json</code>.</p>
+<p>A portable run is a bundle: its checkpoint, required journal prefix, and any referenced attachments, together with compatible application code and data. Copying a checkpoint manifest alone does not necessarily create a resumable run.</p>
+<h2 id="application-and-environment-limits">Application and environment limits</h2>
+<ul>
+<li>Work in an interrupted, uncommitted generation can repeat. External calls needing deduplication must use application-level idempotency or result lookup.</li>
+<li>Continuation inside an arbitrary long evaluation is not supplied by the framework. A training evaluator may need model, optimizer, scheduler, data-position, and application random state of its own.</li>
+<li>Changing external data or using nondeterministic numerical operations can change future results even when engine state restores exactly.</li>
+<li>Supporting multiple Python versions is not a promise of identical trajectories or checkpoint portability between those versions.</li>
+<li>Operational messages and their timestamps need not match across executions.</li>
+</ul>
+<p>Compatibility checks must succeed before a resumed run claims exact continuation. Keep the application's factory, codec identifiers/versions, and registered state keys stable; use a new compatibility version when semantics change.</p>
+<p>The current checks compare framework source fingerprints, package and schema versions, Python implementation/version and platform information, application identity/version and explicit <code>compatibility</code> entries, codec identity/version, and the registered component composition. A source edit or a Python patch upgrade can therefore require the original environment to resume a saved run. These checks are deliberately strict; <code>inspect</code> and <code>analyze</code> can still read committed records without loading the application factory.</p>
+</article>
+<nav class="pagination" aria-label="Previous and next articles"><a class="previous" href="architecture.html"><small>Previous</small><strong>Architecture &amp; ownership</strong></a><a class="next" href="porting_notes.html"><small>Next</small><strong>Porting notes</strong></a></nav>
+<footer class="page-footer">xevolution 0.1.1 documentation · <a href="building_docs.html">Build and edit these docs</a><br>Framework behavior is documented for the supplied Python port. See <a href="verification.html">release verification</a> for the scope of executed checks.</footer>
+</div>
+<aside class="page-toc"><nav aria-label="On this page"><div class="toc-title">On this page</div><ul class="toc-list"><li><a href="#saved-boundary">Saved boundary</a></li><li><a href="#required-state">Required state</a></li><li><a href="#serialization">Serialization</a></li><li><a href="#commit-order-and-visibility">Commit order and visibility</a></li><li><a href="#recovery-and-journal-tails">Recovery and journal tails</a></li><li><a href="#application-and-environment-limits">Application and environment limits</a></li></ul></nav></aside>
+</div></main></div>
+</body></html>

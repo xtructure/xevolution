@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Application extension contracts Applications provide ordinary functions or compatible objects. No framework base class is required. Core bookkeeping stays in the framework, and arb">
+<title>Application extension contracts · xevolution documentation</title>
+<link rel="stylesheet" href="assets/docs.css">
+<script defer src="assets/search-index.js"></script>
+<script defer src="assets/docs.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#xevo-main">Skip to content</a>
+<header class="site-header"><div class="header-inner">
+<a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">x</span><span class="brand-name">xevolution<span class="brand-note">Evolutionary computation · Python</span></span></a>
+<div class="header-right"><span class="version">v0.1.1</span>
+<div class="search-wrap" id="xevo-search" role="search" hidden>
+<label class="sr-only" for="xevo-search-input">Search documentation</label>
+<input id="xevo-search-input" type="search" placeholder="Search the documentation" autocomplete="off" aria-controls="xevo-search-results" aria-expanded="false">
+<kbd class="search-key" aria-hidden="true">/</kbd>
+<div id="xevo-search-results" class="search-results" role="region" aria-label="Search results" aria-live="polite" hidden></div>
+</div></div></div></header>
+<div class="layout">
+<details class="sidebar" id="xevo-navigation" open><summary>Browse documentation</summary>
+<nav aria-label="Documentation"><section class="nav-group"><h2 class="nav-heading">Start here</h2><ul><li><a href="index.html">Documentation home</a></li><li><a href="overview.html">Package overview</a></li><li><a href="examples.html">Choose an example</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Example projects</h2><ul><li><a href="arithmetic_demo.html">Arithmetic expressions</a></li><li><a href="batch_demo.html">Shared resources</a></li><li><a href="digits_demo.html">Digits MLP</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Reference</h2><ul><li><a href="configuration.html">JSON configuration</a></li><li><a href="cli.html">Command line</a></li><li><a href="extensions.html" aria-current="page">Application extensions</a></li><li><a href="architecture.html">Architecture &amp; ownership</a></li><li><a href="checkpointing.html">Checkpoints &amp; recovery</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Project</h2><ul><li><a href="porting_notes.html">Porting notes</a></li><li><a href="verification.html">Release verification</a></li><li><a href="port_specification.html">Port specification</a></li><li><a href="contributing.html">Contributing</a></li><li><a href="building_docs.html">Building these docs</a></li></ul></section></nav>
+<div class="sidebar-footer">Version 0.1.1<br>Offline reference documentation.<br>Markdown is the editable source.</div>
+</details>
+<main class="content" id="xevo-main"><div class="document-grid">
+<div class="article-column">
+<div class="page-meta"><div class="breadcrumb"><a href="index.html">Docs</a><span>/</span>Reference</div><a class="source-link" href="../markdown/extensions.md">Markdown source</a></div>
+<details class="compact-toc"><summary>On this page</summary><ul class="toc-list"><li><a href="#constructing-an-experiment">Constructing an experiment</a></li><li><a href="#genotype-and-observation-ownership">Genotype and observation ownership</a></li><li><a href="#evaluation">Evaluation</a></li><li><a href="#variation-and-selection">Variation and selection</a></li><li><a href="#stateful-components-and-adaptation">Stateful components and adaptation</a></li><li><a href="#codecs-and-attachments">Codecs and attachments</a></li></ul></details>
+<article class="document"><h1 id="application-extension-contracts">Application extension contracts</h1>
+<p>Applications provide ordinary functions or compatible objects. No framework base class is required. Core bookkeeping stays in the framework, and arbitrary genotype payloads stay under application control.</p>
+<h2 id="constructing-an-experiment">Constructing an experiment</h2>
+<p>A configured factory has this signature:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> build_experiment(config: RunConfig, random: RunRandom) <span class="op">-&gt;</span> Experiment[G]: ...</span></code></pre></div>
+<p>Use <code>config.parameters</code> for application settings and <code>config.evolution</code> for resolved core settings. Validate your parameter namespace, including unknown keys. The factory constructs collaborators without creating the initial population or performing evaluation; restoration also calls the factory.</p>
+<p><code>Experiment</code> accepts these collaborators:</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Contract</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>initialize</code></td>
+<td><code>(rng: Random) -&gt; G</code>; produce one initial genotype</td>
+</tr>
+<tr class="even">
+<td><code>clone</code></td>
+<td><code>(genotype: G) -&gt; G</code>; preserve independent ownership where required</td>
+</tr>
+<tr class="odd">
+<td><code>evaluate</code></td>
+<td><code>(individual: Individual[G], context: EvaluationContext) -&gt; EvaluationResult</code></td>
+</tr>
+<tr class="even">
+<td><code>evaluate_population</code></td>
+<td><code>(population: Population[G], context: EvaluationContext) -&gt; Mapping[int, EvaluationResult]</code> or an iterable of <code>(id, result)</code> pairs</td>
+</tr>
+<tr class="odd">
+<td><code>mutations</code></td>
+<td>Tuple of named <code>OperatorSpec</code> entries with <code>(genotype, rng) -&gt; VariationResult[G]</code> operations</td>
+</tr>
+<tr class="even">
+<td><code>crossovers</code></td>
+<td>Tuple of named entries with <code>(first, second, rng) -&gt; VariationResult[G]</code> operations</td>
+</tr>
+<tr class="odd">
+<td><code>select_parent</code></td>
+<td><code>(population, rng) -&gt; individual_id</code></td>
+</tr>
+<tr class="even">
+<td><code>select_survivors</code></td>
+<td><code>(population, target_size, rng) -&gt; Sequence[individual_id]</code></td>
+</tr>
+<tr class="odd">
+<td><code>stop</code></td>
+<td><code>(finalized_state) -&gt; StopDecision</code> or <code>bool</code></td>
+</tr>
+<tr class="even">
+<td><code>adaptive_hooks</code></td>
+<td>Tuple of `(state) -&gt; EvolutionSettings</td>
+</tr>
+<tr class="odd">
+<td><code>codec</code></td>
+<td>A <code>PayloadCodec[G]</code> with explicit identity, version, encode, and decode</td>
+</tr>
+<tr class="even">
+<td><code>components</code></td>
+<td>Stable named additional stateful collaborators</td>
+</tr>
+<tr class="odd">
+<td><code>identity</code>, <code>version</code></td>
+<td>Application compatibility identity and version</td>
+</tr>
+<tr class="even">
+<td><code>compatibility</code></td>
+<td>Explicit JSON fingerprints for application data or external library versions</td>
+</tr>
+</tbody>
+</table></div>
+<p>Absent selection and stopping collaborators are constructed from configuration. A stopping policy must be supplied by the experiment or configuration. The default JSON codec is suitable only for genuinely JSON-native payloads. Supply a custom codec for tuples, arrays, bytes, graphs, or application objects.</p>
+<h2 id="genotype-and-observation-ownership">Genotype and observation ownership</h2>
+<p>The engine does not assume that a genotype supports equality, ordering, hashing, truth testing, length, or indexing. Individuals are identified by their explicit IDs. Application operators may of course use operations supported by their own representation.</p>
+<p>An operator must leave both parents unchanged and return an independent child, unless sharing explicitly immutable data is safe. The framework assigns the offspring ID, birth generation, parents, fitness validity, and evaluation count. Do not copy a parent's wrapper and carry those fields into a child.</p>
+<p>A frozen dataclass does not freeze nested payloads. Supply a clone that handles your representation correctly. Historical bests use it to retain independent genotype snapshots; metadata and measurements are preserved separately. For an immutable string or integer, <code>clone(value): return value</code> is valid.</p>
+<p>Optional decoding belongs naturally inside the evaluator. The arithmetic example composes a <code>decode()</code> function with scoring and does not need a dummy decoder object in the engine.</p>
+<h2 id="evaluation">Evaluation</h2>
+<p>Return one finite scalar fitness and an optional mapping of named finite numeric metrics. Zero is a valid score. Signed scores are valid; choose a selector that supports them. Metadata and encoded payloads have separate JSON contracts and should not be placed into numeric metrics.</p>
+<p>If <code>evaluate_population</code> is supplied, it runs directly, even if <code>evaluate</code> is also present. Otherwise the framework adapts the individual hook. A population hook may score candidates jointly or compare them in a shared environment; it need not match independent scoring.</p>
+<p>The result set must contain each requested ID exactly once and no other IDs. Sequence results can arrive in arbitrary order; the coordinator checks coverage and duplicates and applies all accepted results in deterministic population order. It validates the complete batch before applying scores or incrementing counts. One accepted result counts as one fitness evaluation; report underlying simulations or training steps as supplementary metrics.</p>
+<p>An individual evaluation receives <code>context.rng</code>. A batch can derive stable job contexts with <code>context.for_individual(id, replicate=0)</code>. These logical contexts are independent of worker completion order. Applications own their execution backend and must return with no work in flight at the checkpoint boundary.</p>
+<p>See <a href="batch_demo.html">the shared-resource example</a>, whose score depends on the number of other candidates choosing the same resource. Its implementation is <code>examples/batch_problem.py</code> in the source project. The <a href="arithmetic_demo.html">arithmetic</a> and <a href="digits_demo.html">Digits</a> guides illustrate the individual hook.</p>
+<h2 id="variation-and-selection">Variation and selection</h2>
+<p>Register operators with stable names:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>OperatorSpec(<span class="st">&quot;domain_mutation&quot;</span>, mutate, weight<span class="op">=</span><span class="fl">2.0</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>OperatorSpec(<span class="st">&quot;copy_fallback&quot;</span>, CloneMutation(clone), fallback<span class="op">=</span><span class="va">True</span>)</span></code></pre></div>
+<p>Import these helpers from <code>xevolution.operators</code>. Weighted entries are tried without replacement within an attempt; weight zero disables weighted selection. Fallbacks are an explicit separate designation and run in registration order after weighted choices, including an explicitly declared fallback whose weight is zero. A new attempt gets a fresh pool and new parent choices. The configured per-child budget bounds retries.</p>
+<p>Raise <code>xevolution.errors.OperatorInapplicable</code> only when an operation cannot apply to the selected parent(s). Unexpected exceptions remain failures, not signals to silently try another operation. Return operation details in <code>VariationResult.details</code>; the framework records stable parent and operator identities.</p>
+<p><code>OperatorSpec.weight</code> is a validated mutable value and is checkpointed. Changes that affect future behavior must occur in registered adaptive/stateful logic, not observation-only reporting callbacks.</p>
+<p>Custom selectors return framework IDs from the supplied population. Parent selection sees the full previous population. Survivor selection independently chooses retained individuals, whose fitness will be reevaluated in the resulting population.</p>
+<h2 id="stateful-components-and-adaptation">Stateful components and adaptation</h2>
+<p>Any collaborator retaining future-affecting information implements:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> state_dict(<span class="va">self</span>) <span class="op">-&gt;</span> JSONValue: ...</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> load_state_dict(<span class="va">self</span>, state: JSONValue) <span class="op">-&gt;</span> <span class="va">None</span>: ...</span></code></pre></div>
+<p>State export is observational and returns an explicit JSON-native description. Restoration validates its schema and contents. Core collaborators exposing this contract are tracked automatically; use <code>Experiment.components</code> for additional shared state such as an evaluator environment, curriculum, or bounded parameter. Keep registration keys stable. Stateless functions may close over immutable configuration values, but mutable closure cells and global state must not hide future-affecting information.</p>
+<p>Frozen dataclasses are suitable for immutable component configuration, as the examples demonstrate. Their nested fields must also satisfy the configuration or registered-component contracts; a frozen wrapper does not make a captured list immutable. A <code>Stateful</code> object reached only through a function capture must be registered in <code>Experiment.components</code>, even when it exposes the state methods. Direct collaborators are registered automatically, and bound methods sharing one registered owner are restored only once.</p>
+<p>A stateful component may additionally implement <code>checkpoint_identity() -&gt; JSONValue</code> to report immutable configuration that must match during restoration, such as an algorithm revision or a dataset digest. This optional identity is compared before loading mutable state; it does not replace <code>state_dict()</code>. Identity and state export must be observational and return strict JSON values.</p>
+<p>An adaptive hook receives finalized observations and may return new validated settings for the <strong>next</strong> transition. It may update its own explicitly saved state. It must not mutate the finalized population or its observations. The checkpoint records both <code>generation_settings</code> and the next <code>effective_settings</code>.</p>
+<p>Stopping runs once after these updates for each completed generation. Stateful custom predicates must save their windows and counters. Restoration honors the recorded decision instead of invoking the predicate again.</p>
+<h2 id="codecs-and-attachments">Codecs and attachments</h2>
+<p>A payload codec defines <code>codec_id: str</code>, <code>version: int</code>, and:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> encode(<span class="va">self</span>, value: G, writer: AttachmentWriter <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>) <span class="op">-&gt;</span> JSONValue: ...</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> decode(<span class="va">self</span>, value: JSONValue, reader: AttachmentReader <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>) <span class="op">-&gt;</span> G: ...</span></code></pre></div>
+<p>Encode required semantics explicitly. The built-in <code>JsonCodec</code> rejects lossy coercions; it is not a generic object-graph serializer. Large or binary payloads can use <code>writer.put(bytes, media_type=...)</code> and <code>reader.get(reference)</code>. Codecs must reject a missing attachment context when they require one. Storage owns attachment integrity, ordering, and durability.</p>
+<p>Codec calls and component state export must not consume evolutionary randomness or mutate application state. For configured factories, restoration first reinstalls the saved pre-construction random snapshot and calls the factory with resolved parameters. Reconstructed components then receive their explicit state, payloads are decoded, and the completed-generation managed random states are installed last. Keep references to the supplied managed generators rather than replacing them during restoration.</p>
+<p>For application changes that alter state interpretation or future behavior, update compatibility identities/versions deliberately. See <a href="checkpointing.html">checkpointing</a> for the full contract.</p>
+</article>
+<nav class="pagination" aria-label="Previous and next articles"><a class="previous" href="cli.html"><small>Previous</small><strong>Command line</strong></a><a class="next" href="architecture.html"><small>Next</small><strong>Architecture &amp; ownership</strong></a></nav>
+<footer class="page-footer">xevolution 0.1.1 documentation · <a href="building_docs.html">Build and edit these docs</a><br>Framework behavior is documented for the supplied Python port. See <a href="verification.html">release verification</a> for the scope of executed checks.</footer>
+</div>
+<aside class="page-toc"><nav aria-label="On this page"><div class="toc-title">On this page</div><ul class="toc-list"><li><a href="#constructing-an-experiment">Constructing an experiment</a></li><li><a href="#genotype-and-observation-ownership">Genotype and observation ownership</a></li><li><a href="#evaluation">Evaluation</a></li><li><a href="#variation-and-selection">Variation and selection</a></li><li><a href="#stateful-components-and-adaptation">Stateful components and adaptation</a></li><li><a href="#codecs-and-attachments">Codecs and attachments</a></li></ul></nav></aside>
+</div></main></div>
+</body></html>

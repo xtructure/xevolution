@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Command-line reference The xevolution console entry point and python -m xevolution expose the same commands. From a source checkout, use uv run --locked python -m xevolution so the">
+<title>Command-line reference · xevolution documentation</title>
+<link rel="stylesheet" href="assets/docs.css">
+<script defer src="assets/search-index.js"></script>
+<script defer src="assets/docs.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#xevo-main">Skip to content</a>
+<header class="site-header"><div class="header-inner">
+<a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">x</span><span class="brand-name">xevolution<span class="brand-note">Evolutionary computation · Python</span></span></a>
+<div class="header-right"><span class="version">v0.1.1</span>
+<div class="search-wrap" id="xevo-search" role="search" hidden>
+<label class="sr-only" for="xevo-search-input">Search documentation</label>
+<input id="xevo-search-input" type="search" placeholder="Search the documentation" autocomplete="off" aria-controls="xevo-search-results" aria-expanded="false">
+<kbd class="search-key" aria-hidden="true">/</kbd>
+<div id="xevo-search-results" class="search-results" role="region" aria-label="Search results" aria-live="polite" hidden></div>
+</div></div></div></header>
+<div class="layout">
+<details class="sidebar" id="xevo-navigation" open><summary>Browse documentation</summary>
+<nav aria-label="Documentation"><section class="nav-group"><h2 class="nav-heading">Start here</h2><ul><li><a href="index.html">Documentation home</a></li><li><a href="overview.html">Package overview</a></li><li><a href="examples.html">Choose an example</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Example projects</h2><ul><li><a href="arithmetic_demo.html">Arithmetic expressions</a></li><li><a href="batch_demo.html">Shared resources</a></li><li><a href="digits_demo.html">Digits MLP</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Reference</h2><ul><li><a href="configuration.html">JSON configuration</a></li><li><a href="cli.html" aria-current="page">Command line</a></li><li><a href="extensions.html">Application extensions</a></li><li><a href="architecture.html">Architecture &amp; ownership</a></li><li><a href="checkpointing.html">Checkpoints &amp; recovery</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Project</h2><ul><li><a href="porting_notes.html">Porting notes</a></li><li><a href="verification.html">Release verification</a></li><li><a href="port_specification.html">Port specification</a></li><li><a href="contributing.html">Contributing</a></li><li><a href="building_docs.html">Building these docs</a></li></ul></section></nav>
+<div class="sidebar-footer">Version 0.1.1<br>Offline reference documentation.<br>Markdown is the editable source.</div>
+</details>
+<main class="content" id="xevo-main"><div class="document-grid">
+<div class="article-column">
+<div class="page-meta"><div class="breadcrumb"><a href="index.html">Docs</a><span>/</span>Reference</div><a class="source-link" href="../markdown/cli.md">Markdown source</a></div>
+<details class="compact-toc"><summary>On this page</summary><ul class="toc-list"><li><a href="#create-a-fresh-run">Create a fresh run</a></li><li><a href="#pause-and-resume">Pause and resume</a></li><li><a href="#inspect-committed-state">Inspect committed state</a></li><li><a href="#build-analysis-exports">Build analysis exports</a></li><li><a href="#run-directory">Run directory</a></li><li><a href="#diagnostics">Diagnostics</a></li></ul></details>
+<article class="document"><h1 id="command-line-reference">Command-line reference</h1>
+<p>The <code>xevolution</code> console entry point and <code>python -m xevolution</code> expose the same commands. From a source checkout, use <code>uv run --locked python -m xevolution</code> so the repository's example factories are importable.</p>
+<p>All commands below run from the source project root, beside <code>pyproject.toml</code>. The <a href="examples.html">examples overview</a> links to complete guides for arithmetic, shared resources, and Digits. For a Digits run or resume, retain <code>--group neural</code> so uv includes its optional numerical dependencies:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> <span class="at">--group</span> neural python <span class="at">-m</span> xevolution run <span class="at">--config</span> examples/neural_digits.json <span class="at">--output</span> runs/digits</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> <span class="at">--group</span> neural python <span class="at">-m</span> xevolution resume runs/digits</span></code></pre></div>
+<p>The separate final-evaluation command is <code>uv run --locked --group neural python -m examples.digits_report runs/digits</code>. It trains two models and scores test data; the core <code>analyze</code> command below only projects existing history. See the <a href="digits_demo.html">Digits guide</a> before using that report. When switching among example commands, keep <code>--group neural</code> or use <code>--all-groups</code> if you want the optional stack to remain installed.</p>
+<h2 id="create-a-fresh-run">Create a fresh run</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> python <span class="at">-m</span> xevolution run <span class="at">--config</span> examples/arithmetic.json <span class="at">--output</span> runs/arithmetic</span></code></pre></div>
+<p>The output directory must be new or empty. A populated directory is an error, not an instruction to resume. Configuration is validated, the application factory is resolved, generation 0 is initialized and evaluated, and subsequent generations execute until stopped or paused.</p>
+<h2 id="pause-and-resume">Pause and resume</h2>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> python <span class="at">-m</span> xevolution run <span class="at">--config</span> examples/batch_problem.json <span class="at">--output</span> runs/paused <span class="at">--pause-after-generation</span> 2</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> python <span class="at">-m</span> xevolution resume runs/paused</span></code></pre></div>
+<p><code>--pause-after-generation N</code> is an operational limit for this invocation. It does not change the recorded evolutionary stopping policy. A limit of 0 commits the evaluated initial population and returns. On resume a limit at or below the saved generation returns without another transition.</p>
+<p>The first <code>Ctrl-C</code> (<code>SIGINT</code>) or <code>SIGTERM</code> requests a graceful pause after the current generation completes and commits. It does not cancel an application evaluation already in progress. A second signal interrupts immediately; the next resume validates the last published checkpoint. Applications with long evaluations decide whether to provide their own cancellation or partial-work mechanism.</p>
+<p>Resume reads only the explicit <code>checkpoint.json</code>, restores recorded settings, components, random states, and observations, and repairs only an uncommitted journal tail. Saved-generation evaluation and stopping are not repeated. If a configured stopping predicate already terminated the run, ordinary resume leaves it terminated. Changing saved policies is not part of these commands.</p>
+<p>Successful <code>run</code> and <code>resume</code> print one JSON summary containing run identity, generation, phase, population size, accepted-evaluation count, historical best ID/fitness, and stopping reason.</p>
+<h2 id="inspect-committed-state">Inspect committed state</h2>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> python <span class="at">-m</span> xevolution inspect runs/arithmetic</span></code></pre></div>
+<p>Inspection validates the checkpoint and its committed data, then prints JSON settings, progress, statistics, best record, stopping state, and compatibility metadata. It does not import the application factory, evolve candidates, or truncate an uncommitted history tail. Large genotypes may appear as codec payloads or attachment references in the best record.</p>
+<h2 id="build-analysis-exports">Build analysis exports</h2>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> python <span class="at">-m</span> xevolution analyze runs/arithmetic <span class="at">--output</span> runs/arithmetic/reports</span></code></pre></div>
+<p>The output defaults to <code>RUN_DIR/reports</code> when <code>--output</code> is omitted. The command replaces <code>analysis.json</code>, a deterministic projection containing generation summaries/settings/stopping, individuals with recorded births and observations, and parent-to-child genealogy edges. Ancestors remain available after leaving the population.</p>
+<p>Only the checkpoint's committed journal prefix contributes. Repeated analysis over the same prefix produces the same logical report and does not append scientific records, invoke evaluators, or consume evolutionary randomness. Reports are rebuildable outputs; checkpoint durability does not depend on them.</p>
+<h2 id="run-directory">Run directory</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Path</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>config.json</code></td>
+<td>Resolved starting configuration</td>
+</tr>
+<tr class="even">
+<td><code>checkpoint.json</code></td>
+<td>Latest authoritative state and committed journal reference</td>
+</tr>
+<tr class="odd">
+<td><code>history.jsonl</code></td>
+<td>Structured scientific records; an uncommitted tail may exist after a failure</td>
+</tr>
+<tr class="even">
+<td><code>artifacts/</code></td>
+<td>Immutable codec payload attachments, when used</td>
+</tr>
+<tr class="odd">
+<td><code>reports/analysis.json</code></td>
+<td>Rebuildable default analysis export</td>
+</tr>
+</tbody>
+</table></div>
+<p>Storage may also use writer-lock or temporary files for coordination. These do not replace the active checkpoint as the source of truth.</p>
+<h2 id="diagnostics">Diagnostics</h2>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> python <span class="at">-m</span> xevolution <span class="at">--help</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> python <span class="at">-m</span> xevolution <span class="at">--version</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> python <span class="at">-m</span> xevolution <span class="at">--verbose</span> inspect runs/arithmetic</span></code></pre></div>
+<p><code>--verbose</code> is a global option, placed before the subcommand. Structured results go to standard output; command errors and diagnostic logging go to standard error. The CLI returns 0 on success, 1 for handled run/configuration/storage errors, 2 for argument-parsing errors, and 130 for an immediate interrupt. Unexpected application programming exceptions remain failures rather than being treated as operator inapplicability.</p>
+<p>See <a href="checkpointing.html">checkpointing</a> for the exact saved boundary, recovery, compatibility, and external-side-effect limits.</p>
+</article>
+<nav class="pagination" aria-label="Previous and next articles"><a class="previous" href="configuration.html"><small>Previous</small><strong>JSON configuration</strong></a><a class="next" href="extensions.html"><small>Next</small><strong>Application extensions</strong></a></nav>
+<footer class="page-footer">xevolution 0.1.1 documentation · <a href="building_docs.html">Build and edit these docs</a><br>Framework behavior is documented for the supplied Python port. See <a href="verification.html">release verification</a> for the scope of executed checks.</footer>
+</div>
+<aside class="page-toc"><nav aria-label="On this page"><div class="toc-title">On this page</div><ul class="toc-list"><li><a href="#create-a-fresh-run">Create a fresh run</a></li><li><a href="#pause-and-resume">Pause and resume</a></li><li><a href="#inspect-committed-state">Inspect committed state</a></li><li><a href="#build-analysis-exports">Build analysis exports</a></li><li><a href="#run-directory">Run directory</a></li><li><a href="#diagnostics">Diagnostics</a></li></ul></nav></aside>
+</div></main></div>
+</body></html>

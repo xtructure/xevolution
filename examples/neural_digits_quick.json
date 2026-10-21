@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "seed": 42,
+  "experiment": {
+    "factory": "examples.neural_digits:build_experiment",
+    "parameters": {
+      "train_size": 1000,
+      "validation_size": 400,
+      "test_size": 397,
+      "epochs": 10,
+      "batch_size": 128,
+      "learning_rate": 0.001,
+      "alpha": 0.0001,
+      "split_seed": 17,
+      "training_seed": 23
+    }
+  },
+  "evolution": {
+    "population_size": 6,
+    "mutation_probability": 0.7,
+    "parent_selection": {"name": "tournament", "size": 3},
+    "survival": {"name": "elitism", "count": 1},
+    "max_attempts_per_child": 20
+  },
+  "termination": {"max_generations": 3}
+}

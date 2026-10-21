@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="xevolution: what it does and how it works xevolution is a Python library for searching a space of candidate solutions through evolutionary computation. You describe a candidate, de">
+<title>xevolution: what it does and how it works · xevolution documentation</title>
+<link rel="stylesheet" href="assets/docs.css">
+<script defer src="assets/search-index.js"></script>
+<script defer src="assets/docs.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#xevo-main">Skip to content</a>
+<header class="site-header"><div class="header-inner">
+<a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">x</span><span class="brand-name">xevolution<span class="brand-note">Evolutionary computation · Python</span></span></a>
+<div class="header-right"><span class="version">v0.1.1</span>
+<div class="search-wrap" id="xevo-search" role="search" hidden>
+<label class="sr-only" for="xevo-search-input">Search documentation</label>
+<input id="xevo-search-input" type="search" placeholder="Search the documentation" autocomplete="off" aria-controls="xevo-search-results" aria-expanded="false">
+<kbd class="search-key" aria-hidden="true">/</kbd>
+<div id="xevo-search-results" class="search-results" role="region" aria-label="Search results" aria-live="polite" hidden></div>
+</div></div></div></header>
+<div class="layout">
+<details class="sidebar" id="xevo-navigation" open><summary>Browse documentation</summary>
+<nav aria-label="Documentation"><section class="nav-group"><h2 class="nav-heading">Start here</h2><ul><li><a href="index.html">Documentation home</a></li><li><a href="overview.html" aria-current="page">Package overview</a></li><li><a href="examples.html">Choose an example</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Example projects</h2><ul><li><a href="arithmetic_demo.html">Arithmetic expressions</a></li><li><a href="batch_demo.html">Shared resources</a></li><li><a href="digits_demo.html">Digits MLP</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Reference</h2><ul><li><a href="configuration.html">JSON configuration</a></li><li><a href="cli.html">Command line</a></li><li><a href="extensions.html">Application extensions</a></li><li><a href="architecture.html">Architecture &amp; ownership</a></li><li><a href="checkpointing.html">Checkpoints &amp; recovery</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Project</h2><ul><li><a href="porting_notes.html">Porting notes</a></li><li><a href="verification.html">Release verification</a></li><li><a href="port_specification.html">Port specification</a></li><li><a href="contributing.html">Contributing</a></li><li><a href="building_docs.html">Building these docs</a></li></ul></section></nav>
+<div class="sidebar-footer">Version 0.1.1<br>Offline reference documentation.<br>Markdown is the editable source.</div>
+</details>
+<main class="content" id="xevo-main"><div class="document-grid">
+<div class="article-column">
+<div class="page-meta"><div class="breadcrumb"><a href="index.html">Docs</a><span>/</span>Start here</div><a class="source-link" href="../markdown/overview.md">Markdown source</a></div>
+<details class="compact-toc"><summary>On this page</summary><ul class="toc-list"><li><a href="#the-central-ideas">The central ideas</a></li><li><a href="#what-the-application-supplies">What the application supplies</a></li><li><a href="#what-happens-in-one-run">What happens in one run?</a></li><li><a href="#independent-and-whole-population-evaluation">Independent and whole-population evaluation</a></li><li><a href="#history-checkpoints-and-continuation">History, checkpoints, and continuation</a></li><li><a href="#run-an-example">Run an example</a></li><li><a href="#where-to-go-next">Where to go next</a></li></ul></details>
+<article class="document"><h1 id="xevolution-what-it-does-and-how-it-works">xevolution: what it does and how it works</h1>
+<p><code>xevolution</code> is a Python library for searching a space of candidate solutions through evolutionary computation. You describe a candidate, define how to evaluate it, and provide ways to create variations. The library maintains a population, selects parents, produces new candidates, evaluates them, and keeps the history needed to understand and continue the search.</p>
+<p>The same engine can search for an arithmetic expression, distribute competing candidates across shared resources, or choose the architecture of a neural network. Those are the <a href="examples.html">three included examples</a>. The framework does not need to know what their genotypes mean.</p>
+<p>The package is headless: it runs through a Python API or command line without a graphical interface. It supports Python 3.12 and later. Its core has no runtime dependencies outside the standard library. Application code can use numerical libraries, simulators, or other services through the evaluation contracts. The Digits example adds its numerical dependencies through an optional uv dependency group.</p>
+<h2 id="the-central-ideas">The central ideas</h2>
+<p>An evolutionary run repeatedly asks two questions: how well does each current candidate perform, and which variations should be tried next? The vocabulary below separates the application problem from the engine's bookkeeping.</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Term</th>
+<th>Meaning in xevolution</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Genotype</td>
+<td>The application-defined description that operators change</td>
+<td>An immutable bit string, an integer resource choice, or an MLP architecture</td>
+</tr>
+<tr class="even">
+<td>Individual</td>
+<td>A genotype wrapped with a unique framework ID, birth generation, parent IDs, and observations</td>
+<td>Individual 37 carries a three-layer neural architecture</td>
+</tr>
+<tr class="odd">
+<td>Population</td>
+<td>An ordered collection of individuals evaluated together</td>
+<td>Eight candidate architectures in the normal Digits preset</td>
+</tr>
+<tr class="even">
+<td>Evaluation</td>
+<td>Application work that measures a candidate or a whole population</td>
+<td>Decode an expression, calculate resource sharing, or train and validate a network</td>
+</tr>
+<tr class="odd">
+<td>Fitness</td>
+<td>One finite scalar used as the optimization objective</td>
+<td>Validation accuracy of <code>0.945</code></td>
+</tr>
+<tr class="even">
+<td>Metric</td>
+<td>An additional named numerical observation</td>
+<td>Parameter count, expression error, or resource crowding</td>
+</tr>
+<tr class="odd">
+<td>Mutation</td>
+<td>An operation that produces a child from one parent genotype</td>
+<td>Resize one neural layer</td>
+</tr>
+<tr class="even">
+<td>Crossover</td>
+<td>An operation that produces a child from two parent genotypes</td>
+<td>Combine the layer descriptions of two architectures</td>
+</tr>
+<tr class="odd">
+<td>Generation</td>
+<td>A completed population and its accepted observations</td>
+<td>Generation 0 is the evaluated initial population</td>
+</tr>
+</tbody>
+</table></div>
+<p>A genotype is not necessarily the object that evaluation executes. In the Digits example it describes layers and activation; the evaluator constructs a network and trains its weights. In the arithmetic example, the evaluator decodes a bit string before calculating a score. Any such decoding or model construction belongs to the application.</p>
+<p>The built-in comparison policies and historical-best tracking treat larger fitness as better. Finite negative values and zero are valid. To minimize a cost, an application can return its negative or another explicitly chosen quality score. Choose a compatible selector: tournament selection accepts signed fitness, while direct roulette selection requires nonnegative weights. See <a href="configuration.html">configuration</a> for the supported policies.</p>
+<p>Metrics do not silently become extra objectives. For example, the Digits application records parameter count but ranks candidates by accuracy alone. An unevaluated fitness is represented separately from zero, and missing metrics remain missing in statistical summaries.</p>
+<h2 id="what-the-application-supplies">What the application supplies</h2>
+<p>An <code>Experiment</code> composes the application-specific pieces. Small functions, callable objects, and immutable configuration records work together through typed structural contracts; an application does not need a framework base class hierarchy.</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Application contribution</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Initializer</td>
+<td>Create a genotype using the run-owned random generator</td>
+</tr>
+<tr class="even">
+<td>Individual or population evaluator</td>
+<td>Return fitness and optional metrics</td>
+</tr>
+<tr class="odd">
+<td>Mutation and/or crossover operators</td>
+<td>Produce valid children while leaving parents unchanged</td>
+</tr>
+<tr class="even">
+<td>Clone policy</td>
+<td>Preserve independent offspring and retained observations, or share explicitly immutable data</td>
+</tr>
+<tr class="odd">
+<td>Payload codec</td>
+<td>Describe how genotype data is encoded and restored for checkpoints</td>
+</tr>
+<tr class="even">
+<td>Optional policies and hooks</td>
+<td>Customize parent selection, survival, stopping, and adaptive updates</td>
+</tr>
+<tr class="odd">
+<td>Explicit component state</td>
+<td>Preserve any application information that affects later behavior</td>
+</tr>
+</tbody>
+</table></div>
+<p>The engine owns IDs, population order, generation numbers, evaluation counts, birth records, and the completed-generation boundary. It does not require arbitrary genotypes to support comparison, hashing, indexing, or truth testing. Two individuals can carry identical genotypes and still have distinct IDs and separate evaluation histories.</p>
+<p>JSON configuration names an importable experiment factory, such as <code>examples.neural_digits:build_experiment</code>. The factory receives validated core configuration, resolved settings, and the managed random streams. It validates its own application parameters and constructs an <code>Experiment</code>. This makes the same application reconstructible during resume. The <a href="extensions.html">extension guide</a> explains the exact callable signatures, ownership rules, codecs, and state contracts.</p>
+<h2 id="what-happens-in-one-run">What happens in one run?</h2>
+<p>Generation 0 is meaningful work. On a fresh run the engine resolves settings, constructs components, initializes genotypes, assigns IDs, and evaluates the initial population. It then performs the same finalization steps used by later generations: validation, statistics, adaptive updates, stopping, and optional checkpoint publication.</p>
+<p>Each later transition follows this order:</p>
+<ol type="1">
+<li><strong>Choose survivors.</strong> The configured survivor policy decides which previous individuals, if any, remain in the next population.</li>
+<li><strong>Produce the remaining members.</strong> Parents are selected from the complete previous population. Each required child follows either the mutation route or the crossover route. Operators receive the managed random generator and return a new genotype; the framework assigns its ID and parent links.</li>
+<li><strong>Evaluate the assembled population.</strong> All members are evaluated, including retained survivors. The engine validates the complete set of results before accepting fitness values or incrementing accepted-evaluation counts.</li>
+<li><strong>Record observations and prepare the next transition.</strong> Statistics and independent historical-best snapshots are updated. Registered adaptive hooks may update their explicit state and settings for the next transition.</li>
+<li><strong>Decide whether to stop.</strong> The stopping policy runs once against the finalized state. Its decision and any stateful stopping window are retained.</li>
+<li><strong>Commit the completed generation.</strong> If persistence is enabled, scientific history and the checkpoint are committed before the engine exposes success.</li>
+</ol>
+<p>Parent selection and survival answer different questions. An individual that will not survive can still contribute offspring to the transition replacing it. Conversely, retaining an elite preserves its identity and genotype, but does not reuse its old fitness without reevaluation.</p>
+<p>The <code>mutation_probability</code> setting chooses mutation <strong>or</strong> crossover for each child. It does not request a second mutation stage after crossover. Operators can declare a defined inapplicability condition, and reproduction uses explicit fallbacks and finite retry budgets. Unexpected programming errors remain failures.</p>
+<p>The default survivor policy replaces the entire population. Other supplied policies include elitism, and applications can supply custom policies. The <a href="architecture.html">architecture guide</a> describes the modules responsible for each stage; <a href="configuration.html">configuration</a> describes settings and stopping conditions.</p>
+<h2 id="independent-and-whole-population-evaluation">Independent and whole-population evaluation</h2>
+<p>Use an individual evaluator when a candidate's score can be calculated on its own. Arithmetic expressions and the Digits networks use this hook. The engine adapts it into a complete population evaluation and provides a stable evaluation context for each individual.</p>
+<p>Use a population evaluator when scoring needs the population together. In the <a href="batch_demo.html">shared-resource example</a>, a candidate receives its chosen resource's quality divided by the number of candidates choosing that resource. The same genotype can receive different fitness when its neighbors change.</p>
+<p>A population evaluator returns results associated with individual IDs. Every expected ID must occur exactly once, with no extra IDs and no non-finite scores. Results are applied in the engine's stable population order. If both hooks are supplied, the population hook takes precedence; candidates are not evaluated twice.</p>
+<p>These hooks define what the application computes. They do not imply that the core schedules parallel workers or supplies a simulator. An application can place such work behind its evaluator while satisfying the result and state contracts.</p>
+<h2 id="history-checkpoints-and-continuation">History, checkpoints, and continuation</h2>
+<p>A persistent run contains versioned JSON configuration and checkpoint state, a JSON Lines scientific history, and any codec attachments. History records population observations, statistics, births, parent links, operator details, settings, and stopping decisions. The recorded historical best is the best fitness observation seen; for a population-dependent problem, interpreting that observation also requires its evaluation context.</p>
+<p>The core <code>inspect</code> and <code>analyze</code> commands read committed results. Analysis reconstructs summaries and genealogy without evaluating candidates or advancing the run. The Digits companion report is a distinct application command that explicitly performs two fresh training runs for its final comparison.</p>
+<p>Checkpoints describe completed generations. They preserve population payloads, IDs and counters, current and next-transition settings, random generator states, historical state, application component state, stopping state, and the committed history boundary. Resume reconstructs the application and restores that state without reinitializing or reevaluating the saved generation.</p>
+<p>Exact continuation requires compatible code, data, numerical execution, and complete future-affecting state. An interrupted, uncommitted generation may run again after a crash. A saved terminal decision stays terminal under normal resume; an operational pause leaves the configured stopping policy intact. Read <a href="checkpointing.html">checkpointing and recovery</a> before relying on continuation for an application with external side effects or stateful evaluators.</p>
+<h2 id="run-an-example">Run an example</h2>
+<p>Use the full project's root directory, containing <code>pyproject.toml</code>, <code>uv.lock</code>, and <code>examples/</code>. The documentation archive can be read independently, but the commands need the source project. All Python dependencies belong in a local virtual environment managed by uv. Keep <code>UV_PROJECT_ENVIRONMENT</code> unset or pointing to this project's <code>.venv</code>.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> python install 3.12</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> sync <span class="at">--locked</span> <span class="at">--group</span> dev</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> python <span class="at">-m</span> xevolution run <span class="at">--config</span> examples/arithmetic.json <span class="at">--output</span> runs/arithmetic</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> python <span class="at">-m</span> xevolution inspect runs/arithmetic</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> python <span class="at">-m</span> xevolution analyze runs/arithmetic <span class="at">--output</span> reports/arithmetic</span></code></pre></div>
+<p>Use a new or empty output directory for a fresh run. The arithmetic preset stops when it finds its target or reaches its generation limit, so a successful initial population can end the run at generation 0. The <a href="arithmetic_demo.html">arithmetic guide</a> explains its encoding and fitness.</p>
+<p>To embed a configured application in Python, the same engine is available through the public API:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> xevolution <span class="im">import</span> create_engine</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> create_engine(<span class="st">&quot;examples/batch_problem.json&quot;</span>) <span class="im">as</span> engine:</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> engine.run()</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    best_fitness <span class="op">=</span> <span class="va">None</span> <span class="cf">if</span> result.best <span class="kw">is</span> <span class="va">None</span> <span class="cf">else</span> result.best.fitness</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(result.generation, best_fitness)</span></code></pre></div>
+<p>This call reads the configuration file and keeps run state in memory because no output directory was supplied. Add <code>output="runs/shared-resources"</code> to <code>create_engine</code> when a persistent run is wanted. Applications can also construct <code>Experiment</code> and <code>RunConfig</code> directly; see <a href="extensions.html">extensions</a>.</p>
+<h2 id="where-to-go-next">Where to go next</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Goal</th>
+<th>Read next</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Choose a working example</td>
+<td><a href="examples.html">Examples overview</a></td>
+</tr>
+<tr class="even">
+<td>Understand representation, decoding, and simple scoring</td>
+<td><a href="arithmetic_demo.html">Arithmetic expressions</a></td>
+</tr>
+<tr class="odd">
+<td>Evaluate interactions between candidates</td>
+<td><a href="batch_demo.html">Shared resources</a></td>
+</tr>
+<tr class="even">
+<td>Train a model inside fitness evaluation</td>
+<td><a href="digits_demo.html">Digits MLP architecture evolution</a></td>
+</tr>
+<tr class="odd">
+<td>Change populations, selection, operators, or stopping</td>
+<td><a href="configuration.html">JSON configuration</a></td>
+</tr>
+<tr class="even">
+<td>Run, pause, inspect, resume, or export results</td>
+<td><a href="cli.html">Command-line reference</a></td>
+</tr>
+<tr class="odd">
+<td>Build an application</td>
+<td><a href="extensions.html">Application extension contracts</a></td>
+</tr>
+<tr class="even">
+<td>Understand library internals</td>
+<td><a href="architecture.html">Architecture and ownership</a></td>
+</tr>
+<tr class="odd">
+<td>Design reliable saved runs</td>
+<td><a href="checkpointing.html">Checkpointing and recovery</a></td>
+</tr>
+</tbody>
+</table></div>
+<p>Return to the <a href="index.html">documentation index</a>.</p>
+</article>
+<nav class="pagination" aria-label="Previous and next articles"><a class="previous" href="index.html"><small>Previous</small><strong>Documentation home</strong></a><a class="next" href="examples.html"><small>Next</small><strong>Choose an example</strong></a></nav>
+<footer class="page-footer">xevolution 0.1.1 documentation · <a href="building_docs.html">Build and edit these docs</a><br>Framework behavior is documented for the supplied Python port. See <a href="verification.html">release verification</a> for the scope of executed checks.</footer>
+</div>
+<aside class="page-toc"><nav aria-label="On this page"><div class="toc-title">On this page</div><ul class="toc-list"><li><a href="#the-central-ideas">The central ideas</a></li><li><a href="#what-the-application-supplies">What the application supplies</a></li><li><a href="#what-happens-in-one-run">What happens in one run?</a></li><li><a href="#independent-and-whole-population-evaluation">Independent and whole-population evaluation</a></li><li><a href="#history-checkpoints-and-continuation">History, checkpoints, and continuation</a></li><li><a href="#run-an-example">Run an example</a></li><li><a href="#where-to-go-next">Where to go next</a></li></ul></nav></aside>
+</div></main></div>
+</body></html>

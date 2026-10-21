@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Architecture xevolution is a generic, headless evolutionary-computation library. Application code supplies the representation and problem; the framework coordinates its evolution, ">
+<title>Architecture · xevolution documentation</title>
+<link rel="stylesheet" href="assets/docs.css">
+<script defer src="assets/search-index.js"></script>
+<script defer src="assets/docs.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#xevo-main">Skip to content</a>
+<header class="site-header"><div class="header-inner">
+<a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">x</span><span class="brand-name">xevolution<span class="brand-note">Evolutionary computation · Python</span></span></a>
+<div class="header-right"><span class="version">v0.1.1</span>
+<div class="search-wrap" id="xevo-search" role="search" hidden>
+<label class="sr-only" for="xevo-search-input">Search documentation</label>
+<input id="xevo-search-input" type="search" placeholder="Search the documentation" autocomplete="off" aria-controls="xevo-search-results" aria-expanded="false">
+<kbd class="search-key" aria-hidden="true">/</kbd>
+<div id="xevo-search-results" class="search-results" role="region" aria-label="Search results" aria-live="polite" hidden></div>
+</div></div></div></header>
+<div class="layout">
+<details class="sidebar" id="xevo-navigation" open><summary>Browse documentation</summary>
+<nav aria-label="Documentation"><section class="nav-group"><h2 class="nav-heading">Start here</h2><ul><li><a href="index.html">Documentation home</a></li><li><a href="overview.html">Package overview</a></li><li><a href="examples.html">Choose an example</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Example projects</h2><ul><li><a href="arithmetic_demo.html">Arithmetic expressions</a></li><li><a href="batch_demo.html">Shared resources</a></li><li><a href="digits_demo.html">Digits MLP</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Reference</h2><ul><li><a href="configuration.html">JSON configuration</a></li><li><a href="cli.html">Command line</a></li><li><a href="extensions.html">Application extensions</a></li><li><a href="architecture.html" aria-current="page">Architecture &amp; ownership</a></li><li><a href="checkpointing.html">Checkpoints &amp; recovery</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Project</h2><ul><li><a href="porting_notes.html">Porting notes</a></li><li><a href="verification.html">Release verification</a></li><li><a href="port_specification.html">Port specification</a></li><li><a href="contributing.html">Contributing</a></li><li><a href="building_docs.html">Building these docs</a></li></ul></section></nav>
+<div class="sidebar-footer">Version 0.1.1<br>Offline reference documentation.<br>Markdown is the editable source.</div>
+</details>
+<main class="content" id="xevo-main"><div class="document-grid">
+<div class="article-column">
+<div class="page-meta"><div class="breadcrumb"><a href="index.html">Docs</a><span>/</span>Reference</div><a class="source-link" href="../markdown/architecture.md">Markdown source</a></div>
+<details class="compact-toc"><summary>On this page</summary><ul class="toc-list"><li><a href="#module-ownership">Module ownership</a></li><li><a href="#data-ownership">Data ownership</a></li><li><a href="#completed-generation-lifecycle">Completed-generation lifecycle</a></li><li><a href="#scientific-records-and-operational-messages">Scientific records and operational messages</a></li></ul></details>
+<article class="document"><h1 id="architecture">Architecture</h1>
+<p><code>xevolution</code> is a generic, headless evolutionary-computation library. Application code supplies the representation and problem; the framework coordinates its evolution, identities, measurements, history, and continuation.</p>
+<h2 id="module-ownership">Module ownership</h2>
+<p>All library modules live under <code>src/xevolution/</code>.</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Module</th>
+<th>Owns</th>
+<th>Main interactions</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>models.py</code></td>
+<td>Shared individuals, populations, results, run state, and generation records</td>
+<td>Data exchanged by policies, the engine, tracking, and serialization</td>
+</tr>
+<tr class="even">
+<td><code>protocols.py</code></td>
+<td>Structural contracts for application components</td>
+<td>Applications implement functions or compatible objects without inheriting framework classes</td>
+</tr>
+<tr class="odd">
+<td><code>errors.py</code></td>
+<td>Focused configuration, evaluation, reproduction, and checkpoint errors</td>
+<td>Components distinguish operator inapplicability from unexpected failures</td>
+</tr>
+<tr class="even">
+<td><code>config.py</code></td>
+<td>Strict JSON input, validated settings, sampling, and explicit updates</td>
+<td>Supplies construction settings and separate completed/next-generation settings</td>
+</tr>
+<tr class="odd">
+<td><code>randomness.py</code></td>
+<td>Managed random streams, evaluation contexts, and stable work identities</td>
+<td>Initialization, variation, selection, evaluation, and state restoration</td>
+</tr>
+<tr class="even">
+<td><code>evaluation.py</code></td>
+<td>Hook routing, complete result validation, deterministic application, and accepted counts</td>
+<td>Engine supplies the population; applications return observations</td>
+</tr>
+<tr class="odd">
+<td><code>selection.py</code></td>
+<td>Distinct parent and survivor policies</td>
+<td>Reproduction chooses parents; population assembly retains survivors</td>
+</tr>
+<tr class="even">
+<td><code>operators.py</code></td>
+<td>Weighted operations, fallbacks, and cloning operations</td>
+<td>Supplies variation behavior and provenance to reproduction</td>
+</tr>
+<tr class="odd">
+<td><code>reproduction.py</code></td>
+<td>Finite offspring attempts and framework birth bookkeeping</td>
+<td>Reads the complete previous population and produces independent children</td>
+</tr>
+<tr class="even">
+<td><code>termination.py</code></td>
+<td>Stopping predicates and logical composition</td>
+<td>Reads finalized state once per generation; exposes persistent predicate state</td>
+</tr>
+<tr class="odd">
+<td><code>engine.py</code></td>
+<td>Fresh initialization, transitions, adaptive updates, stopping, and commits</td>
+<td>Coordinates the policy modules and an optional store</td>
+</tr>
+<tr class="even">
+<td><code>experiment.py</code></td>
+<td>Explicit composition of an application's collaborators</td>
+<td>Connects initialization, clone/codec, evaluator, operators, and policies</td>
+</tr>
+<tr class="odd">
+<td><code>registry.py</code></td>
+<td>Named and explicit Python factory resolution</td>
+<td>Reconstructs application behavior from recorded identities</td>
+</tr>
+<tr class="even">
+<td><code>serialization.py</code></td>
+<td>Versioned conversion of typed state and application payloads</td>
+<td>Engine prepares state for storage and decodes restored records</td>
+</tr>
+<tr class="odd">
+<td><code>storage.py</code></td>
+<td>Files, attachments, journal offsets, atomic publication, and recovery</td>
+<td>Commits prepared state and exposes only committed scientific history</td>
+</tr>
+<tr class="even">
+<td><code>tracking.py</code></td>
+<td>Statistics, independent historical snapshots, genealogy, and report projections</td>
+<td>Consumes finalized observations; supplies historical data to stopping</td>
+</tr>
+<tr class="odd">
+<td><code>cli.py</code></td>
+<td>Command parsing, operational logging, and user-facing process errors</td>
+<td>Calls public experiment/engine/storage operations</td>
+</tr>
+<tr class="even">
+<td><code>__main__.py</code></td>
+<td><code>python -m xevolution</code> entry point</td>
+<td>Delegates to the same CLI as the console script</td>
+</tr>
+<tr class="odd">
+<td><code>__init__.py</code></td>
+<td>Small public import surface</td>
+<td>Does not import examples or perform run-time work on import</td>
+</tr>
+</tbody>
+</table></div>
+<p>Shared models and protocols do not depend on the concrete engine or storage. Application behavior enters through composition. There is no miscellaneous utility module or runtime dependency on the old Xnet packages.</p>
+<h2 id="data-ownership">Data ownership</h2>
+<p>The framework owns individual IDs, population order, generation numbers, accepted-evaluation counts, provenance, and the commit boundary. An application owns genotype semantics, cloning, decoding, domain evaluation, and any private state retained by its components.</p>
+<p>IDs determine individual identity. The engine does not compare, hash, index, measure, or truth-test arbitrary genotype payloads. A frozen wrapper does not make a nested list, array, or graph immutable: operators must leave parents unchanged, and retained historical snapshots use the application's cloning contract.</p>
+<p>Numeric metrics supplement one scalar fitness. They do not create multiple objectives. Population summaries include each metric's contributing count; missing observations remain missing.</p>
+<h2 id="completed-generation-lifecycle">Completed-generation lifecycle</h2>
+<p>Fresh execution resolves settings, constructs components, creates genotypes, assigns IDs, and evaluates generation 0. A later transition:</p>
+<ol type="1">
+<li>Captures the effective settings to use for the new generation.</li>
+<li>Selects survivors and determines how many children are needed.</li>
+<li>Selects parents from the <strong>complete</strong> previous population.</li>
+<li>Produces children through mutation or crossover with finite retry budgets.</li>
+<li>Assembles the new population and evaluates all members, including survivors.</li>
+<li>Validates all result identities and scores before applying observations.</li>
+<li>Updates statistics, independent historical snapshots, and registered adaptive components.</li>
+<li>Evaluates stopping once and retains the decision and predicate state.</li>
+<li>Commits the generation if persistence is enabled, then exposes its record.</li>
+</ol>
+<p>The population hook takes precedence when supplied. Otherwise the coordinator adapts the individual hook. A population hook can calculate jointly dependent fitness; the engine does not replace it with an independent loop.</p>
+<p>An adaptive update changes <code>effective_settings</code> for the next transition. The completed population retains its own <code>generation_settings</code> snapshot, so changing the next target population size cannot rewrite what just happened.</p>
+<p>In-memory execution follows the same lifecycle without opening a run directory. Failure inside a transition may have mutated application state; the library does not promise general in-memory rollback. Durable recovery starts from the last committed generation.</p>
+<h2 id="scientific-records-and-operational-messages">Scientific records and operational messages</h2>
+<p>Scientific history records generation membership, evaluation observations, statistics, births, parent links, operations, settings, and stopping decisions. Its committed prefix is the authority for reproducible analysis. Genealogy child indexes are derived from recorded parent links.</p>
+<p>Logging is for progress and diagnostics. It is not parsed to reconstruct scientific results, and its timing may differ after recovery. The CLI configures logging; importing or embedding the library does not.</p>
+<p>See <a href="extensions.html">extensions</a> for application contracts, <a href="configuration.html">configuration</a> for settings, and <a href="checkpointing.html">checkpointing</a> for durability and restoration.</p>
+</article>
+<nav class="pagination" aria-label="Previous and next articles"><a class="previous" href="extensions.html"><small>Previous</small><strong>Application extensions</strong></a><a class="next" href="checkpointing.html"><small>Next</small><strong>Checkpoints &amp; recovery</strong></a></nav>
+<footer class="page-footer">xevolution 0.1.1 documentation · <a href="building_docs.html">Build and edit these docs</a><br>Framework behavior is documented for the supplied Python port. See <a href="verification.html">release verification</a> for the scope of executed checks.</footer>
+</div>
+<aside class="page-toc"><nav aria-label="On this page"><div class="toc-title">On this page</div><ul class="toc-list"><li><a href="#module-ownership">Module ownership</a></li><li><a href="#data-ownership">Data ownership</a></li><li><a href="#completed-generation-lifecycle">Completed-generation lifecycle</a></li><li><a href="#scientific-records-and-operational-messages">Scientific records and operational messages</a></li></ul></nav></aside>
+</div></main></div>
+</body></html>

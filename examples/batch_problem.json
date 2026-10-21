@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "seed": 24680,
+  "experiment": {
+    "factory": "examples.batch_problem:build_experiment",
+    "parameters": {
+      "resource_quality": [1.0, 1.8, 3.0, 5.0]
+    }
+  },
+  "evolution": {
+    "population_size": 48,
+    "mutation_probability": 0.75,
+    "parent_selection": {"name": "roulette"},
+    "survival": {"name": "replace_all"},
+    "max_attempts_per_child": 20
+  },
+  "termination": {"max_generations": 12}
+}

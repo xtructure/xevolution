@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "seed": 12345,
+  "experiment": {
+    "factory": "examples.arithmetic:build_experiment",
+    "parameters": {
+      "target": 64,
+      "terms": 10,
+      "mutation_rate": 0.01
+    }
+  },
+  "evolution": {
+    "population_size": 100,
+    "mutation_probability": 0.5,
+    "parent_selection": {"name": "roulette"},
+    "survival": {"name": "replace_all"},
+    "max_attempts_per_child": 100
+  },
+  "termination": {
+    "any": [
+      {"max_generations": 200},
+      {"fitness_at_least": 1.0}
+    ]
+  }
+}

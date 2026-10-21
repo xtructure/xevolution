@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Contributor and coding-agent guidelines This is a documentation copy of the repository-root AGENTS.md, which remains the instruction file for agents working on the source project. ">
+<title>Contributor and coding-agent guidelines · xevolution documentation</title>
+<link rel="stylesheet" href="assets/docs.css">
+<script defer src="assets/search-index.js"></script>
+<script defer src="assets/docs.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#xevo-main">Skip to content</a>
+<header class="site-header"><div class="header-inner">
+<a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">x</span><span class="brand-name">xevolution<span class="brand-note">Evolutionary computation · Python</span></span></a>
+<div class="header-right"><span class="version">v0.1.1</span>
+<div class="search-wrap" id="xevo-search" role="search" hidden>
+<label class="sr-only" for="xevo-search-input">Search documentation</label>
+<input id="xevo-search-input" type="search" placeholder="Search the documentation" autocomplete="off" aria-controls="xevo-search-results" aria-expanded="false">
+<kbd class="search-key" aria-hidden="true">/</kbd>
+<div id="xevo-search-results" class="search-results" role="region" aria-label="Search results" aria-live="polite" hidden></div>
+</div></div></div></header>
+<div class="layout">
+<details class="sidebar" id="xevo-navigation" open><summary>Browse documentation</summary>
+<nav aria-label="Documentation"><section class="nav-group"><h2 class="nav-heading">Start here</h2><ul><li><a href="index.html">Documentation home</a></li><li><a href="overview.html">Package overview</a></li><li><a href="examples.html">Choose an example</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Example projects</h2><ul><li><a href="arithmetic_demo.html">Arithmetic expressions</a></li><li><a href="batch_demo.html">Shared resources</a></li><li><a href="digits_demo.html">Digits MLP</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Reference</h2><ul><li><a href="configuration.html">JSON configuration</a></li><li><a href="cli.html">Command line</a></li><li><a href="extensions.html">Application extensions</a></li><li><a href="architecture.html">Architecture &amp; ownership</a></li><li><a href="checkpointing.html">Checkpoints &amp; recovery</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Project</h2><ul><li><a href="porting_notes.html">Porting notes</a></li><li><a href="verification.html">Release verification</a></li><li><a href="port_specification.html">Port specification</a></li><li><a href="contributing.html" aria-current="page">Contributing</a></li><li><a href="building_docs.html">Building these docs</a></li></ul></section></nav>
+<div class="sidebar-footer">Version 0.1.1<br>Offline reference documentation.<br>Markdown is the editable source.</div>
+</details>
+<main class="content" id="xevo-main"><div class="document-grid">
+<div class="article-column">
+<div class="page-meta"><div class="breadcrumb"><a href="index.html">Docs</a><span>/</span>Project</div><a class="source-link" href="../markdown/contributing.md">Markdown source</a></div>
+<details class="compact-toc"><summary>On this page</summary><ul class="toc-list"><li><a href="#1-project-overview-and-scope">1. Project overview and scope</a></li><li><a href="#2-recommended-technology-stack">2. Recommended technology stack</a></li><li><a href="#3-required-uv-environment-policy">3. Required uv environment policy</a></li><li class="subsection"><a href="#initial-project-bootstrap">Initial project bootstrap</a></li><li class="subsection"><a href="#existing-checkout">Existing checkout</a></li><li><a href="#4-repository-and-module-boundaries">4. Repository and module boundaries</a></li><li><a href="#5-python-coding-practices">5. Python coding practices</a></li><li class="subsection"><a href="#api-and-type-design">API and type design</a></li><li class="subsection"><a href="#data-ownership-and-arbitrary-genotypes">Data ownership and arbitrary genotypes</a></li><li class="subsection"><a href="#readability-errors-and-resources">Readability, errors, and resources</a></li><li><a href="#6-evolutionary-invariants">6. Evolutionary invariants</a></li><li><a href="#7-determinism-and-checkpoint-discipline">7. Determinism and checkpoint discipline</a></li><li><a href="#8-json-and-numerical-boundaries">8. JSON and numerical boundaries</a></li><li><a href="#9-tool-configuration-and-normal-checks">9. Tool configuration and normal checks</a></li><li><a href="#10-testing-expectations">10. Testing expectations</a></li><li><a href="#11-agent-workflow-and-completion">11. Agent workflow and completion</a></li><li><a href="#reference-links">Reference links</a></li></ul></details>
+<article class="document"><h1 id="contributor-and-coding-agent-guidelines">Contributor and coding-agent guidelines</h1>
+<p>This is a documentation copy of the repository-root <code>AGENTS.md</code>, which remains the instruction file for agents working on the source project. Repository paths below are relative to that project root. See <a href="overview.html">the package overview</a> for an introduction and <a href="building_docs.html">documentation maintenance</a> for the Markdown/HTML workflow.</p>
+<p>This file guides coding agents working anywhere in this repository. Paths are relative to the repository root. The <a href="port_specification.html">port specification</a> defines the required behavior; this file defines the working practices and recommended implementation stack. Keep both consistent when requirements change.</p>
+<p>Inspect the checkout before acting. The specification describes a target architecture, so a named module, test, or command may not have been implemented yet. Do not report planned functionality as existing or verified functionality.</p>
+<h2 id="1-project-overview-and-scope">1. Project overview and scope</h2>
+<p>Port the generic Java <code>xevolution</code> framework into a standalone, headless Python library for evolutionary computation. Preserve its useful capabilities, correct the identified algorithmic defects, and make application extension straightforward. The reviewed Java baseline is <a href="https://github.com/xtructure/xnet-public/tree/509c673e502f0c27daa6b91f39cc298404b59ae2/xnet/xevolution">xtructure/xnet-public at commit 509c673e502f0c27daa6b91f39cc298404b59ae2</a>.</p>
+<p>The agreed scope is:</p>
+<ul>
+<li>Python 3.12 and later, with an installable <code>src/xevolution/</code> package.</li>
+<li>Arbitrary application-defined genotypes, individual evaluation, and genuine whole-population evaluation.</li>
+<li>One finite scalar objective, maximized by default, with extensible parent and survivor selection.</li>
+<li>Initialization, mutation, crossover, population replacement, termination, statistics, historical results, genealogy, and headless analysis.</li>
+<li>Versioned JSON configuration and explicit Python checkpoint state.</li>
+<li>Reliable continuation from completed-generation checkpoints under the specified state and determinism contracts.</li>
+<li>Necessary Xnet utility behavior incorporated into this package using suitable Python facilities.</li>
+</ul>
+<p>NEAT, the graphical interface, the operator workbench, and compatibility with Java files or random trajectories are outside this port. Do not introduce a built-in simulator, distributed scheduler, GPU requirement, or multiobjective engine without a requirement for that work. Applications can supply specialized capabilities through the extension contracts.</p>
+<h2 id="2-recommended-technology-stack">2. Recommended technology stack</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Area</th>
+<th>Project choice</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Language</td>
+<td>Python <code>&gt;=3.12</code>; use syntax and standard-library APIs available at the minimum supported version.</td>
+</tr>
+<tr class="even">
+<td>Environment and dependency management</td>
+<td><code>uv</code>, a repository-local <code>.venv</code>, <code>pyproject.toml</code>, and a committed <code>uv.lock</code>.</td>
+</tr>
+<tr class="odd">
+<td>Core runtime</td>
+<td>Standard library initially. Prefer <code>dataclasses</code>, <code>typing</code>, <code>collections.abc</code>, <code>random</code>, <code>math</code>, <code>json</code>, <code>pathlib</code>, <code>hashlib</code>, <code>logging</code>, and <code>argparse</code> as appropriate.</td>
+</tr>
+<tr class="even">
+<td>Packaging</td>
+<td>Hatchling build backend, with <code>src/xevolution</code> explicitly selected for the wheel and <code>py.typed</code> included. Build through <code>uv build</code>.</td>
+</tr>
+<tr class="odd">
+<td>Testing</td>
+<td><code>pytest</code>, deterministic fixtures, temporary run directories, and subprocess-based resume tests.</td>
+</tr>
+<tr class="even">
+<td>Formatting and linting</td>
+<td>Ruff formatter and linter.</td>
+</tr>
+<tr class="odd">
+<td>Static typing</td>
+<td>mypy, with strict checking for the library.</td>
+</tr>
+<tr class="even">
+<td>Persistence</td>
+<td>Versioned JSON checkpoints and JSON Lines scientific history; application codecs for payloads.</td>
+</tr>
+<tr class="odd">
+<td>Documentation</td>
+<td>Markdown, executable examples, public API docstrings, and this repository-level instruction file.</td>
+</tr>
+<tr class="even">
+<td>CI</td>
+<td>GitHub Actions using the same environment and check commands as local development. Test Python 3.12 and each newer version advertised as supported.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Keep the initial runtime dependency list empty. Testing, linting, typing, and build tools are development/build dependencies. Numerical libraries belong to applications or justified optional integrations. Avoid adding a framework or dependency for behavior the standard library already handles clearly.</p>
+<h2 id="3-required-uv-environment-policy">3. Required uv environment policy</h2>
+<p><strong>All Python dependencies must be installed in virtual environments created and managed by <code>uv</code>. Runtime, development, testing, documentation, and build dependencies are all covered by this requirement.</strong></p>
+<p>Use the repository's <code>.venv</code> for normal development and execution. Temporary build-isolation or packaging-test environments are permitted when <code>uv</code> creates and manages them. Never install project dependencies into a system interpreter, a user-wide Python installation, or an unrelated environment. The standalone <code>uv</code> executable itself is tooling, not a project Python dependency.</p>
+<ul>
+<li>Run project Python commands and development tools through <code>uv run</code>.</li>
+<li>Before dependency-changing commands, verify that <code>UV_PROJECT_ENVIRONMENT</code> is unset or resolves to this repository's <code>.venv</code>. Correct an unexpected override first; do not use <code>--active</code> to select an unrelated environment.</li>
+<li>Declare dependencies in <code>pyproject.toml</code>; commit the corresponding <code>uv.lock</code> changes.</li>
+<li>Use <code>uv add</code>, <code>uv remove</code>, and <code>uv sync</code> for ordinary dependency management. Do not maintain an unrecorded collection of manually installed packages.</li>
+<li>Do not use global <code>pip</code>, <code>pip install --user</code>, <code>sudo pip</code>, or <code>uv pip --system</code>. Do not use <code>uvx</code> or globally installed tools to bypass the project's locked development tools.</li>
+<li>Do not redirect the project environment to a system or shared interpreter. Configure the editor to use this repository's <code>.venv</code>.</li>
+<li>Do not commit <code>.venv</code>, caches, build output, generated run directories, or large checkpoint payloads.</li>
+</ul>
+<p><code>uv</code> maintains the project environment and supports dependency groups; keep the normal developer tools in the <code>dev</code> group. See the official <a href="https://docs.astral.sh/uv/guides/projects/">project workflow</a> and <a href="https://docs.astral.sh/uv/concepts/projects/dependencies/">dependency documentation</a>.</p>
+<h3 id="initial-project-bootstrap">Initial project bootstrap</h3>
+<p>Only when the Python project does not yet exist, create its package skeleton and <code>pyproject.toml</code> with <code>requires-python = "&gt;=3.12"</code>, a Hatchling build-system declaration, the console entry point, and the tool settings below. Do not reinitialize or overwrite an existing project.</p>
+<p>Use Python 3.12 as the initial development baseline:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> python install 3.12</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> python pin 3.12</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> add <span class="at">--group</span> dev pytest ruff mypy</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> sync <span class="at">--group</span> dev</span></code></pre></div>
+<p>The <code>uv add</code> command creates or updates the lockfile. Commit <code>pyproject.toml</code>, <code>uv.lock</code>, and <code>.python-version</code>. If editing dependency declarations directly during an intentional dependency change, run <code>uv lock</code> and review its diff.</p>
+<h3 id="existing-checkout">Existing checkout</h3>
+<p>Run from the repository root:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> sync <span class="at">--locked</span> <span class="at">--group</span> dev</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> <span class="at">--group</span> dev python <span class="at">-c</span> <span class="st">&quot;import sys; from pathlib import Path; assert sys.prefix != sys.base_prefix; assert Path(sys.prefix).resolve() == Path(&#39;.venv&#39;).resolve(); print(sys.executable)&quot;</span></span></code></pre></div>
+<p>The interpreter should belong to the repository's <code>.venv</code>. An explicit environment activation is unnecessary for these commands. <code>--locked</code> makes stale or missing lock state an error instead of silently updating it. Resolve the actual dependency mismatch; do not remove the flag merely to make a check pass. See <a href="https://docs.astral.sh/uv/concepts/projects/sync/">locking and syncing</a>.</p>
+<p>Hatchling belongs in <code>[build-system].requires</code>, with backend <code>hatchling.build</code>. Let <code>uv</code> manage isolated build dependencies. Do not assume that <code>uv.lock</code> alone pins every isolated build requirement; use deliberate build constraints when reproducible distribution builds are needed. See <a href="https://docs.astral.sh/uv/concepts/projects/build/">uv builds</a> and <a href="https://hatch.pypa.io/latest/config/build/">Hatchling package selection</a>.</p>
+<h2 id="4-repository-and-module-boundaries">4. Repository and module boundaries</h2>
+<p>Follow the shallow module layout in the specification. Organize by responsibility, not by Java class hierarchy.</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Location</th>
+<th>Ownership</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>models.py</code>, <code>protocols.py</code>, <code>errors.py</code></td>
+<td>Shared records, extension contracts, and focused exceptions. No dependency on concrete engine, storage, or CLI implementations.</td>
+</tr>
+<tr class="even">
+<td><code>config.py</code>, <code>randomness.py</code></td>
+<td>Validated settings, effective configuration, managed random streams, and stable evaluation contexts.</td>
+</tr>
+<tr class="odd">
+<td><code>evaluation.py</code>, <code>selection.py</code>, <code>operators.py</code>, <code>reproduction.py</code>, <code>termination.py</code></td>
+<td>Evolutionary policies and calculations. Framework bookkeeping has one explicit owner.</td>
+</tr>
+<tr class="even">
+<td><code>engine.py</code>, <code>experiment.py</code>, <code>registry.py</code></td>
+<td>Lifecycle coordination, component composition, and explicit factory resolution.</td>
+</tr>
+<tr class="odd">
+<td><code>serialization.py</code></td>
+<td>Conversion between typed state and versioned representations.</td>
+</tr>
+<tr class="even">
+<td><code>storage.py</code></td>
+<td>File operations, journal positions, checkpoint publication, and recovery.</td>
+</tr>
+<tr class="odd">
+<td><code>tracking.py</code></td>
+<td>Scientific statistics, historical snapshots, genealogy, and report projections.</td>
+</tr>
+<tr class="even">
+<td><code>cli.py</code>, <code>__main__.py</code>, <code>__init__.py</code></td>
+<td>Command boundaries and a small public import API.</td>
+</tr>
+<tr class="odd">
+<td><code>examples/</code>, <code>tests/</code>, <code>docs/</code></td>
+<td>Application examples, behavioral verification, and user/developer documentation.</td>
+</tr>
+</tbody>
+</table></div>
+<p>The Python-module rows above are under <code>src/xevolution/</code>. The engine must not import example applications. Application behavior enters through experiment composition and explicit factories. Keep optional application imports out of package initialization.</p>
+<p>Documentation prose lives in <code>docs/markdown/</code>; <code>docs/html/</code> is generated with <code>docs/build_docs.py</code>. Update Markdown first, keep all three example guides and the overview consistent with actual behavior, and verify local links and heading fragments after rebuilding HTML. The documentation builder uses the standard library and the standalone Pandoc executable.</p>
+<p>Do not recreate Xnet as a dependency. Port needed utility behavior into the module that owns it; avoid a miscellaneous <code>utils.py</code> that accumulates unrelated responsibilities.</p>
+<h2 id="5-python-coding-practices">5. Python coding practices</h2>
+<h3 id="api-and-type-design">API and type design</h3>
+<ul>
+<li>Prefer small functions, explicit collaborators, and cohesive records. Use classes for meaningful state and behavior.</li>
+<li>Use <code>typing.Protocol</code> and well-typed callables for extension points. Applications should not need to inherit from framework base classes. Avoid interface/abstract/implementation triples, routine builders, getter/setter wrappers, service locators, and one-class-per-file layouts.</li>
+<li>Annotate public APIs and core internal interfaces. Preserve genotype generics across component boundaries. Use modern built-in annotations such as <code>list[T]</code> and <code>T | None</code>, with Python 3.12-compatible generic syntax.</li>
+<li>Prefer <code>Sequence</code>, <code>Mapping</code>, or other appropriate abstract interfaces for inputs when their operations suffice. Do not expose mutable coordinator collections unnecessarily.</li>
+<li>Validate untrusted or application-provided values at boundaries, then work with typed records. Type annotations and runtime protocol checks do not validate result contents. Keep <code>Any</code>, casts, and type-checker suppressions narrow and explain them. <a href="https://docs.python.org/3.12/library/typing.html">Python typing documentation</a></li>
+<li>Use keyword-only parameters where several booleans, probabilities, or optional policies would make positional calls unclear. Avoid hidden behavior encoded in loosely related flags.</li>
+</ul>
+<h3 id="data-ownership-and-arbitrary-genotypes">Data ownership and arbitrary genotypes</h3>
+<ul>
+<li>Keep genotype type <code>G</code> unconstrained. Framework code must not assume it supports hashing, equality, ordering, truth testing, length, indexing, or numerical-array operations.</li>
+<li>Identify individuals through explicit framework IDs. Do not let dataclass-generated equality, ordering, or hashing traverse genotype payloads. Configure those methods deliberately and use explicit selection keys.</li>
+<li>Use <code>default_factory</code> for mutable dataclass defaults; never use shared mutable function defaults.</li>
+<li>Prefer frozen records for retained observations and value-like configuration where appropriate, but remember that a frozen wrapper does not freeze a nested genotype. <code>dataclasses.replace()</code> is not a cloning policy. Use application cloning/codecs for independent offspring and historical snapshots. <a href="https://docs.python.org/3.12/library/dataclasses.html">Dataclass semantics</a></li>
+<li>Mutators and crossovers must leave parents unchanged and return independent children unless the shared data is explicitly immutable. Fresh offspring receive fresh IDs and evaluation bookkeeping.</li>
+<li>Avoid blanket deep-copying of arbitrary large objects. Define ownership and copy only what the application contract requires. Keep large payloads out of routine representations and log messages.</li>
+</ul>
+<h3 id="readability-errors-and-resources">Readability, errors, and resources</h3>
+<ul>
+<li>Use <code>snake_case</code> for functions/modules, <code>PascalCase</code> for classes, and clear domain names. Let Ruff enforce formatting; prefer readable control flow over clever expressions.</li>
+<li>Document public contracts, units, side effects, ownership, failure modes, and determinism requirements. Comments should explain decisions and invariants.</li>
+<li>Raise focused exceptions with useful context and preserve causes with exception chaining. Catch only the defined operator-inapplicability condition for evolutionary retries; unexpected exceptions must remain failures.</li>
+<li>Do not use <code>assert</code> to validate configuration, evaluator results, or checkpoint data. Assertions are appropriate for internal invariants and tests.</li>
+<li>Use <code>pathlib</code>, context managers, and explicit UTF-8 text encoding. Keep scientific persistence in storage; components must not write their own checkpoint files.</li>
+<li>Use <code>logging.getLogger(__name__)</code> in library modules. Configure logging and process exit only at the application/CLI boundary. Importing the package must not start work, consume randomness, or create run files.</li>
+<li>Profile a concrete bottleneck before optimizing. Preserve stable ordering and state ownership when changing performance-sensitive code.</li>
+</ul>
+<h2 id="6-evolutionary-invariants">6. Evolutionary invariants</h2>
+<p>Preserve these behaviors when implementing or refactoring; the specification supplies the full algorithms and defaults:</p>
+<ul>
+<li>Generation 0 is the evaluated initial population. Newborn age is zero; derive age from birth generation.</li>
+<li>Allocate IDs with saved monotonic counters. Never reconstruct the next ID from current survivors.</li>
+<li>Represent unevaluated fitness explicitly, such as <code>None</code>; zero is valid fitness.</li>
+<li>Keep parent selection and survivor selection separate. The default parent pool includes the entire previous population, including nonsurvivors.</li>
+<li>Default to complete replacement and reevaluate the entire resulting population, including survivors. Mutation probability selects mutation <strong>or</strong> crossover for each child; it is not a second mutation stage after crossover.</li>
+<li>Use the whole-population evaluator directly when configured. Otherwise adapt the individual evaluator. Providing both must not evaluate candidates twice.</li>
+<li>Validate the complete evaluation result set before applying scores or accounting: every expected ID exactly once, no unexpected IDs, and finite fitness values. The framework owns accepted-evaluation counts.</li>
+<li>Signed fitness is valid. Direct roulette weighting requires nonnegative weights; all-zero weights select uniformly. Negative weights require an error or an explicitly configured transformation, never a silent fallback.</li>
+<li>Bound reproduction attempts. Try positive-weight operators without replacement within an attempt, then explicit fallbacks. Zero-weight operators are disabled in the weighted pool; explicitly declared fallbacks remain available. Unexpected errors are not retry signals.</li>
+<li>Keep historical snapshots independent of live state. Missing metrics are not zero; means use each metric's contributing count. Equal fitness with a different ID is not an improvement.</li>
+<li>Resolve sampled settings before constructing components. Preserve <code>generation_settings</code> separately from <code>effective_settings</code> prepared for the next transition. Adaptive hooks must not rewrite finalized observations or population data.</li>
+</ul>
+<h2 id="7-determinism-and-checkpoint-discipline">7. Determinism and checkpoint discipline</h2>
+<p><strong>Checkpoint compatibility and exact continuation are core behavior, not optional conveniences.</strong> Read the specification's checkpoint section before changing any stateful component, generation ordering, randomness, or storage behavior.</p>
+<ul>
+<li>Inject run-owned random generators and stable evaluation contexts. Do not use module-global randomness, wall time, process IDs, unordered set iteration, worker-completion order, or Python's randomized <code>hash()</code> for scientific decisions.</li>
+<li>Separate evolution and evaluation randomness. Persist complete generator states and versioned seed-derivation metadata, not only the initial seed.</li>
+<li>Preserve deterministic population, operator, tie-break, result-application, and numerical-accumulation order. Derive job randomness from stable logical work identities.</li>
+<li>Every component retaining future-affecting state must expose explicit export/restoration. Include adaptive policies, evaluator state, stopping windows, caches that affect behavior, and application RNGs. Hidden mutable globals and closures are not a checkpoint mechanism.</li>
+<li>Commit only after complete evaluation, validated result application, tracking, adaptive updates, and one stopping decision. There must be no jobs in flight. When persistent storage is enabled, checkpoint generation 0 and every later completed generation by default. Preserve in-memory execution without a run directory or file I/O.</li>
+<li>Persist ordered population payloads, identities/counters, both settings snapshots, RNGs, historical state, component states, termination state, journal position/integrity, and schema/codec/application compatibility information.</li>
+<li>Restoration reconstructs components, restores explicit state, and installs saved RNG state after setup. Do not rerun initialization, saved-generation evaluation, adaptive updates, or stateful stopping.</li>
+<li>A graceful operational pause leaves the checkpoint ready unless a configured stopping predicate terminates the run. Ordinary resume must honor a saved terminal decision.</li>
+<li>One coordinator commits: durable attachments first, then append/synchronize history, then write/synchronize a temporary checkpoint and atomically replace the active one. Complete required directory synchronization before claiming power-loss durability.</li>
+<li>The checkpoint identifies the committed journal prefix. Before writable resume, truncate or reset the journal to the saved committed byte offset; new appends must begin there. Read-only inspection may ignore the uncommitted tail. Missing or corrupt committed data is an error, not permission to reevaluate saved candidates.</li>
+<li>Encoding and post-commit reporting must not mutate evolutionary state or consume its randomness. Reports must be reproducible from committed records.</li>
+</ul>
+<p>Exact continuation assumes compatible application code, data, state, and numerical execution. Mid-generation external work may repeat after a crash; applications own any required idempotency. Do not equate support for several Python versions with exact checkpoint portability between them.</p>
+<h2 id="8-json-and-numerical-boundaries">8. JSON and numerical boundaries</h2>
+<ul>
+<li>Reject unsupported schema versions, unknown core configuration fields, duplicate object keys, invalid types, and out-of-range values. Application factories validate their own parameter namespaces.</li>
+<li>Validate programmatic entry points as well as JSON input. Explicitly reject booleans where integer IDs/counts or numeric probabilities/fitness are required.</li>
+<li>Reject non-finite values after parsing, including overflow such as <code>1e999</code>, and encode strict JSON with <code>allow_nan=False</code>. Rejecting only the <code>NaN</code> and <code>Infinity</code> tokens is insufficient.</li>
+<li>Keep configuration, runtime records, and serialized payloads distinct. Use explicit codecs; do not treat <code>dataclasses.asdict()</code>, <code>__dict__</code>, <code>pickle</code>, or arbitrary object-graph serialization as the persistence design.</li>
+<li>Preserve tuple-based RNG state, application payload semantics, numeric precision, and string-key requirements explicitly. Include schema and codec versions; validate before accepting restored state.</li>
+<li>Make weight normalization and summaries numerically sound. Finite inputs can still produce invalid aggregates; validate results and use stable arithmetic where appropriate.</li>
+</ul>
+<h2 id="9-tool-configuration-and-normal-checks">9. Tool configuration and normal checks</h2>
+<p>Keep tool settings in <code>pyproject.toml</code>. Recommended starting configuration:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode toml"><code class="sourceCode toml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[tool.ruff]</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="dt">target-version</span> <span class="op">=</span> <span class="st">&quot;py312&quot;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="dt">line-length</span> <span class="op">=</span> <span class="dv">88</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="kw">[tool.ruff.lint]</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="dt">select</span> <span class="op">=</span> <span class="op">[</span><span class="st">&quot;E4&quot;</span><span class="op">,</span> <span class="st">&quot;E7&quot;</span><span class="op">,</span> <span class="st">&quot;E9&quot;</span><span class="op">,</span> <span class="st">&quot;F&quot;</span><span class="op">,</span> <span class="st">&quot;I&quot;</span><span class="op">,</span> <span class="st">&quot;UP&quot;</span><span class="op">,</span> <span class="st">&quot;B&quot;</span><span class="op">]</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="kw">[tool.mypy]</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="dt">python_version</span> <span class="op">=</span> <span class="st">&quot;3.12&quot;</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="dt">strict</span> <span class="op">=</span> <span class="cn">true</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="kw">[tool.pytest.ini_options]</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="dt">testpaths</span> <span class="op">=</span> <span class="op">[</span><span class="st">&quot;tests&quot;</span><span class="op">]</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="dt">addopts</span> <span class="op">=</span> <span class="op">[</span><span class="st">&quot;--import-mode=importlib&quot;</span><span class="op">]</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="kw">[tool.hatch.build.targets.wheel]</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="dt">packages</span> <span class="op">=</span> <span class="op">[</span><span class="st">&quot;src/xevolution&quot;</span><span class="op">]</span></span></code></pre></div>
+<p>This is a tool-configuration excerpt, not a complete <code>pyproject.toml</code>. Merge it with package metadata, build requirements, dependency groups, and the <code>xevolution = "xevolution.cli:main"</code> script entry. See the official <a href="https://docs.astral.sh/ruff/configuration/">Ruff</a>, <a href="https://mypy.readthedocs.io/en/stable/config_file.html">mypy</a>, and <a href="https://docs.pytest.org/en/stable/explanation/goodpractices.html">pytest</a> guidance.</p>
+<p>Once the corresponding implementation exists, the standard checks are:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> sync <span class="at">--locked</span> <span class="at">--group</span> dev</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> <span class="at">--group</span> dev ruff format <span class="at">--check</span> .</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> <span class="at">--group</span> dev ruff check .</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> <span class="at">--group</span> dev mypy src/xevolution</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> <span class="at">--group</span> dev python <span class="at">-m</span> pytest</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> build</span></code></pre></div>
+<p>For formatting edits, use <code>uv run --locked --group dev ruff format</code> with the affected paths. Do not disable checks broadly or add blanket suppressions to hide failures. Use focused tests while developing; run the relevant broader checks before completing code changes. Documentation-only changes need proportionate documentation validation.</p>
+<p>CI should pin a reviewed <code>uv</code> version, record its selected Python versions, and use the committed lockfile. Each matrix job must select its interpreter explicitly through the <code>python-version</code> input of <code>astral-sh/setup-uv</code> or the <code>UV_PYTHON</code> environment variable. Do not rely on <code>PATH</code> alone to override the committed <code>.python-version</code>. See <a href="https://docs.astral.sh/uv/guides/integration/github/">uv's CI guidance</a>. Keep dependency upgrades intentional and separate from unrelated behavior changes when practical.</p>
+<h2 id="10-testing-expectations">10. Testing expectations</h2>
+<p>Test observable contracts and regressions, not private helper structure. Use small deterministic applications; do not require GPUs, network services, or long evolutionary runs for the default suite.</p>
+<ul>
+<li>Cover population size, parent/survivor distinctions, selection boundaries, finite retries, identity, age, evaluation coverage/accounting, and stopping.</li>
+<li>Include mutable nested genotypes and custom payloads that cannot be generically compared or hashed. Verify parent independence and historical snapshot integrity.</li>
+<li>Test both evaluation hooks, including jointly dependent population evaluation and invalid/duplicate/missing result identities.</li>
+<li>Compare uninterrupted execution with restoration in a <strong>new process</strong> at generation 0 and a later generation. Include stateful components and stopping, custom codecs, and failure during an uncommitted generation. Compare complete logical state and committed scientific history, not just the best fitness.</li>
+<li>Exercise real temporary files and targeted failure injection around journal and checkpoint operations. Test uncommitted-tail recovery separately from missing/corrupt committed history. Do not mock away the persistence layer being verified.</li>
+<li>Test that repeated analysis does not duplicate scientific records or alter evolutionary state.</li>
+<li>Avoid flaky statistical assertions and wall-clock sleeps. Use controlled random inputs and explicit boundary cases where practical.</li>
+</ul>
+<p>For packaging changes, build a wheel and smoke-test it outside the checkout in a disposable <code>uv</code>-created environment. Install that exact wheel using <code>uv pip</code> with the disposable interpreter explicitly selected, then invoke that interpreter directly. Verify import, the console entry point, <code>python -m xevolution</code>, and included <code>py.typed</code>/resources. A project-mode <code>uv run</code> that returns to the development environment would invalidate this check.</p>
+<p>Use the specification's acceptance criteria as the completion target. Add tests for changed behavior and concrete risks; avoid arbitrary coverage quotas or tests that merely repeat implementation details.</p>
+<h2 id="11-agent-workflow-and-completion">11. Agent workflow and completion</h2>
+<ol type="1">
+<li>Read the relevant specification sections, existing code, tests, and any instructions scoped to the files you will change. Preserve unrelated user work.</li>
+<li>Identify the behavior and state ownership affected. Use reasonable judgment for routine implementation choices within the requested scope.</li>
+<li>Implement a cohesive change. Keep documentation and examples synchronized with public behavior, configuration, and checkpoint formats. Record deliberate Java behavior corrections in <code>docs/markdown/porting_notes.md</code>.</li>
+<li>Verify the changed contract with the appropriate checks. Do not weaken the contract to make an existing test pass or claim unrun checks succeeded.</li>
+<li>Report what changed, why, what was verified, and any remaining limitations. Distinguish implementation, planned work, and environmental blockers clearly.</li>
+</ol>
+<p>For the initial port, follow the specification's sequence: in-memory evolution, reliable continuation, then headless tools and documentation. Establish state ownership and the completed-generation boundary before applications depend on the framework.</p>
+<h2 id="reference-links">Reference links</h2>
+<p>The project policies above are specific to this port. Consult these primary references for tool behavior and Python semantics; version decisions belong in the repository configuration and lockfile.</p>
+</article>
+<nav class="pagination" aria-label="Previous and next articles"><a class="previous" href="port_specification.html"><small>Previous</small><strong>Port specification</strong></a><a class="next" href="building_docs.html"><small>Next</small><strong>Building these docs</strong></a></nav>
+<footer class="page-footer">xevolution 0.1.1 documentation · <a href="building_docs.html">Build and edit these docs</a><br>Framework behavior is documented for the supplied Python port. See <a href="verification.html">release verification</a> for the scope of executed checks.</footer>
+</div>
+<aside class="page-toc"><nav aria-label="On this page"><div class="toc-title">On this page</div><ul class="toc-list"><li><a href="#1-project-overview-and-scope">1. Project overview and scope</a></li><li><a href="#2-recommended-technology-stack">2. Recommended technology stack</a></li><li><a href="#3-required-uv-environment-policy">3. Required uv environment policy</a></li><li class="subsection"><a href="#initial-project-bootstrap">Initial project bootstrap</a></li><li class="subsection"><a href="#existing-checkout">Existing checkout</a></li><li><a href="#4-repository-and-module-boundaries">4. Repository and module boundaries</a></li><li><a href="#5-python-coding-practices">5. Python coding practices</a></li><li class="subsection"><a href="#api-and-type-design">API and type design</a></li><li class="subsection"><a href="#data-ownership-and-arbitrary-genotypes">Data ownership and arbitrary genotypes</a></li><li class="subsection"><a href="#readability-errors-and-resources">Readability, errors, and resources</a></li><li><a href="#6-evolutionary-invariants">6. Evolutionary invariants</a></li><li><a href="#7-determinism-and-checkpoint-discipline">7. Determinism and checkpoint discipline</a></li><li><a href="#8-json-and-numerical-boundaries">8. JSON and numerical boundaries</a></li><li><a href="#9-tool-configuration-and-normal-checks">9. Tool configuration and normal checks</a></li><li><a href="#10-testing-expectations">10. Testing expectations</a></li><li><a href="#11-agent-workflow-and-completion">11. Agent workflow and completion</a></li><li><a href="#reference-links">Reference links</a></li></ul></nav></aside>
+</div></main></div>
+</body></html>

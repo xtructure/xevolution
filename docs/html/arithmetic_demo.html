@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Arithmetic expression search This example evolves bit strings that describe integer arithmetic expressions. The task is to find an expression whose value matches a target, such as ">
+<title>Arithmetic expression search · xevolution documentation</title>
+<link rel="stylesheet" href="assets/docs.css">
+<script defer src="assets/search-index.js"></script>
+<script defer src="assets/docs.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#xevo-main">Skip to content</a>
+<header class="site-header"><div class="header-inner">
+<a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">x</span><span class="brand-name">xevolution<span class="brand-note">Evolutionary computation · Python</span></span></a>
+<div class="header-right"><span class="version">v0.1.1</span>
+<div class="search-wrap" id="xevo-search" role="search" hidden>
+<label class="sr-only" for="xevo-search-input">Search documentation</label>
+<input id="xevo-search-input" type="search" placeholder="Search the documentation" autocomplete="off" aria-controls="xevo-search-results" aria-expanded="false">
+<kbd class="search-key" aria-hidden="true">/</kbd>
+<div id="xevo-search-results" class="search-results" role="region" aria-label="Search results" aria-live="polite" hidden></div>
+</div></div></div></header>
+<div class="layout">
+<details class="sidebar" id="xevo-navigation" open><summary>Browse documentation</summary>
+<nav aria-label="Documentation"><section class="nav-group"><h2 class="nav-heading">Start here</h2><ul><li><a href="index.html">Documentation home</a></li><li><a href="overview.html">Package overview</a></li><li><a href="examples.html">Choose an example</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Example projects</h2><ul><li><a href="arithmetic_demo.html" aria-current="page">Arithmetic expressions</a></li><li><a href="batch_demo.html">Shared resources</a></li><li><a href="digits_demo.html">Digits MLP</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Reference</h2><ul><li><a href="configuration.html">JSON configuration</a></li><li><a href="cli.html">Command line</a></li><li><a href="extensions.html">Application extensions</a></li><li><a href="architecture.html">Architecture &amp; ownership</a></li><li><a href="checkpointing.html">Checkpoints &amp; recovery</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Project</h2><ul><li><a href="porting_notes.html">Porting notes</a></li><li><a href="verification.html">Release verification</a></li><li><a href="port_specification.html">Port specification</a></li><li><a href="contributing.html">Contributing</a></li><li><a href="building_docs.html">Building these docs</a></li></ul></section></nav>
+<div class="sidebar-footer">Version 0.1.1<br>Offline reference documentation.<br>Markdown is the editable source.</div>
+</details>
+<main class="content" id="xevo-main"><div class="document-grid">
+<div class="article-column">
+<div class="page-meta"><div class="breadcrumb"><a href="index.html">Docs</a><span>/</span>Example projects</div><a class="source-link" href="../markdown/arithmetic_demo.md">Markdown source</a></div>
+<details class="compact-toc"><summary>On this page</summary><ul class="toc-list"><li><a href="#run-the-supplied-preset">Run the supplied preset</a></li><li><a href="#what-the-genotype-represents">What the genotype represents</a></li><li class="subsection"><a href="#a-small-worked-example">A small worked example</a></li><li><a href="#how-fitness-is-calculated">How fitness is calculated</a></li><li><a href="#initialization-mutation-and-crossover">Initialization, mutation, and crossover</a></li><li><a href="#configuration">Configuration</a></li><li><a href="#read-the-results-and-observe-a-longer-run">Read the results and observe a longer run</a></li><li><a href="#useful-next-steps">Useful next steps</a></li></ul></details>
+<article class="document"><h1 id="arithmetic-expression-search">Arithmetic expression search</h1>
+<p>This example evolves bit strings that describe integer arithmetic expressions. The task is to find an expression whose value matches a target, such as 64. It is a compact introduction to the division of work in xevolution: the application defines the representation, operators, and scoring rule; the framework manages populations, selection, identity, history, and checkpoints.</p>
+<p>Start with the <a href="overview.html">package overview</a> if evolutionary runs are new to you. The <a href="examples.html">examples guide</a> compares this application with the <a href="batch_demo.html">shared-resource</a> and <a href="digits_demo.html">Digits</a> examples.</p>
+<h2 id="run-the-supplied-preset">Run the supplied preset</h2>
+<p>The application lives in <code>examples/arithmetic.py</code>, and its configuration is <code>examples/arithmetic.json</code>. Run the following from the project root containing <code>pyproject.toml</code> and <code>examples/</code>, rather than from the documentation directory:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> python install 3.12</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> sync <span class="at">--locked</span> <span class="at">--group</span> dev</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> python <span class="at">-m</span> xevolution run <span class="at">--config</span> examples/arithmetic.json <span class="at">--output</span> runs/arithmetic</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> python <span class="at">-m</span> xevolution inspect runs/arithmetic</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> python <span class="at">-m</span> xevolution analyze runs/arithmetic <span class="at">--output</span> reports/arithmetic</span></code></pre></div>
+<p>All dependencies belong to the repository's uv-managed <code>.venv</code>. Keep <code>UV_PROJECT_ENVIRONMENT</code> unset or pointing to that directory. This example uses the Python standard library and needs no numerical packages, dataset, or GPU. The Python example module is distributed with the source project; it is not installed inside the core xevolution wheel.</p>
+<p>The run command requires a new or empty output directory. Its JSON summary reports the completed generation, accepted-evaluation count, historical best fitness, and stopping reason. The analysis command writes <code>reports/arithmetic/analysis.json</code>.</p>
+<h2 id="what-the-genotype-represents">What the genotype represents</h2>
+<p>A genotype is an immutable string containing only <code>0</code> and <code>1</code>. The first four bits encode an unsigned integer from 0 to 15. Each subsequent six-bit group contains a two-bit operator followed by another four-bit integer.</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Operator bits</th>
+<th>Operation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>00</code></td>
+<td>Addition, <code>+</code></td>
+</tr>
+<tr class="even">
+<td><code>01</code></td>
+<td>Subtraction, <code>-</code></td>
+</tr>
+<tr class="odd">
+<td><code>10</code></td>
+<td>Multiplication, <code>*</code></td>
+</tr>
+<tr class="even">
+<td><code>11</code></td>
+<td>Integer division, <code>/</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>The <code>terms</code> parameter counts the numbers in an expression. There are <code>terms - 1</code> operators and <code>4 + 6 * (terms - 1)</code> bits. The supplied ten-term configuration therefore uses 58-bit genotypes. The number of terms remains fixed throughout a run.</p>
+<p>The decoder evaluates operations <strong>from left to right</strong>. Division truncates toward zero, including when an intermediate result is negative. For example, <code>1 - 8 / 3</code> is evaluated as <code>(1 - 8) / 3</code>, producing <code>-2</code>. A zero divisor makes the entire expression invalid.</p>
+<h3 id="a-small-worked-example">A small worked example</h3>
+<p>For three terms, the bit string <code>0111001001100100</code> decodes as follows:</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Bits</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>0111</code></td>
+<td>Start with 7</td>
+</tr>
+<tr class="even">
+<td><code>00 1001</code></td>
+<td>Add 9</td>
+</tr>
+<tr class="odd">
+<td><code>10 0100</code></td>
+<td>Multiply by 4</td>
+</tr>
+</tbody>
+</table></div>
+<p>The result is <code>(7 + 9) * 4 = 64</code>. You can inspect this representation with the application's helper functions:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> examples.arithmetic <span class="im">import</span> decode, expression</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>bits <span class="op">=</span> <span class="st">&quot;0111001001100100&quot;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(expression(bits))  <span class="co"># 7 + 9 * 4</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(decode(bits))      <span class="co"># 64</span></span></code></pre></div>
+<p>The text returned by <code>expression()</code> does not add parentheses. Read it using the example's left-to-right rule; feeding that text to Python's <code>eval()</code> would apply different precedence rules. The example's decoder never uses <code>eval()</code>.</p>
+<h2 id="how-fitness-is-calculated">How fitness is calculated</h2>
+<p>The individual evaluation hook decodes one candidate and calculates:</p>
+<pre class="text"><code>absolute_error = abs(target - decoded_value)
+fitness = 1 / (1 + absolute_error)</code></pre>
+<p>Higher fitness is better. An exact match scores 1; an error of 1 scores 0.5; an error of 3 scores 0.25. An expression containing division by zero scores 0. Its invalidity is an ordinary evaluation outcome, with no infinite or missing fitness value.</p>
+<p>The evaluator also returns these measurements:</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Metric</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>valid</code></td>
+<td>1 for a valid expression; 0 for division by zero</td>
+</tr>
+<tr class="even">
+<td><code>value</code></td>
+<td>Decoded integer value, recorded as a float; valid expressions only</td>
+</tr>
+<tr class="odd">
+<td><code>absolute_error</code></td>
+<td>Distance from the target; valid expressions only</td>
+</tr>
+<tr class="even">
+<td><code>complexity</code></td>
+<td>Number of terms, recorded for both valid and invalid expressions</td>
+</tr>
+</tbody>
+</table></div>
+<p>Complexity is descriptive and does not affect selection. Every candidate in this example has the same configured term count. Because invalid candidates omit <code>value</code> and <code>absolute_error</code>, the framework's summaries calculate those means only from candidates that supplied the metric. Missing values do not become zeros.</p>
+<h2 id="initialization-mutation-and-crossover">Initialization, mutation, and crossover</h2>
+<p>Initialization samples each bit with equal probability using the run-owned random generator. Mutation visits every bit and flips it independently with the application's <code>mutation_rate</code>. It can leave the string unchanged when no bit is selected. Such a child still receives a fresh framework identity and is evaluated normally.</p>
+<p>Crossover chooses a cut between two bits, takes the prefix from the first parent, and the suffix from the second. A cut may fall inside a number or operator field. The child retains the required bit-string length, and every two-bit/four-bit field still decodes to an operator/operand. Division by zero is handled later by evaluation.</p>
+<p>Parents are unchanged. The clone function may return the same string because strings are immutable. The explicit <code>BitStringCodec</code> checks the alphabet and configured length when encoding or restoring a genotype.</p>
+<p>Two probability settings have different jobs:</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Setting</th>
+<th style="text-align: right;">Supplied value</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>evolution.mutation_probability</code></td>
+<td style="text-align: right;">0.5</td>
+<td>Choose mutation or crossover for each child</td>
+</tr>
+<tr class="even">
+<td><code>experiment.parameters.mutation_rate</code></td>
+<td style="text-align: right;">0.01</td>
+<td>Chance of flipping each bit after the mutation route is chosen</td>
+</tr>
+</tbody>
+</table></div>
+<p>The framework does not apply an additional mutation stage after crossover. See <a href="configuration.html">configuration</a> and <a href="extensions.html">extension contracts</a> for the general routing and operator rules.</p>
+<h2 id="configuration">Configuration</h2>
+<p>The application's namespace is <code>experiment.parameters</code>:</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th style="text-align: right;">Default and supplied value</th>
+<th>Accepted values</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>target</code></td>
+<td style="text-align: right;">64</td>
+<td>An integer representable as a finite floating-point metric</td>
+</tr>
+<tr class="even">
+<td><code>terms</code></td>
+<td style="text-align: right;">10</td>
+<td>An integer from 1 through 32</td>
+</tr>
+<tr class="odd">
+<td><code>mutation_rate</code></td>
+<td style="text-align: right;">0.01</td>
+<td>A finite number from 0 through 1</td>
+</tr>
+</tbody>
+</table></div>
+<p>Booleans are not accepted as numeric parameters. Unknown parameter names are errors. Some targets cannot be represented by a particular term count, so a bounded stopping policy remains useful even when a target score is configured.</p>
+<p>The supplied framework settings are:</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Setting</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Evolutionary seed</td>
+<td>12345</td>
+</tr>
+<tr class="even">
+<td>Population size</td>
+<td>100</td>
+</tr>
+<tr class="odd">
+<td>Parent selection</td>
+<td>Roulette using the nonnegative fitness values</td>
+</tr>
+<tr class="even">
+<td>Survivor policy</td>
+<td>Complete replacement</td>
+</tr>
+<tr class="odd">
+<td>Maximum attempts per child</td>
+<td>100</td>
+</tr>
+<tr class="even">
+<td>Termination</td>
+<td>Stop at generation 200, or earlier when fitness reaches 1</td>
+</tr>
+</tbody>
+</table></div>
+<p>Generation 0 is the evaluated initial population. An exact target can already appear there, allowing the run to finish after just 100 accepted evaluations. A run reaching generation 200 would evaluate 201 populations, or 20,100 candidates. Complete replacement gives every child a new ID, while genealogy and retained history preserve its relationships to earlier generations.</p>
+<p>During documentation verification, the supplied preset reached the exact target in generation 0, with 100 accepted evaluations and fitness 1. If your run finishes immediately with that result, the target was already present in the initial population. The longer-run variation below makes the generation cycle easier to observe.</p>
+<h2 id="read-the-results-and-observe-a-longer-run">Read the results and observe a longer run</h2>
+<p>Look at <code>best_fitness</code> in the run summary and the <code>best</code> record from <code>inspect</code>. A value of 1 means that the target was reached. The inspected best record also contains the bit-string payload and its <code>value</code> and <code>absolute_error</code> metrics when valid. The generic CLI reports the stored representation; application helpers such as <code>expression()</code> can turn a bit string into readable arithmetic.</p>
+<p>The analysis JSON contains generation summaries, individual birth and observation records, and genealogy edges. The <code>flipped_positions</code> and <code>cut_position</code> details supplied by the operators explain how children were created. Analysis does not decode or evaluate the candidates again.</p>
+<p>For a demonstration that always includes several generations, save a copy of the preset as <code>examples/arithmetic_progress.json</code> and replace its <code>termination</code> object with:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span><span class="dt">&quot;max_generations&quot;</span><span class="fu">:</span> <span class="dv">20</span><span class="fu">}</span></span></code></pre></div>
+<p>This runs for the chosen generation budget even if an exact expression appears early. You can then pause that new run and continue it:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> python <span class="at">-m</span> xevolution run <span class="at">--config</span> examples/arithmetic_progress.json <span class="at">--output</span> runs/arithmetic-progress <span class="at">--pause-after-generation</span> 2</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> python <span class="at">-m</span> xevolution resume runs/arithmetic-progress</span></code></pre></div>
+<p>Resume restores the saved configuration and completed-generation state. It does not use later edits to the original JSON file, and it does not extend a run that has already met its stopping condition. See <a href="checkpointing.html">checkpointing</a> for compatibility and recovery requirements and <a href="cli.html">the CLI reference</a> for operational pause behavior.</p>
+<h2 id="useful-next-steps">Useful next steps</h2>
+<p>Change the target, bit-mutation rate, or population size in a new configuration and compare the recorded histories. To evolve expression length itself, extend the genotype, operators, and codec together; changing only the decoder would leave inconsistent ownership and persistence rules.</p>
+<p>The <a href="batch_demo.html">shared-resource example</a> introduces scores that depend on the other population members. The <a href="digits_demo.html">Digits example</a> keeps the individual hook but makes evaluation train a neural network before scoring it.</p>
+</article>
+<nav class="pagination" aria-label="Previous and next articles"><a class="previous" href="examples.html"><small>Previous</small><strong>Choose an example</strong></a><a class="next" href="batch_demo.html"><small>Next</small><strong>Shared resources</strong></a></nav>
+<footer class="page-footer">xevolution 0.1.1 documentation · <a href="building_docs.html">Build and edit these docs</a><br>Framework behavior is documented for the supplied Python port. See <a href="verification.html">release verification</a> for the scope of executed checks.</footer>
+</div>
+<aside class="page-toc"><nav aria-label="On this page"><div class="toc-title">On this page</div><ul class="toc-list"><li><a href="#run-the-supplied-preset">Run the supplied preset</a></li><li><a href="#what-the-genotype-represents">What the genotype represents</a></li><li class="subsection"><a href="#a-small-worked-example">A small worked example</a></li><li><a href="#how-fitness-is-calculated">How fitness is calculated</a></li><li><a href="#initialization-mutation-and-crossover">Initialization, mutation, and crossover</a></li><li><a href="#configuration">Configuration</a></li><li><a href="#read-the-results-and-observe-a-longer-run">Read the results and observe a longer run</a></li><li><a href="#useful-next-steps">Useful next steps</a></li></ul></nav></aside>
+</div></main></div>
+</body></html>

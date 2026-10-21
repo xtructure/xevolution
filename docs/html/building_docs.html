@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Maintain and rebuild the documentation The documentation has two editions generated from one set of Markdown sources. The HTML pages are ready to read by opening docs/html/index.ht">
+<title>Maintain and rebuild the documentation · xevolution documentation</title>
+<link rel="stylesheet" href="assets/docs.css">
+<script defer src="assets/search-index.js"></script>
+<script defer src="assets/docs.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#xevo-main">Skip to content</a>
+<header class="site-header"><div class="header-inner">
+<a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">x</span><span class="brand-name">xevolution<span class="brand-note">Evolutionary computation · Python</span></span></a>
+<div class="header-right"><span class="version">v0.1.1</span>
+<div class="search-wrap" id="xevo-search" role="search" hidden>
+<label class="sr-only" for="xevo-search-input">Search documentation</label>
+<input id="xevo-search-input" type="search" placeholder="Search the documentation" autocomplete="off" aria-controls="xevo-search-results" aria-expanded="false">
+<kbd class="search-key" aria-hidden="true">/</kbd>
+<div id="xevo-search-results" class="search-results" role="region" aria-label="Search results" aria-live="polite" hidden></div>
+</div></div></div></header>
+<div class="layout">
+<details class="sidebar" id="xevo-navigation" open><summary>Browse documentation</summary>
+<nav aria-label="Documentation"><section class="nav-group"><h2 class="nav-heading">Start here</h2><ul><li><a href="index.html">Documentation home</a></li><li><a href="overview.html">Package overview</a></li><li><a href="examples.html">Choose an example</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Example projects</h2><ul><li><a href="arithmetic_demo.html">Arithmetic expressions</a></li><li><a href="batch_demo.html">Shared resources</a></li><li><a href="digits_demo.html">Digits MLP</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Reference</h2><ul><li><a href="configuration.html">JSON configuration</a></li><li><a href="cli.html">Command line</a></li><li><a href="extensions.html">Application extensions</a></li><li><a href="architecture.html">Architecture &amp; ownership</a></li><li><a href="checkpointing.html">Checkpoints &amp; recovery</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Project</h2><ul><li><a href="porting_notes.html">Porting notes</a></li><li><a href="verification.html">Release verification</a></li><li><a href="port_specification.html">Port specification</a></li><li><a href="contributing.html">Contributing</a></li><li><a href="building_docs.html" aria-current="page">Building these docs</a></li></ul></section></nav>
+<div class="sidebar-footer">Version 0.1.1<br>Offline reference documentation.<br>Markdown is the editable source.</div>
+</details>
+<main class="content" id="xevo-main"><div class="document-grid">
+<div class="article-column">
+<div class="page-meta"><div class="breadcrumb"><a href="index.html">Docs</a><span>/</span>Project</div><a class="source-link" href="../markdown/building_docs.md">Markdown source</a></div>
+<details class="compact-toc"><summary>On this page</summary><ul class="toc-list"><li><a href="#directory-layout">Directory layout</a></li><li><a href="#edit-the-source">Edit the source</a></li><li><a href="#build-html">Build HTML</a></li><li><a href="#check-content-as-well-as-links">Check content as well as links</a></li></ul></details>
+<article class="document"><h1 id="maintain-and-rebuild-the-documentation">Maintain and rebuild the documentation</h1>
+<p>The documentation has two editions generated from one set of Markdown sources. The HTML pages are ready to read by opening <code>docs/html/index.html</code> in a browser. Reading requires no Python environment, web server, external stylesheet, or downloaded font.</p>
+<h2 id="directory-layout">Directory layout</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Path within <code>docs/</code></th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>README.md</code></td>
+<td>Entry instructions for the downloadable documentation bundle</td>
+</tr>
+<tr class="even">
+<td><code>markdown/index.md</code></td>
+<td>Markdown documentation home</td>
+</tr>
+<tr class="odd">
+<td><code>markdown/*.md</code></td>
+<td>Authoritative prose for the package, examples, and references</td>
+</tr>
+<tr class="even">
+<td><code>markdown/verification.json</code></td>
+<td>Preserved machine-readable evidence from the verified Python 0.1.1 release</td>
+</tr>
+<tr class="odd">
+<td><code>markdown/resources/</code></td>
+<td>Reference copies of the CI workflow and licensing notices</td>
+</tr>
+<tr class="even">
+<td><code>html/index.html</code></td>
+<td>HTML documentation home; open this after extracting the ZIP</td>
+</tr>
+<tr class="odd">
+<td><code>html/*.html</code></td>
+<td>HTML pages generated from the corresponding Markdown files</td>
+</tr>
+<tr class="even">
+<td><code>html/assets/</code></td>
+<td>Local stylesheet, optional navigation/search code, and generated search index</td>
+</tr>
+<tr class="odd">
+<td><code>build_docs.py</code></td>
+<td>Standard-library Python driver for Pandoc conversion and link validation</td>
+</tr>
+<tr class="even">
+<td><code>build_report.json</code></td>
+<td>Results and source identities recorded by the documentation build</td>
+</tr>
+<tr class="odd">
+<td><code>browser_verification.json</code></td>
+<td>Browser checks recorded for the delivered documentation edition</td>
+</tr>
+</tbody>
+</table></div>
+<p>The main documentation pages are flat within each format directory. For example, the Markdown link <code>[checkpoints](checkpointing.md)</code> becomes an HTML link to <code>checkpointing.html</code>. Section fragments are retained. Supporting resources are copied into the HTML tree at the same relative locations.</p>
+<h2 id="edit-the-source">Edit the source</h2>
+<p>Change the relevant file under <code>docs/markdown/</code>, then rebuild. A correction to the HTML alone will be replaced on the next build. Use ordinary GitHub-flavored Markdown: headings, paragraphs, lists, fenced code blocks, and tables.</p>
+<p>Keep code fences labeled with their language, for example <code>python</code>, <code>bash</code>, or <code>json</code>. Use relative links between documentation pages. Link to another section using its heading fragment, and let the build validate that the target exists. Avoid links that depend on files outside the documentation bundle.</p>
+<p>When describing source code, name its path relative to the project root, such as <code>examples/batch_problem.py</code>. A documentation-only archive cannot resolve a clickable link to that external source file. Link to the relevant example guide when the explanation is what the reader needs.</p>
+<p>When adding a page, also add it to the grouped page catalog in <code>build_docs.py</code> and link to it from <a href="index.html">the documentation home</a> or an appropriate guide. This keeps navigation and the generated search index complete.</p>
+<p>The <a href="port_specification.html">port specification</a> and <a href="contributing.html">coding guidelines</a> are reference copies of the repository's <code>xevolution_python_port_spec.md</code> and <code>AGENTS.md</code>. Update the repository versions first when their requirements change, then refresh these copies and preserve their documentation introduction and local links. The reference workflow is a snapshot of <code>.github/workflows/ci.yml</code>.</p>
+<h2 id="build-html">Build HTML</h2>
+<p>Put this <code>docs/</code> directory in the xevolution source project. Use its repository-local virtual environment managed by uv, and keep <code>UV_PROJECT_ENVIRONMENT</code> unset or pointing to that <code>.venv</code>.</p>
+<p>Install the standalone <a href="https://pandoc.org/installing.html">Pandoc command-line tool</a> using the method appropriate to your operating system. The documentation build was developed with <strong>Pandoc 3.1.3 and Python 3.12.14</strong>. The Python driver uses only the standard library; it adds no Python package dependency to xevolution. Pandoc is a separate executable, not a Python dependency.</p>
+<p>From the source project root:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> sync <span class="at">--locked</span> <span class="at">--group</span> dev</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">pandoc</span> <span class="at">--version</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> python docs/build_docs.py</span></code></pre></div>
+<p>If you already use the Digits example and want to retain its numerical stack, include all configured dependency groups on the same commands:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> sync <span class="at">--locked</span> <span class="at">--all-groups</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> <span class="at">--all-groups</span> python docs/build_docs.py</span></code></pre></div>
+<p>After a successful build, open <code>docs/html/index.html</code>. Keep the whole <code>html/</code> directory together when copying it, including <code>assets/</code> and supporting files. Keep its sibling <code>markdown/</code> directory too if you want the HTML pages' Markdown source links to remain available.</p>
+<p>The builder regenerates HTML and local assets. It checks local file links, heading fragments, and duplicate HTML IDs; a missing document or broken local target is a build failure. External reference websites are not downloaded by the builder. The generated search works from local files and does not contact a service.</p>
+<p>To validate that the checked-in HTML still matches the Markdown and generator, without replacing the generated files, run:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> python docs/build_docs.py <span class="at">--check</span></span></code></pre></div>
+<p>Add <code>--all-groups</code> after <code>--locked</code> when retaining the Digits dependencies. The check creates a temporary build, validates it, and compares the output files byte for byte with the existing HTML tree. Use the same Pandoc version when checking a previously generated edition.</p>
+<h2 id="check-content-as-well-as-links">Check content as well as links</h2>
+<p>A working link does not establish that an API example is correct. When editing commands or behavior, compare the guide with current code and configurations. Run a small relevant example where the change warrants it. For documentation changes, inspect representative HTML pages at desktop and narrow widths and check long tables and code blocks.</p>
+<p>The documentation release added full arithmetic and shared-resource guides, an introductory package overview, an examples comparison, and this maintenance guide. The actual arithmetic and shared-resource commands were checked again, including analysis and shared-resource pause/resume. The Digits results remain the measured results from the previously verified Python release.</p>
+<p>The <a href="verification.html">release verification report</a> and its JSON preserve that Python release's original tests, timing measurements, and artifact identities. Documentation edits do not imply that the full application test suite, wheel build, or hosted CI has run again. Documentation build results are recorded separately in <code>docs/build_report.json</code>.</p>
+<p>The delivered HTML was also opened directly from disk in Chromium at desktop (1440 × 1000) and phone (390 × 844) viewport sizes. All 16 pages were checked for a visible title, current-page navigation, working search initialization, and horizontal page overflow. Interaction checks covered local search, keyboard controls, section links, mobile navigation, and reading/navigation with JavaScript disabled. No browser errors or network requests occurred during these checks. Their results are retained in <code>docs/browser_verification.json</code>; the normal builder does not rerun those browser checks.</p>
+<p>Return to the <a href="index.html">documentation home</a> or the <a href="overview.html">package overview</a>.</p>
+</article>
+<nav class="pagination" aria-label="Previous and next articles"><a class="previous" href="contributing.html"><small>Previous</small><strong>Contributing</strong></a><span aria-hidden="true"></span></nav>
+<footer class="page-footer">xevolution 0.1.1 documentation · <a href="building_docs.html">Build and edit these docs</a><br>Framework behavior is documented for the supplied Python port. See <a href="verification.html">release verification</a> for the scope of executed checks.</footer>
+</div>
+<aside class="page-toc"><nav aria-label="On this page"><div class="toc-title">On this page</div><ul class="toc-list"><li><a href="#directory-layout">Directory layout</a></li><li><a href="#edit-the-source">Edit the source</a></li><li><a href="#build-html">Build HTML</a></li><li><a href="#check-content-as-well-as-links">Check content as well as links</a></li></ul></nav></aside>
+</div></main></div>
+</body></html>

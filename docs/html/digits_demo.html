@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Evolving a small neural network for Digits This example uses xevolution to choose the architecture of a small multilayer perceptron (MLP). Training learns each network&#x27;s weights. E">
+<title>Evolving a small neural network for Digits · xevolution documentation</title>
+<link rel="stylesheet" href="assets/docs.css">
+<script defer src="assets/search-index.js"></script>
+<script defer src="assets/docs.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#xevo-main">Skip to content</a>
+<header class="site-header"><div class="header-inner">
+<a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">x</span><span class="brand-name">xevolution<span class="brand-note">Evolutionary computation · Python</span></span></a>
+<div class="header-right"><span class="version">v0.1.1</span>
+<div class="search-wrap" id="xevo-search" role="search" hidden>
+<label class="sr-only" for="xevo-search-input">Search documentation</label>
+<input id="xevo-search-input" type="search" placeholder="Search the documentation" autocomplete="off" aria-controls="xevo-search-results" aria-expanded="false">
+<kbd class="search-key" aria-hidden="true">/</kbd>
+<div id="xevo-search-results" class="search-results" role="region" aria-label="Search results" aria-live="polite" hidden></div>
+</div></div></div></header>
+<div class="layout">
+<details class="sidebar" id="xevo-navigation" open><summary>Browse documentation</summary>
+<nav aria-label="Documentation"><section class="nav-group"><h2 class="nav-heading">Start here</h2><ul><li><a href="index.html">Documentation home</a></li><li><a href="overview.html">Package overview</a></li><li><a href="examples.html">Choose an example</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Example projects</h2><ul><li><a href="arithmetic_demo.html">Arithmetic expressions</a></li><li><a href="batch_demo.html">Shared resources</a></li><li><a href="digits_demo.html" aria-current="page">Digits MLP</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Reference</h2><ul><li><a href="configuration.html">JSON configuration</a></li><li><a href="cli.html">Command line</a></li><li><a href="extensions.html">Application extensions</a></li><li><a href="architecture.html">Architecture &amp; ownership</a></li><li><a href="checkpointing.html">Checkpoints &amp; recovery</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Project</h2><ul><li><a href="porting_notes.html">Porting notes</a></li><li><a href="verification.html">Release verification</a></li><li><a href="port_specification.html">Port specification</a></li><li><a href="contributing.html">Contributing</a></li><li><a href="building_docs.html">Building these docs</a></li></ul></section></nav>
+<div class="sidebar-footer">Version 0.1.1<br>Offline reference documentation.<br>Markdown is the editable source.</div>
+</details>
+<main class="content" id="xevo-main"><div class="document-grid">
+<div class="article-column">
+<div class="page-meta"><div class="breadcrumb"><a href="index.html">Docs</a><span>/</span>Example projects</div><a class="source-link" href="../markdown/digits_demo.md">Markdown source</a></div>
+<details class="compact-toc"><summary>On this page</summary><ul class="toc-list"><li><a href="#1-install-and-run">1. Install and run</a></li><li><a href="#2-what-evolves">2. What evolves?</a></li><li><a href="#3-what-happens-during-one-evaluation">3. What happens during one evaluation?</a></li><li><a href="#4-presets-and-configurable-values">4. Presets and configurable values</a></li><li><a href="#5-read-the-results">5. Read the results</a></li><li><a href="#6-pause-and-resume">6. Pause and resume</a></li><li><a href="#7-runtime-and-verification">7. Runtime and verification</a></li><li><a href="#source-references">Source references</a></li></ul></details>
+<article class="document"><h1 id="evolving-a-small-neural-network-for-digits">Evolving a small neural network for Digits</h1>
+<p>This example uses xevolution to choose the architecture of a small multilayer perceptron (MLP). Training learns each network's weights. Evolution changes its hidden layers and activation, trains the resulting candidate, and compares how many validation images it classifies correctly.</p>
+<p>The goal is an understandable example of the framework. <strong>Fitness is accuracy alone:</strong> the number of correct validation predictions divided by the number of validation images. A fitness of <code>0.925</code> means 92.5% correct. There is no loss, parameter-count penalty, or size preference hidden in this score.</p>
+<p>The <a href="overview.html">package overview</a> explains the shared evolution cycle. For simpler representations and the other evaluation hook, see the <a href="arithmetic_demo.html">arithmetic</a> and <a href="batch_demo.html">shared-resource</a> guides, or start with the <a href="examples.html">examples comparison</a>.</p>
+<h2 id="1-install-and-run">1. Install and run</h2>
+<p>Run these commands from the source project's root, beside <code>pyproject.toml</code>. Use Python 3.12 as the initial baseline. Every dependency is installed in the repository-local virtual environment created and managed by uv.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> python install 3.12</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> sync <span class="at">--locked</span> <span class="at">--group</span> dev <span class="at">--group</span> neural</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> <span class="at">--group</span> neural python <span class="at">-m</span> xevolution run <span class="at">--config</span> examples/neural_digits_quick.json <span class="at">--output</span> runs/digits-quick</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> <span class="at">--group</span> neural python <span class="at">-m</span> examples.digits_report runs/digits-quick</span></code></pre></div>
+<p>Keep <code>UV_PROJECT_ENVIRONMENT</code> unset or pointing to this repository's <code>.venv</code>. Keep <code>--group neural</code> on commands that build, train, or restore this application. The <code>neural</code> group declares NumPy, scikit-learn, and threadpoolctl; uv records their resolved transitive dependencies in <code>uv.lock</code>. They are not dependencies of the installed xevolution core wheel.</p>
+<p>The Digits data ships with scikit-learn, so running the example needs no further dataset download. Once the uv environment is prepared, training needs neither a network connection nor a GPU.</p>
+<p>The run command prints a JSON summary containing <code>best_fitness</code>. The companion report displays the selected architecture and its accuracy as both counts and percentages, alongside a fixed one-hidden-layer, 32-neuron ReLU baseline.</p>
+<p>For the normal preset, use a fresh output directory:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> <span class="at">--group</span> neural python <span class="at">-m</span> xevolution run <span class="at">--config</span> examples/neural_digits.json <span class="at">--output</span> runs/digits</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> <span class="at">--group</span> neural python <span class="at">-m</span> examples.digits_report runs/digits <span class="at">--output</span> reports/digits.json</span></code></pre></div>
+<p><code>--output</code> on the report command is an optional JSON file outside the run directory. The command still prints its readable summary. The report validates the saved run and requires a completed evolutionary run before evaluating its test images.</p>
+<h2 id="2-what-evolves">2. What evolves?</h2>
+<p>An individual carries an immutable architecture record. Its explicit JSON codec uses this representation:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;hidden_layers&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="dv">32</span><span class="ot">,</span> <span class="dv">16</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;activation&quot;</span><span class="fu">:</span> <span class="st">&quot;relu&quot;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>Each number is the number of individual neurons in that hidden layer. This example means 64 inputs, a hidden layer with 32 neurons, a hidden layer with 16 neurons, and ten output class scores. Every neuron in a layer receives all outputs from the preceding layer. A unit means one neuron, not a block of neurons.</p>
+<p>The allowed search space is intentionally small:</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Property</th>
+<th>Allowed values</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Number of hidden layers</td>
+<td>1, 2, or 3</td>
+</tr>
+<tr class="even">
+<td>Neurons in each hidden layer</td>
+<td>8, 16, 32, or 64</td>
+</tr>
+<tr class="odd">
+<td>Hidden activation</td>
+<td><code>relu</code> or <code>tanh</code>, shared across hidden layers</td>
+</tr>
+<tr class="even">
+<td>Input size</td>
+<td>Fixed at 64 pixel values</td>
+</tr>
+<tr class="odd">
+<td>Output size</td>
+<td>Fixed at ten digit classes</td>
+</tr>
+</tbody>
+</table></div>
+<p>The largest architecture, <code>64 -&gt; 64 -&gt; 64 -&gt; 64 -&gt; 10</code>, has 13,130 trainable weights and biases. The baseline, <code>64 -&gt; 32 -&gt; 10</code>, has 2,410.</p>
+<p>Mutation resizes a layer, inserts a layer, removes a layer, or switches the activation. Inapplicable operations, such as removing the only hidden layer, use the framework's defined operator-inapplicability mechanism. Crossover combines parent descriptions within the same architecture bounds. Parents are never modified, and the framework assigns fresh child IDs and genealogy.</p>
+<p>The normal and quick presets use tournament parent selection with a tournament size of three and retain one elite individual. They select mutation with probability 0.7 and crossover with probability 0.3. Fitness ties follow the framework's stable policies; model size does not break ties.</p>
+<p>Retaining an elite preserves its architecture and identity. Its network is still trained afresh when the next population is evaluated, as required by xevolution's population-evaluation contract.</p>
+<h2 id="3-what-happens-during-one-evaluation">3. What happens during one evaluation?</h2>
+<p>The application prepares a fixed stratified division of the 1,797 examples:</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Partition</th>
+<th style="text-align: right;">Examples</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Training</td>
+<td style="text-align: right;">1,000</td>
+<td>Learn weights using the selected architecture</td>
+</tr>
+<tr class="even">
+<td>Validation</td>
+<td style="text-align: right;">400</td>
+<td>Compute the fitness used by evolution</td>
+</tr>
+<tr class="odd">
+<td>Final test</td>
+<td style="text-align: right;">397</td>
+<td>Evaluate the selected model after evolution finishes</td>
+</tr>
+</tbody>
+</table></div>
+<p>Pixel values are divided by their known maximum, 16. This transformation has no fitted statistics and uses no validation/test information. The split indices and data contents are fingerprinted for checkpoint compatibility.</p>
+<p>For each candidate, the evaluator:</p>
+<ol type="1">
+<li>Creates a fresh scikit-learn <code>MLPClassifier</code> from the architecture.</li>
+<li>Initializes its weights with the recorded <code>training_seed</code>.</li>
+<li>Trains for exactly the configured number of epochs with Adam, fixed learning rate and regularization, and the same precomputed minibatch order.</li>
+<li>Predicts the validation labels and counts correct predictions.</li>
+<li>Returns accuracy as fitness, with numeric measurements describing the score and architecture.</li>
+</ol>
+<p>The initialization generator and the generator that produces epoch permutations are separate. Different architectures consume different numbers of random weights, so a shared initialization seed alone would not ensure the same ordering of training samples. Precomputed ordering keeps that part of the comparison fixed. Evolution uses its own managed random stream.</p>
+<p>The training loop makes one <code>partial_fit</code> call per epoch, preserving the candidate's Adam state between epochs. It does not reuse a trained network between candidate evaluations. The batch size is capped at the training partition's size for small test configurations. Numerical work uses one BLAS thread, and there is no candidate-level parallel executor or fitness cache.</p>
+<p>Training loss is used internally by the classifier to learn weights, as usual; it is not returned as fitness. Reported size and depth are descriptive metrics. Elapsed time is operational information and does not enter scientific history or evolutionary decisions.</p>
+<h2 id="4-presets-and-configurable-values">4. Presets and configurable values</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Preset</th>
+<th style="text-align: right;">Population</th>
+<th>Generations evaluated</th>
+<th style="text-align: right;">Epochs per candidate</th>
+<th style="text-align: right;">Candidate evaluations</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Quick</td>
+<td style="text-align: right;">6</td>
+<td>0 through 3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">24</td>
+</tr>
+<tr class="even">
+<td>Normal</td>
+<td style="text-align: right;">8</td>
+<td>0 through 5</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">48</td>
+</tr>
+</tbody>
+</table></div>
+<p>Generation 0 is the initial evaluated population. With a fixed population size <code>P</code> and final generation <code>G</code>, evaluation count is <code>P * (G + 1)</code>, including elites. The final report performs two additional model fits outside this count.</p>
+<p>Application parameters live under <code>experiment.parameters</code> in the JSON file:</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th style="text-align: right;">Default</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>train_size</code></td>
+<td style="text-align: right;">1000</td>
+<td>Number of training images</td>
+</tr>
+<tr class="even">
+<td><code>validation_size</code></td>
+<td style="text-align: right;">400</td>
+<td>Number of images used to calculate fitness</td>
+</tr>
+<tr class="odd">
+<td><code>test_size</code></td>
+<td style="text-align: right;">397</td>
+<td>Number of final held-out test images</td>
+</tr>
+<tr class="even">
+<td><code>epochs</code></td>
+<td style="text-align: right;">30</td>
+<td>Complete passes through training data per candidate</td>
+</tr>
+<tr class="odd">
+<td><code>batch_size</code></td>
+<td style="text-align: right;">128</td>
+<td>Maximum examples in one training minibatch</td>
+</tr>
+<tr class="even">
+<td><code>learning_rate</code></td>
+<td style="text-align: right;">0.001</td>
+<td>Fixed initial Adam learning rate</td>
+</tr>
+<tr class="odd">
+<td><code>alpha</code></td>
+<td style="text-align: right;">0.0001</td>
+<td>scikit-learn's L2 regularization coefficient</td>
+</tr>
+<tr class="even">
+<td><code>split_seed</code></td>
+<td style="text-align: right;">17</td>
+<td>Seed used to create the fixed stratified split</td>
+</tr>
+<tr class="odd">
+<td><code>training_seed</code></td>
+<td style="text-align: right;">23</td>
+<td>Common model-initialization and derived shuffle seed</td>
+</tr>
+</tbody>
+</table></div>
+<p>Split sizes must add to 1,797 and must support all ten classes. Counts and seeds must be integers, excluding booleans. Learning rate and regularization must be finite and within their documented validation ranges; unknown parameter names are errors. Read <code>DigitsSettings</code> in the example for exact programmatic bounds.</p>
+<p>The top-level <code>seed</code> controls the evolutionary run. Changing it explores a different evolutionary trajectory while the explicit split/training seeds continue to define the same scoring task. Change a configuration only when starting a new run; resume uses the saved configuration.</p>
+<h2 id="5-read-the-results">5. Read the results</h2>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> <span class="at">--group</span> neural python <span class="at">-m</span> xevolution inspect runs/digits</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> <span class="at">--group</span> neural python <span class="at">-m</span> xevolution analyze runs/digits <span class="at">--output</span> reports/digits-history</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> <span class="at">--group</span> neural python <span class="at">-m</span> examples.digits_report runs/digits <span class="at">--output</span> reports/digits.json</span></code></pre></div>
+<p><code>inspect</code> reads checkpoint metadata. <code>analyze</code> exports the existing scientific history without training or evaluating anything. <code>digits_report</code> is a separate application-level final evaluation: it trains the recorded historical-best architecture afresh and verifies that its validation accuracy reproduces the saved score. It also trains the fixed 32-neuron ReLU baseline with the same training split and budget.</p>
+<p>Both architectures are fixed before final test prediction. The report computes each model's test accuracy once, with no selection based on those test scores. It does not train on the combined training-plus-validation set. This makes the reported comparison match the training protocol that evolution optimized.</p>
+<p>The report never advances the run, changes the committed journal, or appends its new evaluations to scientific history. Repeating the report in a compatible environment reproduces its results; it does retrain the two models. Optional report output must be outside the run directory.</p>
+<p>A run need not beat the fixed baseline to demonstrate the framework correctly. With only 400 validation images, one changed prediction moves accuracy by 0.25 percentage points. Short training budgets also favor architectures that learn well within that budget; they do not establish which architecture would win after convergence. Treat small differences as an illustration, not evidence of a generally superior classifier.</p>
+<h2 id="6-pause-and-resume">6. Pause and resume</h2>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> <span class="at">--group</span> neural python <span class="at">-m</span> xevolution run <span class="at">--config</span> examples/neural_digits.json <span class="at">--output</span> runs/digits-paused <span class="at">--pause-after-generation</span> 2</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> <span class="at">--group</span> neural python <span class="at">-m</span> xevolution resume runs/digits-paused</span></code></pre></div>
+<p>The engine checkpoints every completed generation, including generation 0. Restore reconstructs and validates the data, split, recipe, and numerical environment; restores explicit evaluator state; and resumes the saved evolutionary random streams. It does not train the saved generation again.</p>
+<p>The evaluator counts completed model fits through the explicit component-state contract. Prepared arrays are reconstructed from the bundled dataset and recorded settings, with integrity fingerprints. Trained estimators and their optimizer states are temporary evaluation work and are not placed in JSON checkpoints.</p>
+<p>If a crash interrupts a candidate fit or an uncommitted generation, that work can run again from the saved checkpoint. Fixed seeds and compatible numerical execution reproduce the same accepted scores. The guarantee requires matching application code, data, Python/library versions, and relevant numerical backend settings. It does not promise identical trajectories across different library versions, operating systems, or processor numerical implementations.</p>
+<p>The first <code>Ctrl-C</code> requests a pause after the current generation completes. Ordinary resume honors a saved terminal decision. Changing a generation limit in the original JSON file does not extend an already completed run.</p>
+<h2 id="7-runtime-and-verification">7. Runtime and verification</h2>
+<p>The architecture and data bounds are intended to keep CPU evaluation short. Actual measurements for this release are in <a href="verification.html">verification.md</a>. They are measurements of the stated execution environment, not a guarantee for every laptop. Time the full evaluation, including model construction and validation, when calibrating a different machine or training recipe.</p>
+<p>There is no wall-clock timeout that assigns a different fitness to a slow candidate. Set a small, fixed epoch budget before a run and leave margin below your time target. At five seconds per candidate the normal preset would take about four minutes for its 48 evaluations; at 30 seconds it would take about 24 minutes, before the final report.</p>
+<p>Run the optional behavioral and continuation tests with:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> <span class="at">--group</span> dev <span class="at">--group</span> neural python <span class="at">-m</span> pytest <span class="at">-m</span> neural</span></code></pre></div>
+<p>The tests exercise real small MLP fits, accuracy accounting, immutable architectures, variation bounds, strict settings, checkpoint compatibility, fresh-process continuation, and final reporting. The core test suite can still run with the development group alone.</p>
+<h2 id="source-references">Source references</h2>
+<ul>
+<li><a href="https://scikit-learn.org/stable/modules/generated/sklearn.datasets.load_digits.html">scikit-learn Digits loader and dataset description</a>.</li>
+<li><a href="https://archive.ics.uci.edu/dataset/80/optical+recognition+of+handwritten+digits">UCI Optical Recognition of Handwritten Digits dataset</a>, the source of scikit-learn's bundled subset.</li>
+<li><a href="https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html">MLPClassifier parameters and incremental training</a>.</li>
+<li><a href="https://scikit-learn.org/stable/computing/parallelism.html">scikit-learn parallelism and numerical thread control</a>.</li>
+<li><a href="https://docs.astral.sh/uv/concepts/projects/dependencies/#dependency-groups">uv dependency groups</a>.</li>
+</ul>
+</article>
+<nav class="pagination" aria-label="Previous and next articles"><a class="previous" href="batch_demo.html"><small>Previous</small><strong>Shared resources</strong></a><a class="next" href="configuration.html"><small>Next</small><strong>JSON configuration</strong></a></nav>
+<footer class="page-footer">xevolution 0.1.1 documentation · <a href="building_docs.html">Build and edit these docs</a><br>Framework behavior is documented for the supplied Python port. See <a href="verification.html">release verification</a> for the scope of executed checks.</footer>
+</div>
+<aside class="page-toc"><nav aria-label="On this page"><div class="toc-title">On this page</div><ul class="toc-list"><li><a href="#1-install-and-run">1. Install and run</a></li><li><a href="#2-what-evolves">2. What evolves?</a></li><li><a href="#3-what-happens-during-one-evaluation">3. What happens during one evaluation?</a></li><li><a href="#4-presets-and-configurable-values">4. Presets and configurable values</a></li><li><a href="#5-read-the-results">5. Read the results</a></li><li><a href="#6-pause-and-resume">6. Pause and resume</a></li><li><a href="#7-runtime-and-verification">7. Runtime and verification</a></li><li><a href="#source-references">Source references</a></li></ul></nav></aside>
+</div></main></div>
+</body></html>

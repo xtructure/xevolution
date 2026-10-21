@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="JSON configuration Configuration selects application behavior and supplies its parameters. The framework validates core fields, and the application factory validates its own namesp">
+<title>JSON configuration · xevolution documentation</title>
+<link rel="stylesheet" href="assets/docs.css">
+<script defer src="assets/search-index.js"></script>
+<script defer src="assets/docs.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#xevo-main">Skip to content</a>
+<header class="site-header"><div class="header-inner">
+<a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">x</span><span class="brand-name">xevolution<span class="brand-note">Evolutionary computation · Python</span></span></a>
+<div class="header-right"><span class="version">v0.1.1</span>
+<div class="search-wrap" id="xevo-search" role="search" hidden>
+<label class="sr-only" for="xevo-search-input">Search documentation</label>
+<input id="xevo-search-input" type="search" placeholder="Search the documentation" autocomplete="off" aria-controls="xevo-search-results" aria-expanded="false">
+<kbd class="search-key" aria-hidden="true">/</kbd>
+<div id="xevo-search-results" class="search-results" role="region" aria-label="Search results" aria-live="polite" hidden></div>
+</div></div></div></header>
+<div class="layout">
+<details class="sidebar" id="xevo-navigation" open><summary>Browse documentation</summary>
+<nav aria-label="Documentation"><section class="nav-group"><h2 class="nav-heading">Start here</h2><ul><li><a href="index.html">Documentation home</a></li><li><a href="overview.html">Package overview</a></li><li><a href="examples.html">Choose an example</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Example projects</h2><ul><li><a href="arithmetic_demo.html">Arithmetic expressions</a></li><li><a href="batch_demo.html">Shared resources</a></li><li><a href="digits_demo.html">Digits MLP</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Reference</h2><ul><li><a href="configuration.html" aria-current="page">JSON configuration</a></li><li><a href="cli.html">Command line</a></li><li><a href="extensions.html">Application extensions</a></li><li><a href="architecture.html">Architecture &amp; ownership</a></li><li><a href="checkpointing.html">Checkpoints &amp; recovery</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Project</h2><ul><li><a href="porting_notes.html">Porting notes</a></li><li><a href="verification.html">Release verification</a></li><li><a href="port_specification.html">Port specification</a></li><li><a href="contributing.html">Contributing</a></li><li><a href="building_docs.html">Building these docs</a></li></ul></section></nav>
+<div class="sidebar-footer">Version 0.1.1<br>Offline reference documentation.<br>Markdown is the editable source.</div>
+</details>
+<main class="content" id="xevo-main"><div class="document-grid">
+<div class="article-column">
+<div class="page-meta"><div class="breadcrumb"><a href="index.html">Docs</a><span>/</span>Reference</div><a class="source-link" href="../markdown/configuration.md">Markdown source</a></div>
+<details class="compact-toc"><summary>On this page</summary><ul class="toc-list"><li><a href="#envelope">Envelope</a></li><li><a href="#defaults-and-policies">Defaults and policies</a></li><li><a href="#stopping">Stopping</a></li><li><a href="#seeded-initial-sampling">Seeded initial sampling</a></li><li><a href="#bounds-and-explicit-changes">Bounds and explicit changes</a></li><li><a href="#strict-boundaries">Strict boundaries</a></li></ul></details>
+<article class="document"><h1 id="json-configuration">JSON configuration</h1>
+<p>Configuration selects application behavior and supplies its parameters. The framework validates core fields, and the application factory validates its own namespace. Arbitrary Python object graphs are not represented declaratively.</p>
+<h2 id="envelope">Envelope</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;schema_version&quot;</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;seed&quot;</span><span class="fu">:</span> <span class="dv">12345</span><span class="fu">,</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;experiment&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;factory&quot;</span><span class="fu">:</span> <span class="st">&quot;examples.arithmetic:build_experiment&quot;</span><span class="fu">,</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;parameters&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="dt">&quot;target&quot;</span><span class="fu">:</span> <span class="dv">64</span><span class="fu">,</span> <span class="dt">&quot;terms&quot;</span><span class="fu">:</span> <span class="dv">10</span><span class="fu">,</span> <span class="dt">&quot;mutation_rate&quot;</span><span class="fu">:</span> <span class="fl">0.01</span><span class="fu">}</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;evolution&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;population_size&quot;</span><span class="fu">:</span> <span class="dv">100</span><span class="fu">,</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;mutation_probability&quot;</span><span class="fu">:</span> <span class="fl">0.5</span><span class="fu">,</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;parent_selection&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;roulette&quot;</span><span class="fu">},</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;survival&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;replace_all&quot;</span><span class="fu">},</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;max_attempts_per_child&quot;</span><span class="fu">:</span> <span class="dv">100</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;termination&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;any&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span><span class="dt">&quot;max_generations&quot;</span><span class="fu">:</span> <span class="dv">200</span><span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span><span class="dt">&quot;fitness_at_least&quot;</span><span class="fu">:</span> <span class="fl">1.0</span><span class="fu">}</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p><code>experiment.factory</code> is an explicit <code>package.module:factory</code> reference or a name registered by a programmatic application. The CLI requires a resolvable factory. Programmatic <code>Engine.create()</code> can receive an already constructed <code>Experiment</code> and a <code>RunConfig</code> whose factory is absent.</p>
+<h2 id="defaults-and-policies">Defaults and policies</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Setting</th>
+<th>Default</th>
+<th>Validation and meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>schema_version</code></td>
+<td><code>1</code></td>
+<td>Only the supported integer version is accepted</td>
+</tr>
+<tr class="even">
+<td><code>seed</code></td>
+<td><code>0</code></td>
+<td>Integer; booleans are rejected</td>
+</tr>
+<tr class="odd">
+<td><code>population_size</code></td>
+<td><code>100</code></td>
+<td>Positive integer; resulting completed population size</td>
+</tr>
+<tr class="even">
+<td><code>mutation_probability</code></td>
+<td><code>0.5</code></td>
+<td>Finite value in <code>[0, 1]</code>; mutation <strong>or</strong> crossover route per child</td>
+</tr>
+<tr class="odd">
+<td><code>max_attempts_per_child</code></td>
+<td><code>100</code></td>
+<td>Positive integer; finite budget after operator/fallback exhaustion</td>
+</tr>
+<tr class="even">
+<td><code>parent_selection</code></td>
+<td><code>{"name":"roulette"}</code></td>
+<td>Full previous population is eligible</td>
+</tr>
+<tr class="odd">
+<td><code>survival</code></td>
+<td><code>{"name":"replace_all"}</code></td>
+<td>Existing individuals retained before producing children</td>
+</tr>
+</tbody>
+</table></div>
+<p>Supported parent selectors:</p>
+<ul>
+<li><code>{"name": "roulette"}</code> uses fitness directly as nonnegative weight. All-zero weights select uniformly; negative weights raise an error.</li>
+<li><code>{"name": "uniform"}</code> samples members uniformly.</li>
+<li><code>{"name": "tournament", "size": 3}</code> compares finite signed fitness among a positive number of sampled candidates. Size defaults to 3.</li>
+</ul>
+<p>Supported survivor selectors:</p>
+<ul>
+<li><code>{"name": "replace_all"}</code> retains none.</li>
+<li><code>{"name": "elitism", "count": 1}</code> retains the best eligible candidates, up to the configured count and target population size. Count defaults to 1 and must be nonnegative. <code>elitist</code> is also accepted as a policy-name alias.</li>
+</ul>
+<p>Ties use stable individual IDs. Parent sampling permits replacement and self-crossover. A custom selection policy is supplied through <code>Experiment</code>.</p>
+<h2 id="stopping">Stopping</h2>
+<p>Each stopping object contains exactly one predicate or combinator:</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Object</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>{"max_generations": N}</code></td>
+<td>Stop at completed generation <code>N</code>; generation 0 is initialization</td>
+</tr>
+<tr class="even">
+<td><code>{"max_evaluations": N}</code></td>
+<td>Stop after a complete generation reaches the accepted-result threshold</td>
+</tr>
+<tr class="odd">
+<td><code>{"fitness_at_least": F}</code></td>
+<td>Stop when current population fitness reaches finite threshold <code>F</code></td>
+</tr>
+<tr class="even">
+<td><code>{"stagnation": N}</code></td>
+<td>Stop after <code>N</code> transitions without a strictly better historical fitness</td>
+</tr>
+<tr class="odd">
+<td><code>{"any": [A, B]}</code></td>
+<td>Stop when any child condition stops</td>
+</tr>
+<tr class="even">
+<td><code>{"all": [A, B]}</code></td>
+<td>Stop when all child conditions stop</td>
+</tr>
+<tr class="odd">
+<td><code>{"not": A}</code></td>
+<td>Negate one child condition</td>
+</tr>
+</tbody>
+</table></div>
+<p>Generation and evaluation limits are nonnegative integers; a stagnation window is positive. <code>any</code> and <code>all</code> require nonempty arrays. Composite predicates evaluate each child once per completed generation rather than short-circuiting away stateful updates.</p>
+<p>The evaluation threshold is a boundary check, not a hard mid-batch budget. The last population may cross it. An experiment must provide a stopping policy either here or as <code>Experiment.stop</code>; an empty declaration does not silently create an endless run.</p>
+<p>Ordinary resume preserves the saved policy and terminal decision. The CLI's <code>--pause-after-generation</code> option is operational and does not change these predicates.</p>
+<h2 id="seeded-initial-sampling">Seeded initial sampling</h2>
+<p>Optional <code>sampling</code> maps simple paths to sampling specifications:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;sampling&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;parameters.mutation_rate&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="dt">&quot;kind&quot;</span><span class="fu">:</span> <span class="st">&quot;log_uniform&quot;</span><span class="fu">,</span> <span class="dt">&quot;low&quot;</span><span class="fu">:</span> <span class="fl">0.001</span><span class="fu">,</span> <span class="dt">&quot;high&quot;</span><span class="fu">:</span> <span class="fl">0.1</span><span class="fu">},</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;evolution.population_size&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="dt">&quot;kind&quot;</span><span class="fu">:</span> <span class="st">&quot;integer&quot;</span><span class="fu">,</span> <span class="dt">&quot;low&quot;</span><span class="fu">:</span> <span class="dv">40</span><span class="fu">,</span> <span class="dt">&quot;high&quot;</span><span class="fu">:</span> <span class="dv">80</span><span class="fu">}</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>Add this field to the complete envelope. Supported kinds are <code>uniform</code> (default), <code>integer</code> with inclusive integer bounds, and <code>log_uniform</code> with positive bounds. Paths are <code>parameters.NAME</code> or <code>evolution.NAME</code>; arbitrary nested traversal is not supported.</p>
+<p>Sampling uses a managed stream and sorted path order before component construction. Resolved values are validated, recorded, and restored. Resume does not resample them.</p>
+<h2 id="bounds-and-explicit-changes">Bounds and explicit changes</h2>
+<p>Optional <code>parameter_rules</code> declares lifetime rules for core evolution settings:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;parameter_rules&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;population_size&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="dt">&quot;minimum&quot;</span><span class="fu">:</span> <span class="dv">20</span><span class="fu">,</span> <span class="dt">&quot;maximum&quot;</span><span class="fu">:</span> <span class="dv">200</span><span class="fu">,</span> <span class="dt">&quot;mutable&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">},</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;mutation_probability&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="dt">&quot;minimum&quot;</span><span class="fu">:</span> <span class="fl">0.0</span><span class="fu">,</span> <span class="dt">&quot;maximum&quot;</span><span class="fu">:</span> <span class="fl">1.0</span><span class="fu">,</span> <span class="dt">&quot;mutable&quot;</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">}</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>Rules apply to starting settings and registered adaptive updates. Invalid values are rejected rather than clamped. A hook returns, for example, <code>state.effective_settings.updated(population_size=120)</code>; that schedules the next population and preserves the completed generation's settings snapshot.</p>
+<p>Applications can use <code>ParameterRule</code> and <code>RangeParameter</code> from <code>xevolution.config</code> for their own bounded numeric state. Register a future-affecting mutable <code>RangeParameter</code> in <code>Experiment.components</code>; its value and rule are explicit checkpoint state.</p>
+<h2 id="strict-boundaries">Strict boundaries</h2>
+<p>Unknown core fields, duplicate JSON object keys, unsupported versions, invalid types, booleans masquerading as numeric settings, and non-finite numbers are errors. Overflowing input such as <code>1e999</code> is rejected along with nonstandard <code>NaN</code>/<code>Infinity</code> tokens. Programmatic settings receive equivalent validation.</p>
+<p>Run directories record resolved starting configuration in <code>config.json</code>. Checkpoints retain both current-generation settings and the next effective settings. Loading configuration itself does not import or execute the factory; experiment construction is explicit.</p>
+</article>
+<nav class="pagination" aria-label="Previous and next articles"><a class="previous" href="digits_demo.html"><small>Previous</small><strong>Digits MLP</strong></a><a class="next" href="cli.html"><small>Next</small><strong>Command line</strong></a></nav>
+<footer class="page-footer">xevolution 0.1.1 documentation · <a href="building_docs.html">Build and edit these docs</a><br>Framework behavior is documented for the supplied Python port. See <a href="verification.html">release verification</a> for the scope of executed checks.</footer>
+</div>
+<aside class="page-toc"><nav aria-label="On this page"><div class="toc-title">On this page</div><ul class="toc-list"><li><a href="#envelope">Envelope</a></li><li><a href="#defaults-and-policies">Defaults and policies</a></li><li><a href="#stopping">Stopping</a></li><li><a href="#seeded-initial-sampling">Seeded initial sampling</a></li><li><a href="#bounds-and-explicit-changes">Bounds and explicit changes</a></li><li><a href="#strict-boundaries">Strict boundaries</a></li></ul></nav></aside>
+</div></main></div>
+</body></html>

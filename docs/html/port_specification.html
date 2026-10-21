@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="xevolution Python Port: Architecture and Implementation Specification This is a documentation copy of the repository-root xevolution_python_port_spec.md. It defines the agreed port">
+<title>xevolution Python Port: Architecture and Implementation Specification · xevolution documentation</title>
+<link rel="stylesheet" href="assets/docs.css">
+<script defer src="assets/search-index.js"></script>
+<script defer src="assets/docs.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#xevo-main">Skip to content</a>
+<header class="site-header"><div class="header-inner">
+<a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">x</span><span class="brand-name">xevolution<span class="brand-note">Evolutionary computation · Python</span></span></a>
+<div class="header-right"><span class="version">v0.1.1</span>
+<div class="search-wrap" id="xevo-search" role="search" hidden>
+<label class="sr-only" for="xevo-search-input">Search documentation</label>
+<input id="xevo-search-input" type="search" placeholder="Search the documentation" autocomplete="off" aria-controls="xevo-search-results" aria-expanded="false">
+<kbd class="search-key" aria-hidden="true">/</kbd>
+<div id="xevo-search-results" class="search-results" role="region" aria-label="Search results" aria-live="polite" hidden></div>
+</div></div></div></header>
+<div class="layout">
+<details class="sidebar" id="xevo-navigation" open><summary>Browse documentation</summary>
+<nav aria-label="Documentation"><section class="nav-group"><h2 class="nav-heading">Start here</h2><ul><li><a href="index.html">Documentation home</a></li><li><a href="overview.html">Package overview</a></li><li><a href="examples.html">Choose an example</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Example projects</h2><ul><li><a href="arithmetic_demo.html">Arithmetic expressions</a></li><li><a href="batch_demo.html">Shared resources</a></li><li><a href="digits_demo.html">Digits MLP</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Reference</h2><ul><li><a href="configuration.html">JSON configuration</a></li><li><a href="cli.html">Command line</a></li><li><a href="extensions.html">Application extensions</a></li><li><a href="architecture.html">Architecture &amp; ownership</a></li><li><a href="checkpointing.html">Checkpoints &amp; recovery</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Project</h2><ul><li><a href="porting_notes.html">Porting notes</a></li><li><a href="verification.html">Release verification</a></li><li><a href="port_specification.html" aria-current="page">Port specification</a></li><li><a href="contributing.html">Contributing</a></li><li><a href="building_docs.html">Building these docs</a></li></ul></section></nav>
+<div class="sidebar-footer">Version 0.1.1<br>Offline reference documentation.<br>Markdown is the editable source.</div>
+</details>
+<main class="content" id="xevo-main"><div class="document-grid">
+<div class="article-column">
+<div class="page-meta"><div class="breadcrumb"><a href="index.html">Docs</a><span>/</span>Project</div><a class="source-link" href="../markdown/port_specification.md">Markdown source</a></div>
+<details class="compact-toc"><summary>On this page</summary><ul class="toc-list"><li><a href="#contents">Contents</a></li><li><a href="#1-purpose-and-agreed-scope">1. Purpose and agreed scope</a></li><li class="subsection"><a href="#11-agreed-decisions">1.1 Agreed decisions</a></li><li class="subsection"><a href="#12-requirement-language">1.2 Requirement language</a></li><li><a href="#2-design-principles">2. Design principles</a></li><li class="subsection"><a href="#21-organize-by-responsibility">2.1 Organize by responsibility</a></li><li class="subsection"><a href="#22-separate-domain-calculations-from-bookkeeping">2.2 Separate domain calculations from bookkeeping</a></li><li class="subsection"><a href="#23-make-data-and-execution-independent">2.3 Make data and execution independent</a></li><li class="subsection"><a href="#24-keep-persistence-out-of-genetic-objects">2.4 Keep persistence out of genetic objects</a></li><li class="subsection"><a href="#25-make-reproducibility-an-explicit-contract">2.5 Make reproducibility an explicit contract</a></li><li class="subsection"><a href="#26-keep-the-initial-runtime-small">2.6 Keep the initial runtime small</a></li><li><a href="#3-repository-layout">3. Repository layout</a></li><li><a href="#4-python-modules-and-interactions">4. Python modules and interactions</a></li><li class="subsection"><a href="#41-shared-data-and-extension-contracts">4.1 Shared data and extension contracts</a></li><li class="subsection"><a href="#42-evolutionary-behavior">4.2 Evolutionary behavior</a></li><li class="subsection"><a href="#43-experiment-construction-persistence-and-tools">4.3 Experiment construction, persistence, and tools</a></li><li class="subsection"><a href="#44-dependency-and-ownership-rules">4.4 Dependency and ownership rules</a></li><li><a href="#5-data-model-and-ownership">5. Data model and ownership</a></li><li class="subsection"><a href="#51-principal-records">5.1 Principal records</a></li><li class="subsection"><a href="#52-identity-age-and-evaluation-status">5.2 Identity, age, and evaluation status</a></li><li class="subsection"><a href="#53-mutable-genotype-data">5.3 Mutable genotype data</a></li><li class="subsection"><a href="#54-metrics-and-metadata">5.4 Metrics and metadata</a></li><li><a href="#6-application-extension-contracts">6. Application extension contracts</a></li><li class="subsection"><a href="#61-required-separation-of-responsibilities">6.1 Required separation of responsibilities</a></li><li class="subsection"><a href="#62-individual-and-population-evaluation">6.2 Individual and population evaluation</a></li><li class="subsection"><a href="#63-stateful-components">6.3 Stateful components</a></li><li><a href="#7-generation-lifecycle-and-algorithms">7. Generation lifecycle and algorithms</a></li><li class="subsection"><a href="#71-fresh-initialization">7.1 Fresh initialization</a></li><li class="subsection"><a href="#72-a-generation-transition">7.2 A generation transition</a></li><li class="subsection"><a href="#73-default-policies">7.3 Default policies</a></li><li class="subsection"><a href="#74-selection-and-numerical-validity">7.4 Selection and numerical validity</a></li><li class="subsection"><a href="#75-bounded-operator-attempts">7.5 Bounded operator attempts</a></li><li class="subsection"><a href="#76-stopping-and-limits">7.6 Stopping and limits</a></li><li><a href="#8-json-configuration">8. JSON configuration</a></li><li class="subsection"><a href="#81-configuration-envelope">8.1 Configuration envelope</a></li><li class="subsection"><a href="#82-validation-and-effective-settings">8.2 Validation and effective settings</a></li><li class="subsection"><a href="#83-factory-resolution">8.3 Factory resolution</a></li><li><a href="#9-randomness-and-deterministic-execution">9. Randomness and deterministic execution</a></li><li class="subsection"><a href="#91-persistent-random-state">9.1 Persistent random state</a></li><li class="subsection"><a href="#92-stable-work-identities">9.2 Stable work identities</a></li><li class="subsection"><a href="#93-ordering">9.3 Ordering</a></li><li class="subsection"><a href="#94-application-responsibilities">9.4 Application responsibilities</a></li><li><a href="#10-checkpoint-and-recovery-contract">10. Checkpoint and recovery contract</a></li><li class="subsection"><a href="#101-required-guarantee">10.1 Required guarantee</a></li><li class="subsection"><a href="#102-exact-saved-boundary">10.2 Exact saved boundary</a></li><li class="subsection"><a href="#103-required-checkpoint-contents">10.3 Required checkpoint contents</a></li><li class="subsection"><a href="#104-serialization-and-attachments">10.4 Serialization and attachments</a></li><li class="subsection"><a href="#105-single-writer-commit-protocol">10.5 Single-writer commit protocol</a></li><li class="subsection"><a href="#106-restoration-and-incomplete-writes">10.6 Restoration and incomplete writes</a></li><li class="subsection"><a href="#107-limits-of-the-guarantee">10.7 Limits of the guarantee</a></li><li><a href="#11-tracking-genealogy-and-reporting">11. Tracking, genealogy, and reporting</a></li><li class="subsection"><a href="#111-scientific-records">11.1 Scientific records</a></li><li class="subsection"><a href="#112-statistics-and-historical-bests">11.2 Statistics and historical bests</a></li><li class="subsection"><a href="#113-report-projections">11.3 Report projections</a></li><li><a href="#12-command-line-interface-and-run-directories">12. Command-line interface and run directories</a></li><li class="subsection"><a href="#121-commands">12.1 Commands</a></li><li class="subsection"><a href="#122-run-directory-contents">12.2 Run directory contents</a></li><li><a href="#13-java-functionality-and-utility-migration">13. Java functionality and utility migration</a></li><li class="subsection"><a href="#131-main-functionality-mapping">13.1 Main functionality mapping</a></li><li class="subsection"><a href="#132-xnet-utility-behavior">13.2 Xnet utility behavior</a></li><li class="subsection"><a href="#133-documented-behavior-changes">13.3 Documented behavior changes</a></li><li><a href="#14-examples-and-documentation">14. Examples and documentation</a></li><li class="subsection"><a href="#141-example-modules">14.1 Example modules</a></li><li class="subsection"><a href="#142-documentation-files">14.2 Documentation files</a></li><li><a href="#15-verification-and-acceptance-criteria">15. Verification and acceptance criteria</a></li><li class="subsection"><a href="#151-test-modules">15.1 Test modules</a></li><li class="subsection"><a href="#152-decisive-continuation-test">15.2 Decisive continuation test</a></li><li class="subsection"><a href="#153-required-acceptance-cases">15.3 Required acceptance cases</a></li><li><a href="#16-implementation-sequence">16. Implementation sequence</a></li><li class="subsection"><a href="#increment-1-in-memory-evolution">Increment 1: In-memory evolution</a></li><li class="subsection"><a href="#increment-2-reliable-continuation">Increment 2: Reliable continuation</a></li><li class="subsection"><a href="#increment-3-headless-tools-and-documentation">Increment 3: Headless tools and documentation</a></li><li class="subsection"><a href="#initial-implementation-is-complete-when">Initial implementation is complete when</a></li><li><a href="#17-source-references">17. Source references</a></li><li class="subsection"><a href="#java-baseline-and-implementation-evidence">Java baseline and implementation evidence</a></li><li class="subsection"><a href="#python-and-tooling-references">Python and tooling references</a></li></ul></details>
+<article class="document"><h1 id="xevolution-python-port-architecture-and-implementation-specification">xevolution Python Port: Architecture and Implementation Specification</h1>
+<p>This is a documentation copy of the repository-root <code>xevolution_python_port_spec.md</code>. It defines the agreed port contract and target design. For implemented behavior, start with the <a href="overview.html">package overview</a>, <a href="examples.html">example guides</a>, and <a href="verification.html">release verification</a>. Repository paths in the specification remain relative to the source project root.</p>
+<p><strong>Version:</strong> 1.0<br>
+<strong>Date:</strong> October 20, 2026<br>
+<strong>Target:</strong> Python 3.12 and later<br>
+<strong>Status:</strong> Specification based on the agreed project outline; implementation has not begun<br>
+<strong>Java baseline:</strong> <a href="https://github.com/xtructure/xnet-public/commit/509c673e502f0c27daa6b91f39cc298404b59ae2"><code>xtructure/xnet-public</code>, commit <code>509c673e502f0c27daa6b91f39cc298404b59ae2</code></a></p>
+<h2 id="contents">Contents</h2>
+<ol type="1">
+<li><a href="#1-purpose-and-agreed-scope">Purpose and agreed scope</a></li>
+<li><a href="#2-design-principles">Design principles</a></li>
+<li><a href="#3-repository-layout">Repository layout</a></li>
+<li><a href="#4-python-modules-and-interactions">Python modules and interactions</a></li>
+<li><a href="#5-data-model-and-ownership">Data model and ownership</a></li>
+<li><a href="#6-application-extension-contracts">Application extension contracts</a></li>
+<li><a href="#7-generation-lifecycle-and-algorithms">Generation lifecycle and algorithms</a></li>
+<li><a href="#8-json-configuration">JSON configuration</a></li>
+<li><a href="#9-randomness-and-deterministic-execution">Randomness and deterministic execution</a></li>
+<li><a href="#10-checkpoint-and-recovery-contract">Checkpoint and recovery contract</a></li>
+<li><a href="#11-tracking-genealogy-and-reporting">Tracking, genealogy, and reporting</a></li>
+<li><a href="#12-command-line-interface-and-run-directories">Command-line interface and run directories</a></li>
+<li><a href="#13-java-functionality-and-utility-migration">Java functionality and utility migration</a></li>
+<li><a href="#14-examples-and-documentation">Examples and documentation</a></li>
+<li><a href="#15-verification-and-acceptance-criteria">Verification and acceptance criteria</a></li>
+<li><a href="#16-implementation-sequence">Implementation sequence</a></li>
+<li><a href="#17-source-references">Source references</a></li>
+</ol>
+<h2 id="1-purpose-and-agreed-scope">1. Purpose and agreed scope</h2>
+<p>Create a standalone, headless Python evolutionary-computation library that preserves the useful functionality of Java <code>xevolution</code>, corrects identified defects, and supports a broad range of application-defined representations and evaluators.</p>
+<p>The architecture must support experiments through Python code and a command-line interface. It must retain population statistics, historical results, and genealogy independently of any graphical interface.</p>
+<p>The Java repository separates the generic evolution framework from NEAT, simulation, and batch-simulation implementations. Its <code>xevolution</code> module declares <code>xutil</code> as its direct sibling dependency. This port follows that boundary and incorporates the required utility behavior into the new Python package. <a href="https://github.com/xtructure/xnet-public/blob/509c673e502f0c27daa6b91f39cc298404b59ae2/README.md">J2</a>, <a href="https://github.com/xtructure/xnet-public/blob/509c673e502f0c27daa6b91f39cc298404b59ae2/xnet/xevolution/pom.xml#L15-L20">J3</a></p>
+<h3 id="11-agreed-decisions">1.1 Agreed decisions</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Topic</th>
+<th>Required scope</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Evolution framework</td>
+<td>Port the generic <code>xevolution</code> functionality.</td>
+</tr>
+<tr class="even">
+<td>NEAT</td>
+<td>Exclude the <code>xneat</code> implementation from this port. Preserve extension points for future applications.</td>
+</tr>
+<tr class="odd">
+<td>Graphical interface</td>
+<td>Exclude all GUI components, visualization callbacks, screenshot tools, and the unfinished operator workbench.</td>
+</tr>
+<tr class="even">
+<td>Java interoperability</td>
+<td>No compatibility with Java configuration files, population files, serialized classes, or historical runs is required.</td>
+</tr>
+<tr class="odd">
+<td>Configuration</td>
+<td>Use versioned JSON configuration instead of XML.</td>
+</tr>
+<tr class="even">
+<td>Application assumptions</td>
+<td>Support arbitrary genotype data and application-defined evaluation. Do not require a numerical-array, neural-network, or simulation representation.</td>
+</tr>
+<tr class="odd">
+<td>Evaluation</td>
+<td>Preserve both individual and whole-population hooks.</td>
+</tr>
+<tr class="even">
+<td>Optimization</td>
+<td>Use one scalar objective, with higher fitness preferred. Keep parent and survivor selection extensible.</td>
+</tr>
+<tr class="odd">
+<td>Algorithm fidelity</td>
+<td>Preserve intended evolutionary behavior while correcting defects and making ambiguous policies explicit. Reproducing Java random trajectories is not required.</td>
+</tr>
+<tr class="even">
+<td>Checkpoints</td>
+<td>Support continuation from a committed, completed generation, subject to explicit application-state and determinism contracts.</td>
+</tr>
+<tr class="odd">
+<td>Other Xnet utilities</td>
+<td>Reimplement necessary behavior inside <code>xevolution</code>, using Python facilities where appropriate.</td>
+</tr>
+</tbody>
+</table></div>
+<p>This specification does not require built-in distributed execution, GPU execution, a simulation engine, multiobjective optimization, or resumption inside an arbitrary external evaluation. Applications may provide such capabilities behind the evaluation contracts.</p>
+<h3 id="12-requirement-language">1.2 Requirement language</h3>
+<p><strong>Must</strong> identifies required behavior for the initial implementation. <strong>Should</strong> identifies a recommended implementation choice. <strong>May</strong> identifies an optional capability or a choice left to the implementer. Illustrative signatures describe contracts; they are not complete source-code implementations.</p>
+<p>The package name in this specification is <code>xevolution</code>. No distribution has been published or installed as part of preparing this document.</p>
+<h2 id="2-design-principles">2. Design principles</h2>
+<h3 id="21-organize-by-responsibility">2.1 Organize by responsibility</h3>
+<p>Use a shallow package containing cohesive modules. Java interface, abstract-base-class, and implementation triples should generally become a small record, a function, or a typed protocol. Introduce a subpackage only when the implementation grows enough to justify it.</p>
+<p>Stateful objects remain appropriate for components that actually own state. The goal is clear ownership and composition, rather than eliminating classes.</p>
+<h3 id="22-separate-domain-calculations-from-bookkeeping">2.2 Separate domain calculations from bookkeeping</h3>
+<p>Application components create genotypes, calculate scores, choose candidates, and perform domain-specific variation. Framework code owns individual identities, evaluation accounting, population assembly, generation numbering, provenance, and durable commits.</p>
+<h3 id="23-make-data-and-execution-independent">2.3 Make data and execution independent</h3>
+<p>The core must not require NumPy, PyTorch, a particular graph library, a simulator, or an executor. Applications can use these behind their hooks. A whole-population evaluator may perform jointly dependent calculations; it need not be equivalent to independent individual evaluations.</p>
+<h3 id="24-keep-persistence-out-of-genetic-objects">2.4 Keep persistence out of genetic objects</h3>
+<p>Individuals, populations, selectors, and operators must not open checkpoint files or write reports directly. Serialization and storage own those operations. This permits in-memory use through scripts, notebooks, and tests without creating a run directory.</p>
+<h3 id="25-make-reproducibility-an-explicit-contract">2.5 Make reproducibility an explicit contract</h3>
+<p>Run-owned randomness, stable work identities, deterministic ordering, component state, and checkpoint boundaries must be designed together. A seed alone is insufficient to describe the current position of a running experiment.</p>
+<h3 id="26-keep-the-initial-runtime-small">2.6 Keep the initial runtime small</h3>
+<p>The initial core should use the Python standard library. Use a project-local virtual environment managed with <code>uv</code>, and commit the dependency lockfile. <code>uv</code> provides the project environment and records resolved dependency versions in <code>uv.lock</code>. <a href="https://docs.astral.sh/uv/concepts/projects/layout/">P1</a></p>
+<p>Use type annotations and <code>typing.Protocol</code> for extension contracts. Protocols allow structural typing without requiring application classes to inherit from framework classes. Runtime validation of configuration, returned results, and saved state remains necessary; annotations do not enforce values during execution. <a href="https://docs.python.org/3.12/library/typing.html#typing.Protocol">P2</a></p>
+<h2 id="3-repository-layout">3. Repository layout</h2>
+<p>Use an installable <code>src/</code> layout. Keeping the import package beneath <code>src/</code> helps tests exercise the installed distribution and exposes packaging mistakes that direct imports from a repository root can conceal. <a href="https://packaging.python.org/en/latest/discussions/src-layout-vs-flat-layout/">P3</a></p>
+<p>All paths in this document are relative to the new repository root unless explicitly identified as Java source references.</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Path</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>pyproject.toml</code></td>
+<td>Package metadata; Python requirement <code>&gt;=3.12</code>; build configuration; development dependencies; the <code>xevolution</code> console entry point; test and code-quality configuration.</td>
+</tr>
+<tr class="even">
+<td><code>uv.lock</code></td>
+<td>Resolved development dependency versions.</td>
+</tr>
+<tr class="odd">
+<td><code>README.md</code></td>
+<td>Installation, a minimal runnable experiment, and links to extension and checkpoint documentation.</td>
+</tr>
+<tr class="even">
+<td><code>AGENTS.md</code></td>
+<td>Repository instructions for coding agents, including component ownership, randomness, checkpoint invariants, and behavioral verification.</td>
+</tr>
+<tr class="odd">
+<td><code>src/xevolution/</code></td>
+<td>Installable library containing the modules in Section 4.</td>
+</tr>
+<tr class="even">
+<td><code>src/xevolution/py.typed</code></td>
+<td>Package typing marker.</td>
+</tr>
+<tr class="odd">
+<td><code>examples/</code></td>
+<td>Small application examples and their JSON configurations.</td>
+</tr>
+<tr class="even">
+<td><code>tests/</code></td>
+<td>Behavioral, integration, and recovery tests.</td>
+</tr>
+<tr class="odd">
+<td><code>tests/fixtures/</code></td>
+<td>Small configuration, checkpoint, and application-payload fixtures.</td>
+</tr>
+<tr class="even">
+<td><code>docs/markdown/</code></td>
+<td>Package overview, three example guides, architecture, extension, configuration, checkpoint, CLI, porting, and verification documentation.</td>
+</tr>
+<tr class="odd">
+<td><code>docs/html/</code></td>
+<td>Cross-linked HTML generated from the Markdown sources, with local reading assets.</td>
+</tr>
+<tr class="even">
+<td><code>docs/build_docs.py</code></td>
+<td>Offline documentation builder and local link/fragment validation.</td>
+</tr>
+<tr class="odd">
+<td><code>.github/workflows/ci.yml</code></td>
+<td>Installation, tests, and code-quality checks on supported Python versions.</td>
+</tr>
+</tbody>
+</table></div>
+<p>The generated local environment and experiment output directories must be excluded from version control. The package must be tested on Python 3.12 and the newer Python versions it advertises as supported. Supporting several Python versions does not imply that an exact-resume checkpoint can move between them without compatibility checks.</p>
+<h2 id="4-python-modules-and-interactions">4. Python modules and interactions</h2>
+<p>All modules below live directly under <code>src/xevolution/</code>. There are 19 Python modules, including the two package entry-point modules.</p>
+<h3 id="41-shared-data-and-extension-contracts">4.1 Shared data and extension contracts</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Module</th>
+<th>Responsibility</th>
+<th>Interactions</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>models.py</code></td>
+<td>Defines shared records such as <code>Individual</code>, <code>Population</code>, <code>EvaluationResult</code>, <code>VariationResult</code>, <code>RunState</code>, and immutable generation and lineage records.</td>
+<td>Provides the data exchanged by evaluation, reproduction, tracking, and persistence. Contains no file I/O or application-specific calculations.</td>
+</tr>
+<tr class="even">
+<td><code>protocols.py</code></td>
+<td>Defines contracts for initialization, cloning, optional decoding, individual evaluation, population evaluation, parent selection, survival selection, mutation, crossover, termination, payload codecs, and stateful components.</td>
+<td>Allows applications to supply functions or compatible objects. Behavior modules depend on these contracts rather than concrete application implementations.</td>
+</tr>
+<tr class="odd">
+<td><code>config.py</code></td>
+<td>Loads and validates JSON configuration, applies defaults, and represents effective settings with typed records. Supports explicit bounds, optional seeded parameter sampling, and validated setting changes where needed.</td>
+<td>Supplies configuration to experiment construction and execution. Coordinates sampling with <code>randomness.py</code>; effective values are included in run state and checkpoints.</td>
+</tr>
+<tr class="even">
+<td><code>randomness.py</code></td>
+<td>Owns per-run random generators, exports and restores their complete states, and derives reproducible evaluation contexts from stable work identities.</td>
+<td>Supplies randomness to initialization, selection, variation, and evaluation. Its persistent state is saved by storage.</td>
+</tr>
+<tr class="odd">
+<td><code>errors.py</code></td>
+<td>Defines focused exceptions for configuration errors, invalid evaluation results, inapplicable operators, exhausted reproduction attempts, and checkpoint failures or incompatibility.</td>
+<td>Lets reproduction distinguish expected operator inapplicability from programming failures; lets the CLI report errors without changing library behavior.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="42-evolutionary-behavior">4.2 Evolutionary behavior</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Module</th>
+<th>Responsibility</th>
+<th>Interactions</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>evaluation.py</code></td>
+<td>Adapts individual evaluation to population evaluation, invokes custom population hooks, validates returned results, and owns evaluation bookkeeping.</td>
+<td>Receives population data and evaluation context from the engine. Associates results with stable IDs and applies accepted scores and metrics in a defined order.</td>
+</tr>
+<tr class="even">
+<td><code>selection.py</code></td>
+<td>Implements distinct parent-selection and survivor-selection contracts. Includes roulette, uniform, and tournament parent selection, complete replacement, and simple elitist survival.</td>
+<td>Reproduction uses parent selection; generation assembly uses survivor decisions. Selectors consume evaluated population data and explicit random context when needed.</td>
+</tr>
+<tr class="odd">
+<td><code>operators.py</code></td>
+<td>Represents mutation and crossover operations, weighted operator pools, explicit fallbacks, recoverable inapplicability, and structured operation provenance. Provides baseline cloning operations.</td>
+<td>Application operators produce genotype data and details. Reproduction selects and invokes them, then assigns offspring identity and lineage.</td>
+</tr>
+<tr class="even">
+<td><code>reproduction.py</code></td>
+<td>Produces the required offspring using parent selection, mutation-or-crossover choice, operator selection, finite retry budgets, and offspring construction.</td>
+<td>Reads the complete previous population and survivor decisions. Uses selection, operators, and run-owned ID allocation; returns a complete offspring set or raises an error.</td>
+</tr>
+<tr class="odd">
+<td><code>termination.py</code></td>
+<td>Provides generation, evaluation-count, fitness-threshold, and stagnation predicates, plus logical composition and custom predicate support.</td>
+<td>Reads finalized run state. Any persistent counters or windows are exposed for checkpointing.</td>
+</tr>
+<tr class="even">
+<td><code>engine.py</code></td>
+<td>Coordinates fresh initialization, one generation, repeated execution, registered adaptive updates, termination, and generation commits. Exposes incremental execution and a convenience run interface.</td>
+<td>Delegates to reproduction, evaluation, tracking, termination, and an optional store. Exposes completed generation records to callers.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Parent selection and survivor selection remain different contracts even though they initially share a module. One chooses who reproduces; the other chooses which existing individuals remain.</p>
+<h3 id="43-experiment-construction-persistence-and-tools">4.3 Experiment construction, persistence, and tools</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Module</th>
+<th>Responsibility</th>
+<th>Interactions</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>experiment.py</code></td>
+<td>Defines an <code>Experiment</code> composition holding application initialization, evaluation, variation, selection, stopping, cloning, and codec collaborators. Provides application-factory construction helpers.</td>
+<td>Connects validated settings with application code and produces the components used by the engine.</td>
+</tr>
+<tr class="even">
+<td><code>registry.py</code></td>
+<td>Resolves configured short names or explicit <code>package.module:factory</code> references into experiment or component factories.</td>
+<td>Used for fresh construction and restoration. Resolves behavior from recorded identities and settings; it does not serialize live Python object graphs.</td>
+</tr>
+<tr class="odd">
+<td><code>serialization.py</code></td>
+<td>Converts framework records, random state, component state, and application payloads to versioned representations and restores them. Includes JSON-native codecs and a contract for other payload formats.</td>
+<td>Called by storage. Uses explicit application codecs, preserves required types and numerical precision, and reconstructs values such as tuple-based random state correctly.</td>
+</tr>
+<tr class="even">
+<td><code>storage.py</code></td>
+<td>Owns run directories, checkpoint loading, atomic checkpoint replacement, the structured journal, attachment references, and committed-state recovery.</td>
+<td>Receives finalized state and generation records from the engine. Calls serialization and provides committed history to inspection and analysis.</td>
+</tr>
+<tr class="odd">
+<td><code>tracking.py</code></td>
+<td>Computes generation statistics, maintains independent historical-best snapshots, records births and provenance, queries genealogy, and builds analysis projections.</td>
+<td>Consumes finalized populations and variation records. Provides information used by stopping and persistence; reconstructs reports from committed history without evolution.</td>
+</tr>
+<tr class="even">
+<td><code>cli.py</code></td>
+<td>Implements <code>run</code>, <code>resume</code>, <code>inspect</code>, and <code>analyze</code>; handles arguments, operational logging, and user-facing errors.</td>
+<td>Calls configuration, registry, experiment construction, engine, storage, and tracking. Interpreter exit is confined to the command boundary.</td>
+</tr>
+<tr class="odd">
+<td><code>__init__.py</code></td>
+<td>Exposes a small public API containing principal records and experiment/run/resume entry points.</td>
+<td>Provides convenient imports. Importing the package must not configure logging, instantiate an experiment, or consume randomness.</td>
+</tr>
+<tr class="even">
+<td><code>__main__.py</code></td>
+<td>Delegates <code>python -m xevolution</code> to <code>cli.main()</code>.</td>
+<td>Shares the implementation of the installed <code>xevolution</code> command.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="44-dependency-and-ownership-rules">4.4 Dependency and ownership rules</h3>
+<p>Shared records and protocols must not depend on concrete execution, storage, or CLI implementations. Application code is introduced through experiment construction; the core engine must not import example applications.</p>
+<p><code>serialization.py</code> owns representation conversion. <code>storage.py</code> owns durability, journal positions, and file operations. <code>tracking.py</code> owns the interpretation of scientific records. These responsibilities must not be duplicated across modules.</p>
+<p>Operational logging uses the standard logging package. Scientific history uses structured generation records; it must not be recovered by parsing diagnostic log messages.</p>
+<h2 id="5-data-model-and-ownership">5. Data model and ownership</h2>
+<h3 id="51-principal-records">5.1 Principal records</h3>
+<p>Use <code>Individual[G]</code> for the framework wrapper around arbitrary genotype data of type <code>G</code>. This corresponds to the role of Java <code>Genome&lt;D&gt;</code>. A genotype may be a string, graph, array, tensor, or application-defined object. <a href="https://github.com/xtructure/xnet-public/blob/509c673e502f0c27daa6b91f39cc298404b59ae2/xnet/xevolution/src/main/java/com/xtructure/xevolution/genetics/Genome.java#L30-L68">J4</a></p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Record</th>
+<th>Required meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>Individual[G]</code></td>
+<td>Stable individual ID; genotype; birth generation; parent IDs; latest fitness or unevaluated status; additional metrics; accepted-evaluation count; optional metadata.</td>
+</tr>
+<tr class="even">
+<td><code>Population[G]</code></td>
+<td>Deterministically ordered individuals, lookup by ID, and optional population metadata. Enforces unique IDs.</td>
+</tr>
+<tr class="odd">
+<td><code>EvaluationResult</code></td>
+<td>One finite scalar fitness and named supplementary measurements. Underlying simulations, training steps, or other effort can be reported as additional measurements.</td>
+</tr>
+<tr class="even">
+<td><code>VariationResult[G]</code></td>
+<td>A newly produced genotype and structured operation details. It does not allocate framework IDs or update the population.</td>
+</tr>
+<tr class="odd">
+<td><code>RunState[G]</code></td>
+<td>Current completed generation and phase; population; settings used for that generation and effective settings for the next transition; ID and evaluation counters; historical bests; improvement information; termination status; other framework state affecting continuation.</td>
+</tr>
+<tr class="even">
+<td><code>GenerationRecord</code></td>
+<td>An immutable account of a finalized generation: population membership identifiers, measurements needed by reporting, births, operation provenance, and relevant state changes.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Small additional context or decision records, such as <code>EvaluationContext</code> and <code>StopDecision</code>, may be added to <code>models.py</code> when they clarify a public contract. They do not require separate modules.</p>
+<h3 id="52-identity-age-and-evaluation-status">5.2 Identity, age, and evaluation status</h3>
+<ul>
+<li>Individual IDs must be unique within a run. Cross-run references use run identity together with individual ID.</li>
+<li>Allocate individual IDs from an explicit monotonic run-state counter. Never reconstruct the counter from current survivors.</li>
+<li>Genotype equality must not determine individual uniqueness or population membership.</li>
+<li>An unevaluated individual has <code>fitness=None</code>, or an equivalently explicit unevaluated state. Zero is a valid fitness.</li>
+<li>Generation 0 is the initial evaluated population. An individual born in generation <code>g</code> has age zero in that generation; age is derived as current generation minus birth generation.</li>
+<li>Offspring receive fresh identity and evaluation bookkeeping. Copying a parent must not copy its evaluation count, fitness validity, or unrelated transient attributes into the new individual.</li>
+</ul>
+<h3 id="53-mutable-genotype-data">5.3 Mutable genotype data</h3>
+<p>Freezing the wrapper does not freeze a nested genotype. Operators must leave parent data unchanged and return an independent child, unless sharing immutable data is explicitly valid.</p>
+<p>Applications must supply a cloning operation when their representation needs one. The framework must not assume that a shallow copy is sufficient, nor require a universal deep copy of every large payload.</p>
+<p>Historical best records and retained scientific observations must be independent of mutable live individuals. Use the application clone/codec contract to preserve the required genotype snapshot, and copy associated metadata. A later fitness update must not change an earlier generation's recorded result.</p>
+<h3 id="54-metrics-and-metadata">5.4 Metrics and metadata</h3>
+<p>Keep the primary scalar objective separate from supplementary numeric metrics and nonnumeric metadata. Complexity is an optional application-provided measurement; the framework must not infer it from the representation.</p>
+<p>Every individual must have valid fitness before it participates in selection. Supplementary metrics may be absent. Statistics must report the number of contributing observations and must not turn missing values into zero. If no observations exist, represent the statistic as absent or <code>null</code>, consistently.</p>
+<h2 id="6-application-extension-contracts">6. Application extension contracts</h2>
+<h3 id="61-required-separation-of-responsibilities">6.1 Required separation of responsibilities</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Extension</th>
+<th>Application responsibility</th>
+<th>Framework responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Initialization</td>
+<td>Produce initial genotype data from parameters and explicit random context.</td>
+<td>Assign IDs, create individual records, and validate the initial population.</td>
+</tr>
+<tr class="even">
+<td>Cloning</td>
+<td>Copy genotype data according to its representation and ownership rules.</td>
+<td>Use cloning where offspring or retained snapshots require independence.</td>
+</tr>
+<tr class="odd">
+<td>Decoding</td>
+<td>Optionally convert genotype data to an evaluable phenotype.</td>
+<td>Permit composition inside evaluation without requiring a dummy decoder.</td>
+</tr>
+<tr class="even">
+<td>Individual evaluation</td>
+<td>Return fitness and measurements for one individual.</td>
+<td>Validate the result and maintain accepted-evaluation bookkeeping.</td>
+</tr>
+<tr class="odd">
+<td>Population evaluation</td>
+<td>Evaluate the requested population jointly or in batches, returning results associated with requested IDs.</td>
+<td>Validate coverage and identities and apply accepted results deterministically.</td>
+</tr>
+<tr class="even">
+<td>Parent selection</td>
+<td>Identify parents from the supplied evaluated population.</td>
+<td>Validate selected IDs and invoke variation.</td>
+</tr>
+<tr class="odd">
+<td>Survivor selection</td>
+<td>Identify existing individuals that remain.</td>
+<td>Validate survivors and assemble the next population.</td>
+</tr>
+<tr class="even">
+<td>Mutation/crossover</td>
+<td>Return newly produced genotype data and provenance, or report inapplicability.</td>
+<td>Assign offspring IDs, parentage, birth generation, and fresh evaluation state.</td>
+</tr>
+<tr class="odd">
+<td>Termination</td>
+<td>Decide whether finalized run state satisfies a stopping policy.</td>
+<td>Invoke the policy once per completed generation and record its decision and state.</td>
+</tr>
+<tr class="even">
+<td>Payload codec</td>
+<td>Encode and decode application data without loss of required semantics.</td>
+<td>Record codec identity/version and coordinate durable storage.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="62-individual-and-population-evaluation">6.2 Individual and population evaluation</h3>
+<p>The conceptual interfaces are:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>evaluate(individual, context) <span class="op">-&gt;</span> EvaluationResult</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>evaluate_population(population, context) <span class="op">-&gt;</span> results_associated_with_individual_ids</span></code></pre></div>
+<p>An application may provide either or both hooks. When a population hook is configured, the engine uses it directly. Otherwise, a standard adapter invokes the individual hook. Supplying both must not cause duplicate evaluation.</p>
+<p>A population hook is allowed to evaluate candidates jointly, comparatively, or in a shared environment. It need not produce the same results as an independent loop. The Java application examples already use an override of whole-population evaluation through an application-specific batch system. <a href="https://github.com/xtructure/xnet-public/blob/509c673e502f0c27daa6b91f39cc298404b59ae2/xnet/demos/src/main/java/com/xtructure/xnet/demos/oned/OneDEvaluationStrategyImpl.java#L94-L147">J5</a></p>
+<p>Before updating population state, the evaluation coordinator must verify that all requested IDs have exactly one accepted result, no unexpected IDs occur, and every fitness value is finite. A sequence-based result API must detect duplicate IDs; a mapping-based API must enforce complete expected key coverage.</p>
+<p>The framework increments accepted-evaluation counts consistently. One accepted fitness result counts as one fitness evaluation. An application performing several simulations or training iterations to produce that result reports those quantities separately, unless a separately specified evaluation-round policy schedules multiple fitness evaluations.</p>
+<p>Applications control their own execution mechanism behind the hook. The initial engine need not create process pools or remote workers. No outstanding jobs may remain at a generation checkpoint boundary.</p>
+<h3 id="63-stateful-components">6.3 Stateful components</h3>
+<p>Components retaining information that affects future results must provide explicit state export and restoration, conceptually:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>state_dict() <span class="op">-&gt;</span> JSONValue</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>load_state_dict(state: JSONValue) <span class="op">-&gt;</span> <span class="va">None</span></span></code></pre></div>
+<p>The component composition must identify each stateful component with a stable key. Stateless functions require no state payload, but must depend only on their explicit inputs and controlled external conditions. Hidden mutable globals or closures must not be silently treated as checkpointable state.</p>
+<p>Adaptive operators, selectors, evaluators, stopping windows, decoding state, and future-affecting caches are included. A deterministic derived cache may be discarded and recomputed only when doing so cannot change randomness, counters, budgets, or subsequent behavior.</p>
+<p>Observation-only reporting hooks run after commit and must not mutate evolutionary state. An application hook that changes future behavior is a registered stateful component and must run at a defined point before the checkpoint.</p>
+<h2 id="7-generation-lifecycle-and-algorithms">7. Generation lifecycle and algorithms</h2>
+<h3 id="71-fresh-initialization">7.1 Fresh initialization</h3>
+<ol type="1">
+<li>Load and validate the configuration envelope and establish run-owned randomness.</li>
+<li>Resolve defaults and any sampled initial settings once, validate the resulting effective settings, and retain their values.</li>
+<li>Construct experiment components from those settings, create initial genotype data, and assign IDs.</li>
+<li>Evaluate the initial population and validate the complete result set.</li>
+<li>Apply results, initialize tracking, perform registered adaptive updates, and evaluate the stopping policy once.</li>
+<li>Finalize generation 0 and commit its checkpoint and scientific records when persistent storage is enabled.</li>
+</ol>
+<p>A crash before the generation-0 checkpoint requires a fresh initialization. There is no earlier committed state to restore.</p>
+<h3 id="72-a-generation-transition">7.2 A generation transition</h3>
+<p>Starting with completed generation <code>g</code>, snapshot its effective settings as the settings to use for generation <code>g + 1</code>:</p>
+<ol type="1">
+<li>Select survivors from the evaluated previous population. The default retains none.</li>
+<li>Determine the number of children needed to reach the configured population size.</li>
+<li>Select parents from the complete previous population, including individuals not selected to survive.</li>
+<li>Produce each child through mutation or crossover, according to the configured mutation probability.</li>
+<li>Assemble survivors and children into the population for <code>g + 1</code>.</li>
+<li>Evaluate the complete resulting population, including survivors, and validate all results.</li>
+<li>Apply results in the defined order; update accounting, statistics, historical records, and registered adaptive state.</li>
+<li>Evaluate termination exactly once and retain both its decision and any updated predicate state.</li>
+<li>Commit the finalized generation and expose its immutable record to callers.</li>
+</ol>
+<p>The Java implementation explicitly keeps genomes marked for removal eligible as parents and evaluates the resulting population after replacement. These intended semantics are preserved. <a href="https://github.com/xtructure/xnet-public/blob/509c673e502f0c27daa6b91f39cc298404b59ae2/xnet/xevolution/src/main/java/com/xtructure/xevolution/evolution/impl/AbstractEvolutionStrategy.java#L243-L265">J6</a></p>
+<p>No partial offspring population or partially applied evaluation batch may be committed as a completed generation. Failure before commit stops the transition; recovery uses the last committed state. The framework does not promise automatic in-memory rollback of arbitrary application objects after a hook fails.</p>
+<p>Post-evaluation adaptive hooks may update future policy and component state, but must not rewrite the population or accepted observations being finalized. Changes to population-construction and evaluation settings take effect on the next transition. Preserve a <code>generation_settings</code> snapshot for the completed generation separately from the <code>effective_settings</code> prepared for the next one. For example, increasing the target size from 100 to 120 leaves the completed population at 100 and schedules 120 for its successor.</p>
+<h3 id="73-default-policies">7.3 Default policies</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Policy</th>
+<th>Initial behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Population size</td>
+<td>Positive configured target size; default 100.</td>
+</tr>
+<tr class="even">
+<td>Survivor policy</td>
+<td>Complete replacement by default; simple elitist survival is also available.</td>
+</tr>
+<tr class="odd">
+<td>Parent pool</td>
+<td>Entire evaluated previous population.</td>
+</tr>
+<tr class="even">
+<td>Parent sampling</td>
+<td>With replacement; self-crossover is permitted.</td>
+</tr>
+<tr class="odd">
+<td>Variation route</td>
+<td>Mutation or crossover for each child; default mutation probability 0.5.</td>
+</tr>
+<tr class="even">
+<td>Evaluation</td>
+<td>Evaluate the full resulting population every generation.</td>
+</tr>
+<tr class="odd">
+<td>Objective</td>
+<td>Maximize one finite scalar fitness.</td>
+</tr>
+<tr class="even">
+<td>Parent selector</td>
+<td>Roulette by default; uniform and tournament selectors are available.</td>
+</tr>
+<tr class="odd">
+<td>Termination</td>
+<td>Explicit configured predicates, including logical combinations.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Mutation probability is the probability of choosing the mutation route. It is not an independent post-crossover mutation probability. Population size and mutation-probability defaults match the base Java configuration. <a href="https://github.com/xtructure/xnet-public/blob/509c673e502f0c27daa6b91f39cc298404b59ae2/xnet/xevolution/src/main/java/com/xtructure/xevolution/config/EvolutionConfiguration.java#L35-L62">J7</a></p>
+<h3 id="74-selection-and-numerical-validity">7.4 Selection and numerical validity</h3>
+<p>The data model accepts finite signed fitness. Roulette requires finite nonnegative selection weights. With the default direct fitness-to-weight policy, a negative score is an error that explains the need for a compatible selector or an explicit weight transformation.</p>
+<p>An all-zero roulette population selects uniformly as a documented policy. Do not silently switch to uniform selection because one score is negative. Tournament selection compares signed scalar scores directly. Any future transformation of scores into weights must be explicit because it can change selection pressure.</p>
+<p>Reject NaN, infinity, invalid weights, and empty parent pools before sampling. Define stable tie-breaking by ID where ordering is required. Equal fitness must not count as an improvement solely because a different ID wins a tie.</p>
+<h3 id="75-bounded-operator-attempts">7.5 Bounded operator attempts</h3>
+<p>For one offspring attempt:</p>
+<ol type="1">
+<li>Choose the variation route and parent or parents.</li>
+<li>Try positive-weight operators in weighted order without replacement.</li>
+<li>Try any explicitly registered fallbacks in their documented order.</li>
+<li>If all fail with a recoverable inapplicability result, retry with new parents subject to a finite per-child attempt budget.</li>
+<li>If the budget is exhausted, raise a descriptive reproduction error before committing the generation.</li>
+</ol>
+<p>Zero-weight operators are disabled in the weighted pool. A fallback must be declared explicitly. This replaces Java's implicit availability of zero-weight operators after positive choices are exhausted.</p>
+<p>Only a specific inapplicability exception or result is recoverable. Unexpected programming errors propagate. Validate configuration so that every route with nonzero probability has an operator or declared fallback. Zero-probability routes may have empty pools.</p>
+<p>The implementation must not retain a partly exhausted operator pool across unrelated offspring attempts. The existing Java reproduction loop can retry indefinitely when no operator succeeds; the Python attempt budget corrects that behavior. <a href="https://github.com/xtructure/xnet-public/blob/509c673e502f0c27daa6b91f39cc298404b59ae2/xnet/xevolution/src/main/java/com/xtructure/xevolution/evolution/impl/AbstractReproductionStrategy.java#L156-L265">J8</a>, <a href="https://github.com/xtructure/xnet-public/blob/509c673e502f0c27daa6b91f39cc298404b59ae2/xnet/xevolution/src/main/java/com/xtructure/xevolution/operator/impl/AbstractOperatorSelecter.java#L90-L183">J9</a></p>
+<h3 id="76-stopping-and-limits">7.6 Stopping and limits</h3>
+<p>Generation 0 does not count as an evolutionary transition. A maximum-generation limit of <code>N</code> stops no later than the completion of generation <code>N</code>, unless another predicate stops earlier.</p>
+<p>Evaluation-count predicates check accepted fitness evaluations at completed-generation boundaries. A threshold can be crossed while completing a population; this is not a hard mid-batch spending cap. Exact pre-operation resource budgeting is outside the initial execution contract.</p>
+<p>Persist stateful stopping windows, counters, and the resulting <code>StopDecision</code>. Restoration must not evaluate the stopping policy again for the saved generation. A checkpoint whose saved decision is terminated remains terminated under ordinary <code>resume</code>.</p>
+<h2 id="8-json-configuration">8. JSON configuration</h2>
+<h3 id="81-configuration-envelope">8.1 Configuration envelope</h3>
+<p>JSON describes settings and component identities; Python application code provides behavior. A proposed complete arithmetic example is:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;schema_version&quot;</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;seed&quot;</span><span class="fu">:</span> <span class="dv">12345</span><span class="fu">,</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;experiment&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;factory&quot;</span><span class="fu">:</span> <span class="st">&quot;examples.arithmetic:build_experiment&quot;</span><span class="fu">,</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;parameters&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;target&quot;</span><span class="fu">:</span> <span class="dv">64</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;evolution&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;population_size&quot;</span><span class="fu">:</span> <span class="dv">100</span><span class="fu">,</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;mutation_probability&quot;</span><span class="fu">:</span> <span class="fl">0.5</span><span class="fu">,</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;parent_selection&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;roulette&quot;</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;survival&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;replace_all&quot;</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;max_attempts_per_child&quot;</span><span class="fu">:</span> <span class="dv">100</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;termination&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;any&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;max_generations&quot;</span><span class="fu">:</span> <span class="dv">200</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;fitness_at_least&quot;</span><span class="fu">:</span> <span class="fl">1.0</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>For this example, the application can define fitness as <code>1 / (1 + absolute_error)</code>, making 1.0 the exact-target score. Operator definitions and application-specific parameters are constructed by <code>examples.arithmetic:build_experiment</code>. The general configuration does not require a universal declarative schema for arbitrary Python objects.</p>
+<h3 id="82-validation-and-effective-settings">8.2 Validation and effective settings</h3>
+<p>Configuration handling must:</p>
+<ul>
+<li>Reject unsupported schema versions, duplicate JSON object keys, unknown core fields, invalid types, and out-of-range settings.</li>
+<li>Reject non-finite numbers. Python's JSON implementation accepts some nonstandard numeric values by default, so strict encoding and decoding must be configured explicitly. <a href="https://docs.python.org/3.12/library/json.html">P4</a></li>
+<li>Validate application parameters through the application factory or its registered validator.</li>
+<li>Resolve defaults and optional sampled values once, then record the effective settings.</li>
+<li>Preserve bounds and explicit mutability/update policies where the application uses them. Ordinary invalid values must not be silently clamped.</li>
+<li>Make runtime parameter changes explicit, validated, and recorded before the next commit. Save both the completed generation's settings snapshot and the effective settings prepared for the next transition, as defined in Section 7.2.</li>
+<li>Reconstruct resumed runs from saved settings and component identities rather than current defaults.</li>
+</ul>
+<p>Input configuration and Python objects may both be supported as entry points. Programmatic callers must receive equivalent validation of core invariants.</p>
+<h3 id="83-factory-resolution">8.3 Factory resolution</h3>
+<p>An explicit application-supplied registry may map short names to factories. An explicit import reference such as <code>package.module:build_experiment</code> may also be used. Automatic scanning of installed packages is unnecessary for the initial version.</p>
+<p>Factories construct compatible components from validated settings. Stored identities, component schema versions, and relevant implementation fingerprints support compatibility checking on restoration. Component construction must be separate from executing the fresh-run initializer.</p>
+<h2 id="9-randomness-and-deterministic-execution">9. Randomness and deterministic execution</h2>
+<h3 id="91-persistent-random-state">9.1 Persistent random state</h3>
+<p>Use per-run generators rather than module-global random calls. Preserve separate evolution and evaluation randomness so additional evaluation work does not silently change the variation stream.</p>
+<p>Save the complete state of every persistent generator. Python's <code>Random.getstate()</code> and <code>setstate()</code> support this; the saved object includes details such as any cached Gaussian value. Saving only the original seed is insufficient. <a href="https://docs.python.org/3.12/library/random.html">P5</a></p>
+<p>Record generator identity and any seed-derivation version. Restoration must preserve required types rather than treating every JSON array as an interchangeable Python list.</p>
+<h3 id="92-stable-work-identities">9.2 Stable work identities</h3>
+<p>Individual evaluation identities should include generation, individual ID, evaluation round, and replicate where applicable. Whole-population evaluators receive a stable batch identity and ordered population view.</p>
+<p>Derive evaluation seeds from a saved root seed and a stable, versioned encoding of the logical work identity. Do not derive them from worker numbers, completion order, wall-clock time, or Python's process-dependent <code>hash()</code>.</p>
+<p>Do not use a randomly generated run ID in seed derivation if two fresh runs with the same root seed and inputs are intended to reproduce one another. Run IDs may still identify journal records and external idempotency keys.</p>
+<h3 id="93-ordering">9.3 Ordering</h3>
+<p>Population iteration, operator ordering, tie-breaking, ID assignment, and result application must be deterministic. Numerical summaries must use a defined accumulation order.</p>
+<p>Parallel evaluators return results to the coordinator, which applies them in that order. Invariance to worker count additionally requires application independence and numerically compatible execution. A joint population evaluator may depend on grouping, so grouping is part of its policy and state.</p>
+<h3 id="94-application-responsibilities">9.4 Application responsibilities</h3>
+<p>Application-owned random generators must either expose persistent state or initialize each independent job from its supplied context. The application must also restore any simulator, optimizer, curriculum, cache, or environment state that influences future results.</p>
+<p>Exact continuation is conditional on compatible code, data, numerical settings, and execution environment. Python documents that many higher-level random algorithms can change across versions. Numerical libraries can impose additional limits; PyTorch, for example, does not promise identical results across releases, platforms, or CPU/GPU execution simply from matching seeds. <a href="https://docs.python.org/3.12/library/random.html">P5</a>, <a href="https://docs.pytorch.org/docs/2.14/notes/randomness.html">P6</a></p>
+<h2 id="10-checkpoint-and-recovery-contract">10. Checkpoint and recovery contract</h2>
+<h3 id="101-required-guarantee">10.1 Required guarantee</h3>
+<p><strong>Given compatible application code and execution conditions, and components satisfying the explicit state and randomness contracts, restoring a committed checkpoint continues the same logical evolutionary run.</strong></p>
+<p>The guarantee concerns genotypes, population membership, fitness observations, selection and variation behavior, identities, counters, stopping behavior, and committed scientific history. Process IDs, diagnostic timestamps, downtime, and console-output timing may differ.</p>
+<p>Default persistent execution must checkpoint after every completed generation, including generation 0. In-memory execution may omit persistence entirely.</p>
+<h3 id="102-exact-saved-boundary">10.2 Exact saved boundary</h3>
+<p>A checkpoint represents the point after all of the following:</p>
+<ol type="1">
+<li>All scheduled evaluations for the generation have finished.</li>
+<li>Results have been validated and applied in deterministic order.</li>
+<li>Population membership, counters, metrics, genealogy records, and historical bests agree.</li>
+<li>Registered adaptive updates have run exactly once.</li>
+<li>The stopping policy has run exactly once, and its updated state and decision have been retained.</li>
+</ol>
+<p>It represents the point before any work for the next generation. There are no outstanding jobs or partially applied mutations. Its phase is ready for the next generation or terminated.</p>
+<p>Restoration must not repeat initialization, evaluate the saved generation, repeat its adaptive updates, rerun its stateful stopping policy, or replay mutating callbacks. A ready checkpoint at generation <code>g</code> proceeds to <code>g + 1</code>; a terminated checkpoint remains terminated.</p>
+<h3 id="103-required-checkpoint-contents">10.3 Required checkpoint contents</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>State</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Run and journal identity; completed generation; phase; stop decision and reason</td>
+<td>Identifies the authoritative run and its next permitted transition.</td>
+</tr>
+<tr class="even">
+<td>Ordered population; stable IDs; complete genotype payloads; observations; birth and parent information</td>
+<td>Restores the actual candidates and deterministic iteration order.</td>
+</tr>
+<tr class="odd">
+<td>Next individual, evaluation, and event identifiers</td>
+<td>Prevents reuse and changes in logical work identities.</td>
+</tr>
+<tr class="even">
+<td>Accepted-evaluation counts and logical budgets</td>
+<td>Preserves stopping and adaptation behavior.</td>
+</tr>
+<tr class="odd">
+<td>Completed-generation settings, next-transition effective settings, and resolved component identities</td>
+<td>Preserves the meaning of the saved population and prevents default changes or resampling from altering continuation.</td>
+</tr>
+<tr class="even">
+<td>All persistent RNG states and evaluation-seed metadata</td>
+<td>Restores the current position of each random stream.</td>
+</tr>
+<tr class="odd">
+<td>Historical-best snapshots, last-improvement generation, and policy-dependent archives or windows</td>
+<td>Preserves information absent from the current population.</td>
+</tr>
+<tr class="even">
+<td>State of all future-affecting application components</td>
+<td>Restores adaptive probabilities, retained evaluation state, and meaningful caches.</td>
+</tr>
+<tr class="odd">
+<td>Committed journal byte offset, next event sequence, and integrity information</td>
+<td>Keeps durable history aligned with the checkpoint.</td>
+</tr>
+<tr class="even">
+<td>Checkpoint schema, codec IDs/versions, application identities, and relevant runtime/environment fingerprints</td>
+<td>Supports explicit compatibility checks.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="104-serialization-and-attachments">10.4 Serialization and attachments</h3>
+<p>Checkpoint encoding must not mutate the run, advance its random streams, or trigger evaluation. Application state methods and codecs have the same restriction.</p>
+<p>JSON-native payloads are supported initially. The codec contract must permit future binary attachments without requiring large arrays or models to be expanded into JSON lists. An attachment reference must identify its format/version and integrity information. Required attachments must be durable before the checkpoint that references them is committed.</p>
+<p>Components are reconstructed from identities and settings, then their explicit state is restored. Install saved persistent RNG states after reconstruction so setup work cannot advance the restored streams. Components must retain references to the managed generators that receive those states.</p>
+<p>Do not make arbitrary closure or entire Python object-graph serialization the default mechanism. If a configured component or payload cannot satisfy its checkpoint contract, fail clearly before claiming a durable checkpoint.</p>
+<h3 id="105-single-writer-commit-protocol">10.5 Single-writer commit protocol</h3>
+<p>One coordinator owns commits for a run. Workers return evaluation results and do not append to the authoritative journal or replace checkpoints.</p>
+<p>The local-file implementation must:</p>
+<ol type="1">
+<li>Finalize and validate generation state in memory; prepare its immutable scientific records and required payload representations.</li>
+<li>Make required immutable attachments durable, if any.</li>
+<li>Append the generation's records to <code>history.jsonl</code>; flush and synchronize the journal.</li>
+<li>Write a temporary checkpoint in the same filesystem as the active checkpoint. Include the committed journal byte offset, identity, integrity information, next event sequence, and finalized state.</li>
+<li>Flush and synchronize the temporary checkpoint, then atomically replace <code>checkpoint.json</code>. Synchronize affected directory entries where supported when establishing the documented local durability guarantee.</li>
+<li>Report commit success and generate optional projections from committed records.</li>
+</ol>
+<p>Python exposes <code>flush()</code>/<code>os.fsync()</code> for buffered-file synchronization and <code>os.replace()</code> for atomic replacement when successful. Replacement may fail across filesystems, so temporary and final files must share a filesystem. <a href="https://docs.python.org/3.12/library/os.html">P7</a></p>
+<p>Atomic publication and power-loss durability are separate milestones. After successful replacement, readers in the running system observe the new checkpoint; an ordinary process crash can recover it because its journal prefix and payloads were synchronized first. A machine or power failure before directory synchronization may recover the old or new checkpoint on filesystems supporting this protocol. Recovery must validate whichever committed checkpoint is present. For generation 0, there may be no surviving checkpoint yet. Do not claim power-loss durability until the required synchronization has succeeded; document a narrower guarantee on platforms that cannot provide it.</p>
+<p>The checkpoint is the authority for the committed journal prefix. A failed write must not be reported as a successful commit. Retrying a write must not rerun generation finalization or create duplicate committed events; an implementation may instead stop with the preceding checkpoint still authoritative.</p>
+<h3 id="106-restoration-and-incomplete-writes">10.6 Restoration and incomplete writes</h3>
+<p>On <code>resume</code>:</p>
+<ol type="1">
+<li>Load the explicit active checkpoint and validate its schema, identities, and compatibility requirements.</li>
+<li>Verify the required journal prefix and attachments.</li>
+<li>Ignore or remove bytes after the saved journal offset before any new append. They belong to uncommitted work.</li>
+<li>Fail if committed history or required attachments are missing or corrupt. Do not repair scientific state by reevaluating saved individuals.</li>
+<li>Reconstruct components, restore all state, and install saved random states.</li>
+<li>Honor the saved stop decision and phase, then continue only if the saved run is ready.</li>
+</ol>
+<p>If the process failed during the next generation, work after the last commit may repeat using the same logical identities and random contexts. No committed generation is reevaluated.</p>
+<p>A checkpoint copied to another location is a bundle: checkpoint state plus its required journal prefix and attachments. A JSON manifest alone is resumable only when it contains or can resolve everything required.</p>
+<h3 id="107-limits-of-the-guarantee">10.7 Limits of the guarantee</h3>
+<ul>
+<li>External calls may repeat if they completed before a crash but their results were not committed. Applications requiring deduplication must use an external idempotency or result-retrieval mechanism.</li>
+<li>Resuming inside a long evaluation requires that evaluator to preserve its own partial computation. Model training may require model, optimizer, scheduler, data-position, and application RNG state.</li>
+<li>Nondeterministic numerical operations or changing external data can change future results even when framework state is restored correctly.</li>
+<li>A time-based policy may restore an active-runtime budget excluding downtime, but cannot generally promise the same final generation because execution durations can change.</li>
+<li>Arbitrary external side effects and console messages do not inherit exactly-once semantics from local journal commits.</li>
+</ul>
+<p>These limits must be documented as application contracts rather than reasons to block the generic implementation. Completed-generation continuation is the required initial capability.</p>
+<h2 id="11-tracking-genealogy-and-reporting">11. Tracking, genealogy, and reporting</h2>
+<h3 id="111-scientific-records">11.1 Scientific records</h3>
+<p>Retain headless population analysis and genealogy. The Java tools already derive population summaries and genealogy from saved populations independently of the graphical interface. <a href="https://github.com/xtructure/xnet-public/blob/509c673e502f0c27daa6b91f39cc298404b59ae2/xnet/xevolution/src/main/java/com/xtructure/xevolution/tool/data/DataTracker.java#L150-L238">J10</a></p>
+<p>The structured history must support:</p>
+<ul>
+<li>Population membership identifiers and generation-level fitness summaries.</li>
+<li>Supplementary metric summaries, including contributing counts.</li>
+<li>Accepted evaluation observations needed by the supplied reports.</li>
+<li>Birth generation, parent IDs, operator identity, and operation details.</li>
+<li>Independent historical-best snapshots and last-improvement information.</li>
+<li>Relevant effective-setting changes and stopping decisions.</li>
+</ul>
+<p>Each event has a stable run/generation/sequence identity. Store parent links as the authoritative lineage relationship; derive child indexes from them rather than maintaining two independently mutable directions.</p>
+<p>An individual's evaluation observations may change over its lifetime. Its birth record must not treat first-observed fitness as permanent fitness.</p>
+<h3 id="112-statistics-and-historical-bests">11.2 Statistics and historical bests</h3>
+<p>Compute min, mean, and max for fitness and supplied numeric metrics, with observation counts. Use a stable tie-breaker for presentation and selection ordering. A best-fitness improvement requires a strictly better fitness value under the configured objective comparison; identity alone does not establish improvement.</p>
+<p>Maintain independent historical-best state, including candidates no longer in the population. Do not retain references that allow live mutation to rewrite earlier records. This corrects problematic coupling in the Java statistics implementation. <a href="https://github.com/xtructure/xnet-public/blob/509c673e502f0c27daa6b91f39cc298404b59ae2/xnet/xevolution/src/main/java/com/xtructure/xevolution/genetics/impl/AbstractPopulation.java#L537-L579">J11</a></p>
+<h3 id="113-report-projections">11.3 Report projections</h3>
+<p>Only committed records contribute to durable scientific reports. <code>analyze</code> must be idempotent: running it repeatedly over the same committed prefix produces the same logical output.</p>
+<p>JSON exports are required. CSV summaries may be provided as a convenience. Report generation must not consume evolutionary randomness, alter component state, or invoke evaluation.</p>
+<p>Operational progress messages may differ after recovery. The authoritative scientific history must not duplicate committed generations or births.</p>
+<h2 id="12-command-line-interface-and-run-directories">12. Command-line interface and run directories</h2>
+<h3 id="121-commands">12.1 Commands</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Command</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>xevolution run --config CONFIG --output RUN_DIR</code></td>
+<td>Creates a fresh run, resolves the experiment, initializes generation 0, and evolves. Refuses to silently reuse an existing populated run directory.</td>
+</tr>
+<tr class="even">
+<td><code>xevolution resume RUN_DIR</code></td>
+<td>Restores <code>checkpoint.json</code> and the recorded component composition, repairs only uncommitted journal tail as specified, and continues from the saved phase.</td>
+</tr>
+<tr class="odd">
+<td><code>xevolution inspect RUN_DIR</code></td>
+<td>Displays effective settings, progress, best results, and checkpoint metadata without evolving the population.</td>
+</tr>
+<tr class="even">
+<td><code>xevolution analyze RUN_DIR --output REPORT_DIR</code></td>
+<td>Builds population summaries and genealogy exports from committed history without evaluating candidates.</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>python -m xevolution</code> must expose the same commands. CLI functions return exit codes or raise errors handled at the command boundary. Library code must not terminate the interpreter or reconfigure an application's logging.</p>
+<p>Ordinary resume uses saved effective settings. It must not silently accept changed defaults or change an evolutionary policy. Explicitly changing a saved run's policies would be a separately identified continuation/fork operation, outside the initial four-command interface.</p>
+<h3 id="122-run-directory-contents">12.2 Run directory contents</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Path</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>config.json</code></td>
+<td>Resolved starting configuration. Current effective settings are also recorded in checkpoints and relevant journal events.</td>
+</tr>
+<tr class="even">
+<td><code>checkpoint.json</code></td>
+<td>Latest authoritative checkpoint.</td>
+</tr>
+<tr class="odd">
+<td><code>history.jsonl</code></td>
+<td>Structured generation, measurement, membership, and lineage records. The checkpoint identifies its committed prefix.</td>
+</tr>
+<tr class="even">
+<td><code>artifacts/</code></td>
+<td>Immutable payload attachments supplied by codecs, when used.</td>
+</tr>
+<tr class="odd">
+<td><code>reports/</code></td>
+<td>Rebuildable analysis exports.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Inspection and analysis read a specific committed prefix. They must not treat uncommitted journal tail or the most recently modified arbitrary file as authoritative.</p>
+<p>A graceful stop request should finish the current generation and save at the defined boundary. An abrupt failure may require replaying work since the last commit. Failure to save must be reported as a failure to make the new state durable.</p>
+<p>An operational pause, such as a graceful user interrupt, must not by itself set the evolutionary stop decision to terminated. Save a ready checkpoint unless the configured stopping policy has independently finished the run. This distinction allows ordinary <code>resume</code> after a planned pause.</p>
+<h2 id="13-java-functionality-and-utility-migration">13. Java functionality and utility migration</h2>
+<h3 id="131-main-functionality-mapping">13.1 Main functionality mapping</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Java area</th>
+<th>Python destination</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>genetics</code> interfaces and implementations</td>
+<td>Shared records in <code>models.py</code>; initialization, cloning, and optional decoding contracts in <code>protocols.py</code>; application composition in <code>experiment.py</code>.</td>
+</tr>
+<tr class="even">
+<td>Evolution and reproduction strategies</td>
+<td><code>engine.py</code>, <code>reproduction.py</code>, and the experiment composition.</td>
+</tr>
+<tr class="odd">
+<td>Evaluation strategies and genome decoders</td>
+<td><code>evaluation.py</code> plus application-supplied evaluation/decoding functions or objects.</td>
+</tr>
+<tr class="even">
+<td>Survival filters</td>
+<td>Survivor-selection contract and policies in <code>selection.py</code>.</td>
+</tr>
+<tr class="odd">
+<td>Operators and operator selectors</td>
+<td><code>operators.py</code>, <code>selection.py</code>, and the finite attempt workflow in <code>reproduction.py</code>.</td>
+</tr>
+<tr class="even">
+<td>Evolution configuration and stopping conditions</td>
+<td><code>config.py</code>, <code>registry.py</code>, and <code>termination.py</code>.</td>
+</tr>
+<tr class="odd">
+<td>Experiment and population-analysis tools</td>
+<td><code>cli.py</code>, <code>experiment.py</code>, <code>storage.py</code>, and <code>tracking.py</code>.</td>
+</tr>
+<tr class="even">
+<td>Population statistics and genealogy data</td>
+<td><code>tracking.py</code>, immutable records in <code>models.py</code>, and the committed journal.</td>
+</tr>
+<tr class="odd">
+<td>GUI package</td>
+<td>Excluded by agreed scope.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="132-xnet-utility-behavior">13.2 Xnet utility behavior</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Java utility or pattern</th>
+<th>Python replacement</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>XId</code> and ID allocation</td>
+<td>Explicit run and individual identity plus saved counters in models/run state.</td>
+</tr>
+<tr class="even">
+<td><code>XValId</code>, <code>ValueMap</code>, and primitive type dispatch</td>
+<td>Typed core fields, named metric and metadata mappings, and boundary validation.</td>
+</tr>
+<tr class="odd">
+<td><code>XIdObjectManager</code></td>
+<td>Ordinary mappings for lookup and genealogy queries in <code>tracking.py</code>.</td>
+</tr>
+<tr class="even">
+<td><code>RandomUtil</code></td>
+<td><code>randomness.py</code>, with selection policies in <code>selection.py</code> and operator ordering in <code>operators.py</code>.</td>
+</tr>
+<tr class="odd">
+<td>Configuration builders, fields, ranges, and vetting</td>
+<td>Typed settings and explicit validation/sampling/update behavior in <code>config.py</code>.</td>
+</tr>
+<tr class="even">
+<td><code>Condition</code> and combinators</td>
+<td>Callable stopping predicates and logical composition in <code>termination.py</code>.</td>
+</tr>
+<tr class="odd">
+<td>XML formats and readers/writers</td>
+<td>Versioned codecs in <code>serialization.py</code> and durable operations in <code>storage.py</code>.</td>
+</tr>
+<tr class="even">
+<td><code>XLogger</code></td>
+<td>Standard logging configured by the application or CLI.</td>
+</tr>
+<tr class="odd">
+<td><code>XOption</code> subclasses</td>
+<td>CLI argument handling.</td>
+</tr>
+<tr class="even">
+<td>Collection builders and transforms</td>
+<td>Collection literals, comprehensions, iterators, and functions where used.</td>
+</tr>
+<tr class="odd">
+<td><code>WormField</code> lazy construction</td>
+<td>Explicit experiment construction and local caching only when needed.</td>
+</tr>
+<tr class="even">
+<td>Validation hierarchies</td>
+<td>Focused checks and exceptions in <code>errors.py</code>.</td>
+</tr>
+</tbody>
+</table></div>
+<p>The Java configuration machinery supports initial ranges, lifetime bounds, and mutability rules. Preserve any such behavior used by the port through explicit operations; its inheritance hierarchy is not required. <a href="https://github.com/xtructure/xnet-public/blob/509c673e502f0c27daa6b91f39cc298404b59ae2/xnet/xutil/src/main/java/com/xtructure/xutil/config/AbstractRangeXParameter.java#L66-L111">J12</a></p>
+<h3 id="133-documented-behavior-changes">13.3 Documented behavior changes</h3>
+<p><code>docs/markdown/porting_notes.md</code> must identify at least these changes:</p>
+<ol type="1">
+<li>JSON and explicit checkpoint state replace Java XML and class-name serialization.</li>
+<li>Fresh run and resume are separate paths; resume does not reinitialize the population. <a href="https://github.com/xtructure/xnet-public/blob/509c673e502f0c27daa6b91f39cc298404b59ae2/xnet/xevolution/src/main/java/com/xtructure/xevolution/evolution/impl/AbstractEvolutionExperiment.java#L123-L169">J14</a></li>
+<li>Operator attempts are finite, and fallback operators are explicit.</li>
+<li>Invalid or incompatible roulette weights fail clearly; negative fitness no longer silently disables selection pressure. <a href="https://github.com/xtructure/xnet-public/blob/509c673e502f0c27daa6b91f39cc298404b59ae2/xnet/xutil/src/main/java/com/xtructure/xutil/RandomUtil.java#L562-L578">J13</a></li>
+<li>Individual IDs come from saved allocation state.</li>
+<li>Newborn age is zero, derived from birth generation.</li>
+<li>Missing metrics are excluded from each metric's denominator and reported with contributing counts.</li>
+<li>Historical records are independent snapshots.</li>
+<li>Evaluation bookkeeping has one framework owner.</li>
+<li>Scientific history and checkpoints share a committed-generation boundary.</li>
+</ol>
+<h2 id="14-examples-and-documentation">14. Examples and documentation</h2>
+<h3 id="141-example-modules">14.1 Example modules</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Module</th>
+<th>Purpose and interactions</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>examples/__init__.py</code></td>
+<td>Makes example factories importable when running from the repository.</td>
+</tr>
+<tr class="even">
+<td><code>examples/arithmetic.py</code></td>
+<td>Demonstrates a string-based representation, initialization, optional decoding, individual scoring, mutation, crossover, and a JSON-native codec through the public experiment API.</td>
+</tr>
+<tr class="odd">
+<td><code>examples/batch_problem.py</code></td>
+<td>Demonstrates whole-population evaluation, stable result identities, and a joint evaluation contract. It must use the population hook directly.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Provide <code>examples/arithmetic.json</code> and <code>examples/batch_problem.json</code>, plus <code>examples/README.md</code> with setup and commands. Examples should remain small and independent of NEAT or the excluded simulation subsystems.</p>
+<p>The approved Digits extension adds <code>examples/neural_digits.py</code>, normal and quick JSON presets, and <code>examples/digits_report.py</code>. It evolves 1–3 hidden layers with 8, 16, 32, or 64 neurons per layer and ReLU/tanh activation. Fitness is solely validation accuracy, maximized, with no loss or model-size penalty. Each candidate receives a fresh CPU-trained MLP with a fixed training budget and recorded data and training seeds. The default stratified split is 1,000 training, 400 validation, and 397 final test examples. The final test partition is excluded from evolution and used by the separate report only after termination. Numerical libraries belong to an optional <code>neural</code> uv dependency group; core runtime dependencies remain empty. This application must satisfy the same completed- generation checkpoint and explicit-state contracts as other applications. See <code>docs/markdown/digits_demo.md</code> for the implemented application contract and presets.</p>
+<p>A repository-root development invocation may use:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python <span class="at">-m</span> xevolution run <span class="at">--config</span> examples/arithmetic.json <span class="at">--output</span> runs/arithmetic</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python <span class="at">-m</span> xevolution resume runs/arithmetic</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python <span class="at">-m</span> xevolution inspect runs/arithmetic</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python <span class="at">-m</span> xevolution analyze runs/arithmetic <span class="at">--output</span> runs/arithmetic/reports</span></code></pre></div>
+<p><code>resume</code> continues only if the saved run is ready for further evolution. A run that already satisfied its stopping policy is inspected or analyzed without further evolution.</p>
+<h3 id="142-documentation-files">14.2 Documentation files</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>File</th>
+<th>Required contents</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>docs/markdown/index.md</code></td>
+<td>Documentation home and reading routes.</td>
+</tr>
+<tr class="even">
+<td><code>docs/markdown/overview.md</code></td>
+<td>What the package does, its central concepts, application responsibilities, and generation lifecycle.</td>
+</tr>
+<tr class="odd">
+<td><code>docs/markdown/examples.md</code></td>
+<td>Comparison and entry points for all three examples.</td>
+</tr>
+<tr class="even">
+<td><code>docs/markdown/arithmetic_demo.md</code></td>
+<td>Bit-string encoding, decoding, scoring, operators, configuration, and commands.</td>
+</tr>
+<tr class="odd">
+<td><code>docs/markdown/batch_demo.md</code></td>
+<td>Shared-resource scoring, genuine whole-population evaluation, contextual fitness, configuration, and commands.</td>
+</tr>
+<tr class="even">
+<td><code>docs/markdown/digits_demo.md</code></td>
+<td>MLP architecture, fixed training recipe, accuracy fitness, presets, reporting, and continuation.</td>
+</tr>
+<tr class="odd">
+<td><code>docs/markdown/building_docs.md</code></td>
+<td>Markdown maintenance, HTML generation, and documentation validation.</td>
+</tr>
+<tr class="even">
+<td><code>docs/markdown/architecture.md</code></td>
+<td>Module responsibilities, data ownership, generation lifecycle, and dependency boundaries.</td>
+</tr>
+<tr class="odd">
+<td><code>docs/markdown/extensions.md</code></td>
+<td>Application factory, genotype ownership/cloning, individual and population evaluation, custom selection/operators, component state, and codecs.</td>
+</tr>
+<tr class="even">
+<td><code>docs/markdown/configuration.md</code></td>
+<td>JSON envelope, built-in policies, defaults, validation, sampled/effective settings, and stopping semantics.</td>
+</tr>
+<tr class="odd">
+<td><code>docs/markdown/checkpointing.md</code></td>
+<td>Exact saved boundary, required state, commit/recovery protocol, bundle contents, compatibility, and application limits.</td>
+</tr>
+<tr class="even">
+<td><code>docs/markdown/cli.md</code></td>
+<td>Commands, run directory contents, stopping, resume, inspection, and analysis.</td>
+</tr>
+<tr class="odd">
+<td><code>docs/markdown/porting_notes.md</code></td>
+<td>Java-to-Python mapping, excluded areas, and deliberate corrections or behavior changes.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Generate the HTML edition under <code>docs/html/</code> from these Markdown sources. Local navigation, page links, and heading fragments must work after extracting a documentation-only archive. Include all reading assets locally and keep application commands explicitly relative to the source project root.</p>
+<p><code>AGENTS.md</code> must direct coding agents to preserve these contracts, keep application assumptions outside the engine, use explicit run-owned randomness, and verify meaningful end-to-end behavior. It should specify the project-local environment and normal build/test commands once implemented.</p>
+<h2 id="15-verification-and-acceptance-criteria">15. Verification and acceptance criteria</h2>
+<h3 id="151-test-modules">15.1 Test modules</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Module</th>
+<th>Primary coverage</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>tests/conftest.py</code></td>
+<td>Reusable deterministic components, stateful test applications, payload codecs, and temporary run stores.</td>
+</tr>
+<tr class="even">
+<td><code>tests/test_evolution.py</code></td>
+<td>Population size, survivor/parent behavior, mutation-or-crossover routing, identity, finite retries, generation/age semantics, and stopping.</td>
+</tr>
+<tr class="odd">
+<td><code>tests/test_evaluation.py</code></td>
+<td>Individual adaptation, genuine population evaluation, result association and validation, accepted-evaluation accounting, and deterministic application order.</td>
+</tr>
+<tr class="even">
+<td><code>tests/test_tracking.py</code></td>
+<td>Historical snapshots, missing-metric statistics, genealogy after ancestors leave the population, and idempotent analysis.</td>
+</tr>
+<tr class="odd">
+<td><code>tests/test_resume.py</code></td>
+<td>Uninterrupted execution versus new-process restoration, including stateful extensions and custom codecs.</td>
+</tr>
+<tr class="even">
+<td><code>tests/test_storage_recovery.py</code></td>
+<td>Failures around journal writes, attachment preparation, and checkpoint replacement; missing/corrupt committed data; safe uncommitted-tail recovery.</td>
+</tr>
+<tr class="odd">
+<td><code>tests/test_cli.py</code></td>
+<td>Fresh run, explicit resume, inspection, analysis, errors, and the installed entry points.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Tests should verify observable contracts rather than mirror helper implementations. Model, configuration, numerical, and serialization checks may be grouped into these behavioral suites or split into focused modules if needed.</p>
+<h3 id="152-decisive-continuation-test">15.2 Decisive continuation test</h3>
+<p>Execute the same deterministic experiment in two ways:</p>
+<ol type="1">
+<li>Run continuously from generation 0 through generation <code>N</code>.</li>
+<li>Run through generation <code>K</code>, commit, terminate the process, restore in a new process, and continue through generation <code>N</code>.</li>
+</ol>
+<p>Compare complete logical state: ordered populations, genotypes, fitness, metrics, IDs, counters, effective settings, RNG states, component states, historical bests, stopping decisions, and committed scientific records. Normalize only intentionally variable diagnostic metadata such as timestamps and fresh-run identity.</p>
+<p>Repeat with <code>K = 0</code>, with a later <code>K</code>, and with a failure during an uncommitted generation. Include a stateful evaluator or operator and a stateful stopping predicate, so repeating finalization or losing hidden state is observable.</p>
+<h3 id="153-required-acceptance-cases">15.3 Required acceptance cases</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>ID</th>
+<th>Acceptance criterion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A01</td>
+<td>The package installs and imports on Python 3.12 without requiring a neural-network or simulation library.</td>
+</tr>
+<tr class="even">
+<td>A02</td>
+<td>Both examples run through the public application API; the batch example exercises whole-population evaluation directly.</td>
+</tr>
+<tr class="odd">
+<td>A03</td>
+<td>Survivors are chosen separately from parents; the full previous population remains the default parent pool.</td>
+</tr>
+<tr class="even">
+<td>A04</td>
+<td>Every committed generation has valid fitness for all members, unique IDs, and the target population size recorded in that generation's settings snapshot. Adaptive setting updates affect the next transition.</td>
+</tr>
+<tr class="odd">
+<td>A05</td>
+<td>Negative, non-finite, and all-zero weight cases follow documented policies without an infinite loop or silent loss of selection pressure.</td>
+</tr>
+<tr class="even">
+<td>A06</td>
+<td>Unusable operators exhaust a finite budget and raise a useful error; no partial generation is committed.</td>
+</tr>
+<tr class="odd">
+<td>A07</td>
+<td>Modifying or reevaluating live individuals cannot alter earlier history or retained best snapshots.</td>
+</tr>
+<tr class="even">
+<td>A08</td>
+<td>Restoring generation 0 or a later generation reproduces the uninterrupted logical run in a new process under the determinism contract.</td>
+</tr>
+<tr class="odd">
+<td>A09</td>
+<td>Saved-generation initialization, evaluation, adaptive updates, and stateful stopping are not repeated after restoration.</td>
+</tr>
+<tr class="even">
+<td>A10</td>
+<td>Recovery never exposes a partial committed generation. Process-failure visibility and power-loss durability follow Section 10.5; the new commit is durably guaranteed only after the required synchronization completes.</td>
+</tr>
+<tr class="odd">
+<td>A11</td>
+<td>Uncommitted journal tail can be recovered safely; missing or corrupt committed history or attachments fails explicitly.</td>
+</tr>
+<tr class="even">
+<td>A12</td>
+<td>Repeated analysis of the same committed prefix does not duplicate generations or genealogy records.</td>
+</tr>
+<tr class="odd">
+<td>A13</td>
+<td>Effective settings, component identities, codec versions, and complete random state are restored rather than inferred from current defaults.</td>
+</tr>
+<tr class="even">
+<td>A14</td>
+<td>The CLI distinguishes fresh creation, resume, inspection, and analysis and never silently resumes an arbitrary newest file.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="16-implementation-sequence">16. Implementation sequence</h2>
+<h3 id="increment-1-in-memory-evolution">Increment 1: In-memory evolution</h3>
+<p>Implement shared records and contracts, validated programmatic settings, initialization, explicit randomness, selection, operators, reproduction, evaluation, tracking needed by stopping, and the incremental engine. Complete the arithmetic example and core behavioral tests.</p>
+<p>The engine must already expose the intended completed-generation boundary, even before durable storage is implemented.</p>
+<h3 id="increment-2-reliable-continuation">Increment 2: Reliable continuation</h3>
+<p>Implement state export/restoration, codecs, effective-configuration persistence, the journal/checkpoint commit protocol, compatibility checks, and recovery. Complete new-process equivalence tests and failure-injection cases before relying on saved experiments.</p>
+<p>Checkpointing belongs early enough that ownership mistakes can still be corrected without disrupting a large set of applications.</p>
+<h3 id="increment-3-headless-tools-and-documentation">Increment 3: Headless tools and documentation</h3>
+<p>Complete JSON-driven factory construction, command-line commands, the whole-population example, analysis exports, packaging checks, and extension documentation. Verify both examples through the public CLI.</p>
+<h3 id="initial-implementation-is-complete-when">Initial implementation is complete when</h3>
+<p>All agreed capabilities are implemented, required acceptance cases pass, the documented command interface works from an installed package, and the checkpoint documentation accurately states both its guarantees and application responsibilities. Changes beyond the agreed scope should be proposed separately rather than silently incorporated into the core.</p>
+<h2 id="17-source-references">17. Source references</h2>
+<p>The Java review was static source-and-test inspection of the pinned commit below. The legacy Java application was not built or executed. Architectural decisions and Python requirements in this document are recommendations for the new implementation, not claims that those features already exist in the repository.</p>
+<h3 id="java-baseline-and-implementation-evidence">Java baseline and implementation evidence</h3>
+<ul>
+<li><strong>J1:</strong> <a href="https://github.com/xtructure/xnet-public/commit/509c673e502f0c27daa6b91f39cc298404b59ae2">Reviewed repository commit</a>.</li>
+<li><strong>J2:</strong> <a href="https://github.com/xtructure/xnet-public/blob/509c673e502f0c27daa6b91f39cc298404b59ae2/README.md">Xnet repository overview and subproject boundaries</a>.</li>
+<li><strong>J3:</strong> <a href="https://github.com/xtructure/xnet-public/blob/509c673e502f0c27daa6b91f39cc298404b59ae2/xnet/xevolution/pom.xml#L15-L20">xevolution Maven dependencies</a>.</li>
+<li><strong>J4:</strong> <a href="https://github.com/xtructure/xnet-public/blob/509c673e502f0c27daa6b91f39cc298404b59ae2/xnet/xevolution/src/main/java/com/xtructure/xevolution/genetics/Genome.java#L30-L68">Generic Java Genome contract</a>.</li>
+<li><strong>J5:</strong> <a href="https://github.com/xtructure/xnet-public/blob/509c673e502f0c27daa6b91f39cc298404b59ae2/xnet/demos/src/main/java/com/xtructure/xnet/demos/oned/OneDEvaluationStrategyImpl.java#L94-L147">Application-level whole-population evaluation example</a>.</li>
+<li><strong>J6:</strong> <a href="https://github.com/xtructure/xnet-public/blob/509c673e502f0c27daa6b91f39cc298404b59ae2/xnet/xevolution/src/main/java/com/xtructure/xevolution/evolution/impl/AbstractEvolutionStrategy.java#L243-L265">Java generation lifecycle</a>.</li>
+<li><strong>J7:</strong> <a href="https://github.com/xtructure/xnet-public/blob/509c673e502f0c27daa6b91f39cc298404b59ae2/xnet/xevolution/src/main/java/com/xtructure/xevolution/config/EvolutionConfiguration.java#L35-L62">Base evolution configuration and defaults</a>.</li>
+<li><strong>J8:</strong> <a href="https://github.com/xtructure/xnet-public/blob/509c673e502f0c27daa6b91f39cc298404b59ae2/xnet/xevolution/src/main/java/com/xtructure/xevolution/evolution/impl/AbstractReproductionStrategy.java#L156-L265">Reproduction, parent selection, and retry loop</a>.</li>
+<li><strong>J9:</strong> <a href="https://github.com/xtructure/xnet-public/blob/509c673e502f0c27daa6b91f39cc298404b59ae2/xnet/xevolution/src/main/java/com/xtructure/xevolution/operator/impl/AbstractOperatorSelecter.java#L90-L183">Operator selection and reset behavior</a>.</li>
+<li><strong>J10:</strong> <a href="https://github.com/xtructure/xnet-public/blob/509c673e502f0c27daa6b91f39cc298404b59ae2/xnet/xevolution/src/main/java/com/xtructure/xevolution/tool/data/DataTracker.java#L150-L238">Headless population and genealogy data tracking</a>.</li>
+<li><strong>J11:</strong> <a href="https://github.com/xtructure/xnet-public/blob/509c673e502f0c27daa6b91f39cc298404b59ae2/xnet/xevolution/src/main/java/com/xtructure/xevolution/genetics/impl/AbstractPopulation.java#L537-L579">Population statistics and historical-extrema handling</a>.</li>
+<li><strong>J12:</strong> <a href="https://github.com/xtructure/xnet-public/blob/509c673e502f0c27daa6b91f39cc298404b59ae2/xnet/xutil/src/main/java/com/xtructure/xutil/config/AbstractRangeXParameter.java#L66-L111">Range-based configuration parameter behavior</a>.</li>
+<li><strong>J13:</strong> <a href="https://github.com/xtructure/xnet-public/blob/509c673e502f0c27daa6b91f39cc298404b59ae2/xnet/xutil/src/main/java/com/xtructure/xutil/RandomUtil.java#L562-L578">Java weight normalization</a>.</li>
+<li><strong>J14:</strong> <a href="https://github.com/xtructure/xnet-public/blob/509c673e502f0c27daa6b91f39cc298404b59ae2/xnet/xevolution/src/main/java/com/xtructure/xevolution/evolution/impl/AbstractEvolutionExperiment.java#L123-L169">Java fresh-start and population-loading behavior</a>.</li>
+</ul>
+<h3 id="python-and-tooling-references">Python and tooling references</h3>
+<ul>
+<li><strong>P1:</strong> <a href="https://docs.astral.sh/uv/concepts/projects/layout/">uv project structure, environments, and lockfiles</a>.</li>
+<li><strong>P2:</strong> <a href="https://docs.python.org/3.12/library/typing.html#typing.Protocol">Python 3.12 typing and protocols</a>.</li>
+<li><strong>P3:</strong> <a href="https://packaging.python.org/en/latest/discussions/src-layout-vs-flat-layout/">Python Packaging User Guide: src layout</a>.</li>
+<li><strong>P4:</strong> <a href="https://docs.python.org/3.12/library/json.html">Python 3.12 JSON encoding and decoding</a>.</li>
+<li><strong>P5:</strong> <a href="https://docs.python.org/3.12/library/random.html">Python 3.12 random state and reproducibility</a>.</li>
+<li><strong>P6:</strong> <a href="https://docs.pytorch.org/docs/2.14/notes/randomness.html">PyTorch reproducibility limitations</a>.</li>
+<li><strong>P7:</strong> <a href="https://docs.python.org/3.12/library/os.html">Python 3.12 file synchronization and replacement operations</a>.</li>
+</ul>
+</article>
+<nav class="pagination" aria-label="Previous and next articles"><a class="previous" href="verification.html"><small>Previous</small><strong>Release verification</strong></a><a class="next" href="contributing.html"><small>Next</small><strong>Contributing</strong></a></nav>
+<footer class="page-footer">xevolution 0.1.1 documentation · <a href="building_docs.html">Build and edit these docs</a><br>Framework behavior is documented for the supplied Python port. See <a href="verification.html">release verification</a> for the scope of executed checks.</footer>
+</div>
+<aside class="page-toc"><nav aria-label="On this page"><div class="toc-title">On this page</div><ul class="toc-list"><li><a href="#contents">Contents</a></li><li><a href="#1-purpose-and-agreed-scope">1. Purpose and agreed scope</a></li><li class="subsection"><a href="#11-agreed-decisions">1.1 Agreed decisions</a></li><li class="subsection"><a href="#12-requirement-language">1.2 Requirement language</a></li><li><a href="#2-design-principles">2. Design principles</a></li><li class="subsection"><a href="#21-organize-by-responsibility">2.1 Organize by responsibility</a></li><li class="subsection"><a href="#22-separate-domain-calculations-from-bookkeeping">2.2 Separate domain calculations from bookkeeping</a></li><li class="subsection"><a href="#23-make-data-and-execution-independent">2.3 Make data and execution independent</a></li><li class="subsection"><a href="#24-keep-persistence-out-of-genetic-objects">2.4 Keep persistence out of genetic objects</a></li><li class="subsection"><a href="#25-make-reproducibility-an-explicit-contract">2.5 Make reproducibility an explicit contract</a></li><li class="subsection"><a href="#26-keep-the-initial-runtime-small">2.6 Keep the initial runtime small</a></li><li><a href="#3-repository-layout">3. Repository layout</a></li><li><a href="#4-python-modules-and-interactions">4. Python modules and interactions</a></li><li class="subsection"><a href="#41-shared-data-and-extension-contracts">4.1 Shared data and extension contracts</a></li><li class="subsection"><a href="#42-evolutionary-behavior">4.2 Evolutionary behavior</a></li><li class="subsection"><a href="#43-experiment-construction-persistence-and-tools">4.3 Experiment construction, persistence, and tools</a></li><li class="subsection"><a href="#44-dependency-and-ownership-rules">4.4 Dependency and ownership rules</a></li><li><a href="#5-data-model-and-ownership">5. Data model and ownership</a></li><li class="subsection"><a href="#51-principal-records">5.1 Principal records</a></li><li class="subsection"><a href="#52-identity-age-and-evaluation-status">5.2 Identity, age, and evaluation status</a></li><li class="subsection"><a href="#53-mutable-genotype-data">5.3 Mutable genotype data</a></li><li class="subsection"><a href="#54-metrics-and-metadata">5.4 Metrics and metadata</a></li><li><a href="#6-application-extension-contracts">6. Application extension contracts</a></li><li class="subsection"><a href="#61-required-separation-of-responsibilities">6.1 Required separation of responsibilities</a></li><li class="subsection"><a href="#62-individual-and-population-evaluation">6.2 Individual and population evaluation</a></li><li class="subsection"><a href="#63-stateful-components">6.3 Stateful components</a></li><li><a href="#7-generation-lifecycle-and-algorithms">7. Generation lifecycle and algorithms</a></li><li class="subsection"><a href="#71-fresh-initialization">7.1 Fresh initialization</a></li><li class="subsection"><a href="#72-a-generation-transition">7.2 A generation transition</a></li><li class="subsection"><a href="#73-default-policies">7.3 Default policies</a></li><li class="subsection"><a href="#74-selection-and-numerical-validity">7.4 Selection and numerical validity</a></li><li class="subsection"><a href="#75-bounded-operator-attempts">7.5 Bounded operator attempts</a></li><li class="subsection"><a href="#76-stopping-and-limits">7.6 Stopping and limits</a></li><li><a href="#8-json-configuration">8. JSON configuration</a></li><li class="subsection"><a href="#81-configuration-envelope">8.1 Configuration envelope</a></li><li class="subsection"><a href="#82-validation-and-effective-settings">8.2 Validation and effective settings</a></li><li class="subsection"><a href="#83-factory-resolution">8.3 Factory resolution</a></li><li><a href="#9-randomness-and-deterministic-execution">9. Randomness and deterministic execution</a></li><li class="subsection"><a href="#91-persistent-random-state">9.1 Persistent random state</a></li><li class="subsection"><a href="#92-stable-work-identities">9.2 Stable work identities</a></li><li class="subsection"><a href="#93-ordering">9.3 Ordering</a></li><li class="subsection"><a href="#94-application-responsibilities">9.4 Application responsibilities</a></li><li><a href="#10-checkpoint-and-recovery-contract">10. Checkpoint and recovery contract</a></li><li class="subsection"><a href="#101-required-guarantee">10.1 Required guarantee</a></li><li class="subsection"><a href="#102-exact-saved-boundary">10.2 Exact saved boundary</a></li><li class="subsection"><a href="#103-required-checkpoint-contents">10.3 Required checkpoint contents</a></li><li class="subsection"><a href="#104-serialization-and-attachments">10.4 Serialization and attachments</a></li><li class="subsection"><a href="#105-single-writer-commit-protocol">10.5 Single-writer commit protocol</a></li><li class="subsection"><a href="#106-restoration-and-incomplete-writes">10.6 Restoration and incomplete writes</a></li><li class="subsection"><a href="#107-limits-of-the-guarantee">10.7 Limits of the guarantee</a></li><li><a href="#11-tracking-genealogy-and-reporting">11. Tracking, genealogy, and reporting</a></li><li class="subsection"><a href="#111-scientific-records">11.1 Scientific records</a></li><li class="subsection"><a href="#112-statistics-and-historical-bests">11.2 Statistics and historical bests</a></li><li class="subsection"><a href="#113-report-projections">11.3 Report projections</a></li><li><a href="#12-command-line-interface-and-run-directories">12. Command-line interface and run directories</a></li><li class="subsection"><a href="#121-commands">12.1 Commands</a></li><li class="subsection"><a href="#122-run-directory-contents">12.2 Run directory contents</a></li><li><a href="#13-java-functionality-and-utility-migration">13. Java functionality and utility migration</a></li><li class="subsection"><a href="#131-main-functionality-mapping">13.1 Main functionality mapping</a></li><li class="subsection"><a href="#132-xnet-utility-behavior">13.2 Xnet utility behavior</a></li><li class="subsection"><a href="#133-documented-behavior-changes">13.3 Documented behavior changes</a></li><li><a href="#14-examples-and-documentation">14. Examples and documentation</a></li><li class="subsection"><a href="#141-example-modules">14.1 Example modules</a></li><li class="subsection"><a href="#142-documentation-files">14.2 Documentation files</a></li><li><a href="#15-verification-and-acceptance-criteria">15. Verification and acceptance criteria</a></li><li class="subsection"><a href="#151-test-modules">15.1 Test modules</a></li><li class="subsection"><a href="#152-decisive-continuation-test">15.2 Decisive continuation test</a></li><li class="subsection"><a href="#153-required-acceptance-cases">15.3 Required acceptance cases</a></li><li><a href="#16-implementation-sequence">16. Implementation sequence</a></li><li class="subsection"><a href="#increment-1-in-memory-evolution">Increment 1: In-memory evolution</a></li><li class="subsection"><a href="#increment-2-reliable-continuation">Increment 2: Reliable continuation</a></li><li class="subsection"><a href="#increment-3-headless-tools-and-documentation">Increment 3: Headless tools and documentation</a></li><li class="subsection"><a href="#initial-implementation-is-complete-when">Initial implementation is complete when</a></li><li><a href="#17-source-references">17. Source references</a></li><li class="subsection"><a href="#java-baseline-and-implementation-evidence">Java baseline and implementation evidence</a></li><li class="subsection"><a href="#python-and-tooling-references">Python and tooling references</a></li></ul></nav></aside>
+</div></main></div>
+</body></html>

@@ -1,0 +1,355 @@
+{
+  "browser": "151.0.7922.34",
+  "pages": 16,
+  "checks": [
+    {
+      "name": "page_render",
+      "page": "architecture.html",
+      "viewport": 1440,
+      "width": 1440,
+      "titles": 1,
+      "current": 1,
+      "searchVisible": true
+    },
+    {
+      "name": "page_render",
+      "page": "arithmetic_demo.html",
+      "viewport": 1440,
+      "width": 1440,
+      "titles": 1,
+      "current": 1,
+      "searchVisible": true
+    },
+    {
+      "name": "page_render",
+      "page": "batch_demo.html",
+      "viewport": 1440,
+      "width": 1440,
+      "titles": 1,
+      "current": 1,
+      "searchVisible": true
+    },
+    {
+      "name": "page_render",
+      "page": "building_docs.html",
+      "viewport": 1440,
+      "width": 1440,
+      "titles": 1,
+      "current": 1,
+      "searchVisible": true
+    },
+    {
+      "name": "page_render",
+      "page": "checkpointing.html",
+      "viewport": 1440,
+      "width": 1440,
+      "titles": 1,
+      "current": 1,
+      "searchVisible": true
+    },
+    {
+      "name": "page_render",
+      "page": "cli.html",
+      "viewport": 1440,
+      "width": 1440,
+      "titles": 1,
+      "current": 1,
+      "searchVisible": true
+    },
+    {
+      "name": "page_render",
+      "page": "configuration.html",
+      "viewport": 1440,
+      "width": 1440,
+      "titles": 1,
+      "current": 1,
+      "searchVisible": true
+    },
+    {
+      "name": "page_render",
+      "page": "contributing.html",
+      "viewport": 1440,
+      "width": 1440,
+      "titles": 1,
+      "current": 1,
+      "searchVisible": true
+    },
+    {
+      "name": "page_render",
+      "page": "digits_demo.html",
+      "viewport": 1440,
+      "width": 1440,
+      "titles": 1,
+      "current": 1,
+      "searchVisible": true
+    },
+    {
+      "name": "page_render",
+      "page": "examples.html",
+      "viewport": 1440,
+      "width": 1440,
+      "titles": 1,
+      "current": 1,
+      "searchVisible": true
+    },
+    {
+      "name": "page_render",
+      "page": "extensions.html",
+      "viewport": 1440,
+      "width": 1440,
+      "titles": 1,
+      "current": 1,
+      "searchVisible": true
+    },
+    {
+      "name": "page_render",
+      "page": "index.html",
+      "viewport": 1440,
+      "width": 1440,
+      "titles": 1,
+      "current": 1,
+      "searchVisible": true
+    },
+    {
+      "name": "page_render",
+      "page": "overview.html",
+      "viewport": 1440,
+      "width": 1440,
+      "titles": 1,
+      "current": 1,
+      "searchVisible": true
+    },
+    {
+      "name": "page_render",
+      "page": "port_specification.html",
+      "viewport": 1440,
+      "width": 1440,
+      "titles": 1,
+      "current": 1,
+      "searchVisible": true
+    },
+    {
+      "name": "page_render",
+      "page": "porting_notes.html",
+      "viewport": 1440,
+      "width": 1440,
+      "titles": 1,
+      "current": 1,
+      "searchVisible": true
+    },
+    {
+      "name": "page_render",
+      "page": "verification.html",
+      "viewport": 1440,
+      "width": 1440,
+      "titles": 1,
+      "current": 1,
+      "searchVisible": true
+    },
+    {
+      "name": "local_search",
+      "viewport": 1440,
+      "results": [
+        "index.html",
+        "overview.html",
+        "examples.html",
+        "digits_demo.html",
+        "verification.html",
+        "port_specification.html"
+      ],
+      "keyboard": true,
+      "navigation": true
+    },
+    {
+      "name": "section_navigation",
+      "viewport": 1440,
+      "fragment": "#what-happens-in-one-run",
+      "targetTop": 99.59375,
+      "headerBottom": 76
+    },
+    {
+      "name": "page_render",
+      "page": "architecture.html",
+      "viewport": 390,
+      "width": 390,
+      "titles": 1,
+      "current": 1,
+      "searchVisible": true
+    },
+    {
+      "name": "page_render",
+      "page": "arithmetic_demo.html",
+      "viewport": 390,
+      "width": 390,
+      "titles": 1,
+      "current": 1,
+      "searchVisible": true
+    },
+    {
+      "name": "page_render",
+      "page": "batch_demo.html",
+      "viewport": 390,
+      "width": 390,
+      "titles": 1,
+      "current": 1,
+      "searchVisible": true
+    },
+    {
+      "name": "page_render",
+      "page": "building_docs.html",
+      "viewport": 390,
+      "width": 390,
+      "titles": 1,
+      "current": 1,
+      "searchVisible": true
+    },
+    {
+      "name": "page_render",
+      "page": "checkpointing.html",
+      "viewport": 390,
+      "width": 390,
+      "titles": 1,
+      "current": 1,
+      "searchVisible": true
+    },
+    {
+      "name": "page_render",
+      "page": "cli.html",
+      "viewport": 390,
+      "width": 390,
+      "titles": 1,
+      "current": 1,
+      "searchVisible": true
+    },
+    {
+      "name": "page_render",
+      "page": "configuration.html",
+      "viewport": 390,
+      "width": 390,
+      "titles": 1,
+      "current": 1,
+      "searchVisible": true
+    },
+    {
+      "name": "page_render",
+      "page": "contributing.html",
+      "viewport": 390,
+      "width": 390,
+      "titles": 1,
+      "current": 1,
+      "searchVisible": true
+    },
+    {
+      "name": "page_render",
+      "page": "digits_demo.html",
+      "viewport": 390,
+      "width": 390,
+      "titles": 1,
+      "current": 1,
+      "searchVisible": true
+    },
+    {
+      "name": "page_render",
+      "page": "examples.html",
+      "viewport": 390,
+      "width": 390,
+      "titles": 1,
+      "current": 1,
+      "searchVisible": true
+    },
+    {
+      "name": "page_render",
+      "page": "extensions.html",
+      "viewport": 390,
+      "width": 390,
+      "titles": 1,
+      "current": 1,
+      "searchVisible": true
+    },
+    {
+      "name": "page_render",
+      "page": "index.html",
+      "viewport": 390,
+      "width": 390,
+      "titles": 1,
+      "current": 1,
+      "searchVisible": true
+    },
+    {
+      "name": "page_render",
+      "page": "overview.html",
+      "viewport": 390,
+      "width": 390,
+      "titles": 1,
+      "current": 1,
+      "searchVisible": true
+    },
+    {
+      "name": "page_render",
+      "page": "port_specification.html",
+      "viewport": 390,
+      "width": 390,
+      "titles": 1,
+      "current": 1,
+      "searchVisible": true
+    },
+    {
+      "name": "page_render",
+      "page": "porting_notes.html",
+      "viewport": 390,
+      "width": 390,
+      "titles": 1,
+      "current": 1,
+      "searchVisible": true
+    },
+    {
+      "name": "page_render",
+      "page": "verification.html",
+      "viewport": 390,
+      "width": 390,
+      "titles": 1,
+      "current": 1,
+      "searchVisible": true
+    },
+    {
+      "name": "local_search",
+      "viewport": 390,
+      "results": [
+        "index.html",
+        "overview.html",
+        "examples.html",
+        "digits_demo.html",
+        "verification.html",
+        "port_specification.html"
+      ],
+      "keyboard": true,
+      "navigation": true
+    },
+    {
+      "name": "mobile_navigation",
+      "viewport": 390,
+      "passed": true
+    },
+    {
+      "name": "section_navigation",
+      "viewport": 390,
+      "fragment": "#what-happens-in-one-run",
+      "targetTop": 135.6875,
+      "headerBottom": 111
+    },
+    {
+      "name": "javascript_disabled",
+      "viewport": 1440,
+      "content": true,
+      "navigation": true
+    },
+    {
+      "name": "javascript_disabled",
+      "viewport": 390,
+      "content": true,
+      "navigation": true
+    }
+  ],
+  "console_errors": [],
+  "network_requests": []
+}

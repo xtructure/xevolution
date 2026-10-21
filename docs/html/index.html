@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="xevolution documentation xevolution is a Python library for evolutionary computation. An application defines its candidates, evaluation, and variation operators; xevolution manages">
+<title>xevolution documentation · xevolution documentation</title>
+<link rel="stylesheet" href="assets/docs.css">
+<script defer src="assets/search-index.js"></script>
+<script defer src="assets/docs.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#xevo-main">Skip to content</a>
+<header class="site-header"><div class="header-inner">
+<a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">x</span><span class="brand-name">xevolution<span class="brand-note">Evolutionary computation · Python</span></span></a>
+<div class="header-right"><span class="version">v0.1.1</span>
+<div class="search-wrap" id="xevo-search" role="search" hidden>
+<label class="sr-only" for="xevo-search-input">Search documentation</label>
+<input id="xevo-search-input" type="search" placeholder="Search the documentation" autocomplete="off" aria-controls="xevo-search-results" aria-expanded="false">
+<kbd class="search-key" aria-hidden="true">/</kbd>
+<div id="xevo-search-results" class="search-results" role="region" aria-label="Search results" aria-live="polite" hidden></div>
+</div></div></div></header>
+<div class="layout">
+<details class="sidebar" id="xevo-navigation" open><summary>Browse documentation</summary>
+<nav aria-label="Documentation"><section class="nav-group"><h2 class="nav-heading">Start here</h2><ul><li><a href="index.html" aria-current="page">Documentation home</a></li><li><a href="overview.html">Package overview</a></li><li><a href="examples.html">Choose an example</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Example projects</h2><ul><li><a href="arithmetic_demo.html">Arithmetic expressions</a></li><li><a href="batch_demo.html">Shared resources</a></li><li><a href="digits_demo.html">Digits MLP</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Reference</h2><ul><li><a href="configuration.html">JSON configuration</a></li><li><a href="cli.html">Command line</a></li><li><a href="extensions.html">Application extensions</a></li><li><a href="architecture.html">Architecture &amp; ownership</a></li><li><a href="checkpointing.html">Checkpoints &amp; recovery</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Project</h2><ul><li><a href="porting_notes.html">Porting notes</a></li><li><a href="verification.html">Release verification</a></li><li><a href="port_specification.html">Port specification</a></li><li><a href="contributing.html">Contributing</a></li><li><a href="building_docs.html">Building these docs</a></li></ul></section></nav>
+<div class="sidebar-footer">Version 0.1.1<br>Offline reference documentation.<br>Markdown is the editable source.</div>
+</details>
+<main class="content" id="xevo-main"><div class="document-grid">
+<div class="article-column">
+<div class="page-meta"><div class="breadcrumb"><a href="index.html">Docs</a><span>/</span>Start here</div><a class="source-link" href="../markdown/index.md">Markdown source</a></div>
+<details class="compact-toc"><summary>On this page</summary><ul class="toc-list"><li><a href="#start-here">Start here</a></li><li><a href="#use-the-library">Use the library</a></li><li><a href="#understand-the-port-and-its-verification">Understand the port and its verification</a></li><li><a href="#read-either-edition">Read either edition</a></li></ul></details>
+<article class="document"><h1 id="xevolution-documentation">xevolution documentation</h1>
+<p><code>xevolution</code> is a Python library for evolutionary computation. An application defines its candidates, evaluation, and variation operators; xevolution manages the population, selection, identities, history, and checkpoint continuation. This documentation covers <strong>version 0.1.1</strong>, including all three example applications.</p>
+<h2 id="start-here">Start here</h2>
+<p>If you are new to the package, read the <a href="overview.html">overview</a> for the central concepts and a walkthrough of one evolutionary run. Then choose an example from the <a href="examples.html">examples guide</a>. Each example has its own explanation of the genotype, fitness, operators, configuration, commands, and results.</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Example</th>
+<th>What it demonstrates</th>
+<th>Guide</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Arithmetic expression search</td>
+<td>Evolve a bit string, decode its expression, and score its distance from a target</td>
+<td><a href="arithmetic_demo.html">Arithmetic expressions</a></td>
+</tr>
+<tr class="even">
+<td>Shared-resource choices</td>
+<td>Evaluate the whole population when each candidate's score depends on other candidates</td>
+<td><a href="batch_demo.html">Shared resources</a></td>
+</tr>
+<tr class="odd">
+<td>Digits neural architecture search</td>
+<td>Evolve hidden layers and activation, train a fresh MLP, and use validation accuracy as fitness</td>
+<td><a href="digits_demo.html">Digits MLP</a></td>
+</tr>
+</tbody>
+</table></div>
+<p>The arithmetic and shared-resource examples use only the Python standard library. The Digits example uses the optional <code>neural</code> dependency group and runs on CPU. Every Python dependency belongs in a project-local virtual environment managed by uv.</p>
+<h2 id="use-the-library">Use the library</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Question</th>
+<th>Documentation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>What does xevolution do, and how does a run work?</td>
+<td><a href="overview.html">Package overview</a></td>
+</tr>
+<tr class="even">
+<td>Which example should I start with?</td>
+<td><a href="examples.html">Three examples</a></td>
+</tr>
+<tr class="odd">
+<td>How do I change population size, selection, operators, or stopping?</td>
+<td><a href="configuration.html">JSON configuration</a></td>
+</tr>
+<tr class="even">
+<td>How do I run, pause, resume, inspect, or analyze an experiment?</td>
+<td><a href="cli.html">Command-line reference</a></td>
+</tr>
+<tr class="odd">
+<td>How do I supply my own genotype and evaluator?</td>
+<td><a href="extensions.html">Application extension contracts</a></td>
+</tr>
+<tr class="even">
+<td>Which module owns each responsibility?</td>
+<td><a href="architecture.html">Architecture and ownership</a></td>
+</tr>
+<tr class="odd">
+<td>What must be saved for reliable continuation?</td>
+<td><a href="checkpointing.html">Checkpointing and recovery</a></td>
+</tr>
+</tbody>
+</table></div>
+<p>Commands in these guides run from the <strong>source project root</strong>, containing <code>pyproject.toml</code>, <code>uv.lock</code>, and <code>examples/</code>. This documentation archive can be read independently; it does not contain the installable package or application source files. Use it alongside the full xevolution Python project.</p>
+<h2 id="understand-the-port-and-its-verification">Understand the port and its verification</h2>
+<p>The generic framework was ported from the Java Xnet <code>xevolution</code> sub-project. The new design uses Python composition, typed records, explicit JSON state, and application-defined extension contracts. NEAT, the graphical interface, the operator workbench, and compatibility with old Java runs are outside the agreed scope.</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Reference</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="porting_notes.html">Porting notes</a></td>
+<td>Java-to-Python mappings, utility migration, and deliberate algorithm corrections</td>
+</tr>
+<tr class="even">
+<td><a href="verification.html">Python release verification</a></td>
+<td>Executed 0.1.1 checks, installed-wheel tests, checkpoint tests, and measured Digits results</td>
+</tr>
+<tr class="odd">
+<td><a href="port_specification.html">Full port specification</a></td>
+<td>Agreed behavior, module design, algorithms, persistence, and acceptance criteria</td>
+</tr>
+<tr class="even">
+<td><a href="contributing.html">Contributor and agent guidelines</a></td>
+<td>Repository practices, uv environment policy, typing, testing, and state ownership</td>
+</tr>
+<tr class="odd">
+<td><a href="building_docs.html">Maintain and rebuild these docs</a></td>
+<td>The Markdown/HTML layout, offline HTML generation, validation, and source maintenance</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="read-either-edition">Read either edition</h2>
+<p>The Markdown edition starts at <code>docs/markdown/index.md</code>; the HTML edition starts at <code>docs/html/index.html</code>. The HTML edition includes local navigation, section links, highlighted code, and a search index. All reading assets are bundled, so opening it does not require a web server or an internet connection. External source references remain ordinary links to their original websites.</p>
+<p>Both editions share the same Markdown content. Edit the Markdown and rebuild the HTML using the <a href="building_docs.html">documentation build instructions</a>.</p>
+<p>The bundle retains the project's <a href="resources/LICENSE.txt">license text</a>, <a href="resources/LICENSE-GPL-3.0.txt">accompanying GPL text</a>, and <a href="resources/NOTICE.txt">source notice</a>.</p>
+</article>
+<nav class="pagination" aria-label="Previous and next articles"><span aria-hidden="true"></span><a class="next" href="overview.html"><small>Next</small><strong>Package overview</strong></a></nav>
+<footer class="page-footer">xevolution 0.1.1 documentation · <a href="building_docs.html">Build and edit these docs</a><br>Framework behavior is documented for the supplied Python port. See <a href="verification.html">release verification</a> for the scope of executed checks.</footer>
+</div>
+<aside class="page-toc"><nav aria-label="On this page"><div class="toc-title">On this page</div><ul class="toc-list"><li><a href="#start-here">Start here</a></li><li><a href="#use-the-library">Use the library</a></li><li><a href="#understand-the-port-and-its-verification">Understand the port and its verification</a></li><li><a href="#read-either-edition">Read either edition</a></li></ul></nav></aside>
+</div></main></div>
+</body></html>

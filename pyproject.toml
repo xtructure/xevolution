@@ -1,0 +1,52 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "xevolution"
+version = "0.1.1"
+description = "A representation-independent evolutionary computation framework"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "LGPL-3.0-or-later"
+license-files = ["LICENSE.txt", "LICENSE-GPL-3.0.txt", "NOTICE.txt"]
+dependencies = []
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Typing :: Typed",
+]
+
+[project.scripts]
+xevolution = "xevolution.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8,<10", "ruff>=0.11,<1", "mypy>=1.15,<3"]
+neural = [
+    "numpy>=2.2,<3",
+    "scikit-learn>=1.7,<2",
+    "threadpoolctl>=3.6,<4",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/xevolution"]
+
+[tool.hatch.build.targets.sdist]
+include = ["/src", "/examples", "/tests", "/docs", "/README.md", "/AGENTS.md", "/xevolution_python_port_spec.md", "/LICENSE*", "/NOTICE*", "/pyproject.toml", "/uv.lock", "/.python-version", "/.github"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "UP", "B"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["--import-mode=importlib"]
+markers = ["neural: optional Digits MLP example tests (requires the neural dependency group)"]

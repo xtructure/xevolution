@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Example projects The three examples use the same evolutionary engine with different representations and evaluation tasks. Start with arithmetic to see the basic contracts, continue">
+<title>Example projects · xevolution documentation</title>
+<link rel="stylesheet" href="assets/docs.css">
+<script defer src="assets/search-index.js"></script>
+<script defer src="assets/docs.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#xevo-main">Skip to content</a>
+<header class="site-header"><div class="header-inner">
+<a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">x</span><span class="brand-name">xevolution<span class="brand-note">Evolutionary computation · Python</span></span></a>
+<div class="header-right"><span class="version">v0.1.1</span>
+<div class="search-wrap" id="xevo-search" role="search" hidden>
+<label class="sr-only" for="xevo-search-input">Search documentation</label>
+<input id="xevo-search-input" type="search" placeholder="Search the documentation" autocomplete="off" aria-controls="xevo-search-results" aria-expanded="false">
+<kbd class="search-key" aria-hidden="true">/</kbd>
+<div id="xevo-search-results" class="search-results" role="region" aria-label="Search results" aria-live="polite" hidden></div>
+</div></div></div></header>
+<div class="layout">
+<details class="sidebar" id="xevo-navigation" open><summary>Browse documentation</summary>
+<nav aria-label="Documentation"><section class="nav-group"><h2 class="nav-heading">Start here</h2><ul><li><a href="index.html">Documentation home</a></li><li><a href="overview.html">Package overview</a></li><li><a href="examples.html" aria-current="page">Choose an example</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Example projects</h2><ul><li><a href="arithmetic_demo.html">Arithmetic expressions</a></li><li><a href="batch_demo.html">Shared resources</a></li><li><a href="digits_demo.html">Digits MLP</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Reference</h2><ul><li><a href="configuration.html">JSON configuration</a></li><li><a href="cli.html">Command line</a></li><li><a href="extensions.html">Application extensions</a></li><li><a href="architecture.html">Architecture &amp; ownership</a></li><li><a href="checkpointing.html">Checkpoints &amp; recovery</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Project</h2><ul><li><a href="porting_notes.html">Porting notes</a></li><li><a href="verification.html">Release verification</a></li><li><a href="port_specification.html">Port specification</a></li><li><a href="contributing.html">Contributing</a></li><li><a href="building_docs.html">Building these docs</a></li></ul></section></nav>
+<div class="sidebar-footer">Version 0.1.1<br>Offline reference documentation.<br>Markdown is the editable source.</div>
+</details>
+<main class="content" id="xevo-main"><div class="document-grid">
+<div class="article-column">
+<div class="page-meta"><div class="breadcrumb"><a href="index.html">Docs</a><span>/</span>Start here</div><a class="source-link" href="../markdown/examples.md">Markdown source</a></div>
+<details class="compact-toc"><summary>On this page</summary><ul class="toc-list"><li><a href="#choose-an-example">Choose an example</a></li><li><a href="#environment-and-commands">Environment and commands</a></li><li class="subsection"><a href="#arithmetic-a-compact-first-run">Arithmetic: a compact first run</a></li><li class="subsection"><a href="#shared-resources-a-population-that-affects-its-own-scores">Shared resources: a population that affects its own scores</a></li><li class="subsection"><a href="#digits-evolve-architecture-train-weights-measure-accuracy">Digits: evolve architecture, train weights, measure accuracy</a></li><li><a href="#settings-and-results-shared-by-all-three">Settings and results shared by all three</a></li><li><a href="#use-an-example-as-a-starting-point">Use an example as a starting point</a></li></ul></details>
+<article class="document"><h1 id="example-projects">Example projects</h1>
+<p>The three examples use the same evolutionary engine with different representations and evaluation tasks. Start with arithmetic to see the basic contracts, continue with shared resources to understand joint evaluation, and use Digits to explore architecture evolution with a training step inside the evaluator. The <a href="overview.html">package overview</a> introduces the common lifecycle.</p>
+<h2 id="choose-an-example">Choose an example</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Example</th>
+<th>Genotype</th>
+<th>Fitness</th>
+<th>Evaluation hook</th>
+<th>Main lesson</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="arithmetic_demo.html">Arithmetic expressions</a></td>
+<td>An immutable string of bits encoding operands and operators</td>
+<td><code>1 / (1 + absolute_error)</code>; invalid division receives zero</td>
+<td>Individual</td>
+<td>Separate a representation from its decoded behavior, then vary and score it</td>
+</tr>
+<tr class="even">
+<td><a href="batch_demo.html">Shared resources</a></td>
+<td>An integer identifying a resource</td>
+<td>Resource quality divided by current occupancy</td>
+<td>Whole population</td>
+<td>A candidate's score can depend on the other candidates present</td>
+</tr>
+<tr class="odd">
+<td><a href="digits_demo.html">Digits MLP</a></td>
+<td>Hidden-layer widths and an activation function</td>
+<td>Fraction of validation images classified correctly</td>
+<td>Individual</td>
+<td>Evolve architecture while ordinary training learns each candidate's weights</td>
+</tr>
+</tbody>
+</table></div>
+<p>Each application provides initialization, mutation, crossover, cloning, and an explicit genotype codec. The engine supplies IDs, evaluation accounting, selection, generations, stopping, genealogy, and checkpoints. The examples are application code in the source project; importing the core package does not import them or start a run.</p>
+<h2 id="environment-and-commands">Environment and commands</h2>
+<p>Run commands from the full xevolution project root, beside <code>pyproject.toml</code> and <code>examples/</code>. The standalone documentation archive does not contain an installed application environment. Use the repository-local <code>.venv</code> managed by uv, with <code>UV_PROJECT_ENVIRONMENT</code> unset or pointing to that directory.</p>
+<p>The arithmetic and shared-resource applications need only the standard library at runtime:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> python install 3.12</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> sync <span class="at">--locked</span> <span class="at">--group</span> dev</span></code></pre></div>
+<p>Digits uses an optional numerical dependency group:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> sync <span class="at">--locked</span> <span class="at">--group</span> dev <span class="at">--group</span> neural</span></code></pre></div>
+<p>Keep <code>--group neural</code> on Digits run, resume, and reporting commands so uv includes the required numerical dependencies. All three applications run on CPU. The core wheel retains an empty runtime dependency list.</p>
+<h3 id="arithmetic-a-compact-first-run">Arithmetic: a compact first run</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> python <span class="at">-m</span> xevolution run <span class="at">--config</span> examples/arithmetic.json <span class="at">--output</span> runs/arithmetic</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> python <span class="at">-m</span> xevolution inspect runs/arithmetic</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> python <span class="at">-m</span> xevolution analyze runs/arithmetic <span class="at">--output</span> reports/arithmetic</span></code></pre></div>
+<p>The supplied preset seeks the integer value 64 using expressions with ten operands. It uses 100 individuals, direct roulette parent selection, complete replacement, and an equal probability of choosing mutation or crossover. A mutation operation then considers each bit for flipping with probability 0.01. Those two probabilities serve different purposes.</p>
+<p>The stopping policy ends the run on an exact solution or at completed generation 200. It can stop at generation 0 if an initial candidate is already exact. Expression evaluation is left to right, and integer division truncates toward zero. The <a href="arithmetic_demo.html">full guide</a> explains why a printed expression must be interpreted using those rules.</p>
+<h3 id="shared-resources-a-population-that-affects-its-own-scores">Shared resources: a population that affects its own scores</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> python <span class="at">-m</span> xevolution run <span class="at">--config</span> examples/batch_problem.json <span class="at">--output</span> runs/shared-resources</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> python <span class="at">-m</span> xevolution inspect runs/shared-resources</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> python <span class="at">-m</span> xevolution analyze runs/shared-resources <span class="at">--output</span> reports/shared-resources</span></code></pre></div>
+<p>The preset contains 48 individuals choosing among four resources with qualities <code>[1.0, 1.8, 3.0, 5.0]</code>. It evaluates generations 0 through 12, giving 624 accepted individual results. Each generation uses one joint evaluator call to calculate occupancy and score the whole population.</p>
+<p>If five candidates choose the resource with quality 5.0, each receives fitness 1.0. If ten choose it, each receives 0.5. This makes the example useful for understanding why fitness cannot always be cached by genotype or calculated without the surrounding population. See the <a href="batch_demo.html">shared-resource guide</a> for operators, metrics, and interpretation of historical best observations.</p>
+<h3 id="digits-evolve-architecture-train-weights-measure-accuracy">Digits: evolve architecture, train weights, measure accuracy</h3>
+<p>Start with the quick preset:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> <span class="at">--group</span> neural python <span class="at">-m</span> xevolution run <span class="at">--config</span> examples/neural_digits_quick.json <span class="at">--output</span> runs/digits-quick</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> <span class="at">--group</span> neural python <span class="at">-m</span> examples.digits_report runs/digits-quick</span></code></pre></div>
+<p>Or use the normal preset:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> <span class="at">--group</span> neural python <span class="at">-m</span> xevolution run <span class="at">--config</span> examples/neural_digits.json <span class="at">--output</span> runs/digits</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> <span class="at">--group</span> neural python <span class="at">-m</span> examples.digits_report runs/digits <span class="at">--output</span> reports/digits.json</span></code></pre></div>
+<p>The genotype allows one to three hidden layers with 8, 16, 32, or 64 neurons per layer, and ReLU or tanh activation. Each candidate gets a fresh model, fixed training recipe, and the same split and training seeds. Accuracy on 400 validation images is the sole evolutionary fitness; final test images stay outside selection.</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Preset</th>
+<th style="text-align: right;">Population</th>
+<th>Evaluated generations</th>
+<th style="text-align: right;">Epochs per candidate</th>
+<th style="text-align: right;">Search evaluations</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Quick</td>
+<td style="text-align: right;">6</td>
+<td>0 through 3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">24</td>
+</tr>
+<tr class="even">
+<td>Normal</td>
+<td style="text-align: right;">8</td>
+<td>0 through 5</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">48</td>
+</tr>
+</tbody>
+</table></div>
+<p>The companion report requires a terminated run. It trains the selected architecture and a fixed 32-neuron ReLU baseline afresh with the original recipe, reproduces the selected architecture's saved validation score, and evaluates each model on the held-out test set once. These two fits are separate from evolutionary history. See the <a href="digits_demo.html">Digits walkthrough</a> for full details and <a href="verification.html">verification</a> for measured runtime and results.</p>
+<h2 id="settings-and-results-shared-by-all-three">Settings and results shared by all three</h2>
+<p>Application parameters live under <code>experiment.parameters</code> in each JSON configuration. The top-level <code>evolution</code> and <code>termination</code> sections control the framework. Changing a configuration is a way to start a new experiment; resume restores the recorded configuration instead of applying edits made afterward.</p>
+<p>All supplied presets use one finite scalar fitness and maximize it. Extra metrics are observations, not additional objectives. Generation 0 is included in evaluation counts, and every new population is evaluated in full. In the Digits presets this includes the retained elite, whose architecture is trained afresh in each generation.</p>
+<p>The core commands have the same meanings for every example:</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Command</th>
+<th>Work performed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>run</code></td>
+<td>Create and execute a fresh run using a new or empty output directory</td>
+</tr>
+<tr class="even">
+<td><code>resume</code></td>
+<td>Continue from an existing completed-generation checkpoint</td>
+</tr>
+<tr class="odd">
+<td><code>inspect</code></td>
+<td>Read settings, state, statistics, and compatibility metadata</td>
+</tr>
+<tr class="even">
+<td><code>analyze</code></td>
+<td>Export committed generations, observations, and genealogy without evaluating candidates</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>digits_report</code> is an additional application command with an explicit training and test-scoring step. It is not another name for the core <code>analyze</code> operation.</p>
+<p>To try pause and resume with the shared-resource example:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> python <span class="at">-m</span> xevolution run <span class="at">--config</span> examples/batch_problem.json <span class="at">--output</span> runs/shared-paused <span class="at">--pause-after-generation</span> 2</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> python <span class="at">-m</span> xevolution resume runs/shared-paused</span></code></pre></div>
+<p>The pause commits generation 2 and leaves the configured generation-12 stopping policy intact. The Digits guide gives equivalent commands with its optional dependency group. Exact continuation requires compatible code, data, numerical execution, and explicit component state; the full contract is in <a href="checkpointing.html">checkpointing and recovery</a>.</p>
+<h2 id="use-an-example-as-a-starting-point">Use an example as a starting point</h2>
+<p>Choose arithmetic when developing a new representation and simple independent scoring. Choose shared resources when the evaluator needs interactions or a common population context. Choose Digits when evaluation constructs and trains a temporary model, and the genotype should describe only the choices that evolution changes.</p>
+<p>Keep the framework's bookkeeping in the engine. Define your genotype's ownership and codec, validate application parameters in the factory, use the supplied random generators, and save every component field that affects future results. The <a href="extensions.html">extension guide</a> describes those contracts; the <a href="configuration.html">configuration reference</a> and <a href="cli.html">CLI reference</a> cover the reusable controls.</p>
+<p>Return to the <a href="index.html">documentation index</a>.</p>
+</article>
+<nav class="pagination" aria-label="Previous and next articles"><a class="previous" href="overview.html"><small>Previous</small><strong>Package overview</strong></a><a class="next" href="arithmetic_demo.html"><small>Next</small><strong>Arithmetic expressions</strong></a></nav>
+<footer class="page-footer">xevolution 0.1.1 documentation · <a href="building_docs.html">Build and edit these docs</a><br>Framework behavior is documented for the supplied Python port. See <a href="verification.html">release verification</a> for the scope of executed checks.</footer>
+</div>
+<aside class="page-toc"><nav aria-label="On this page"><div class="toc-title">On this page</div><ul class="toc-list"><li><a href="#choose-an-example">Choose an example</a></li><li><a href="#environment-and-commands">Environment and commands</a></li><li class="subsection"><a href="#arithmetic-a-compact-first-run">Arithmetic: a compact first run</a></li><li class="subsection"><a href="#shared-resources-a-population-that-affects-its-own-scores">Shared resources: a population that affects its own scores</a></li><li class="subsection"><a href="#digits-evolve-architecture-train-weights-measure-accuracy">Digits: evolve architecture, train weights, measure accuracy</a></li><li><a href="#settings-and-results-shared-by-all-three">Settings and results shared by all three</a></li><li><a href="#use-an-example-as-a-starting-point">Use an example as a starting point</a></li></ul></nav></aside>
+</div></main></div>
+</body></html>

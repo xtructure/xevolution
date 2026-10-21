@@ -1,0 +1,147 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Python ${{ matrix.python-version }} (${{ matrix.channel }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13", "3.14"]
+        channel: [stable]
+        include:
+          - python-version: "3.15.0rc3"
+            channel: preview
+    env:
+      UV_PROJECT_ENVIRONMENT: .venv
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install reviewed uv and select the matrix interpreter
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: "0.12.23"
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+
+      - name: Install the locked development environment
+        run: uv sync --locked --group dev
+
+      - name: Verify the project interpreter
+        env:
+          EXPECTED_PYTHON: ${{ matrix.python-version }}
+        run: |
+          uv --version
+          uv run --locked --group dev python - <<'PY'
+          import os
+          import platform
+          import sys
+          from pathlib import Path
+
+          assert sys.prefix != sys.base_prefix
+          assert Path(sys.prefix).resolve() == Path(".venv").resolve()
+          requested = os.environ["EXPECTED_PYTHON"]
+          actual = platform.python_version()
+          assert actual == requested or actual.startswith(requested + ".")
+          print(sys.executable)
+          print(sys.version)
+          PY
+
+      - name: Check formatting
+        run: uv run --locked --group dev ruff format --check .
+
+      - name: Lint
+        run: uv run --locked --group dev ruff check .
+
+      - name: Check library types
+        run: uv run --locked --group dev mypy src/xevolution
+
+      - name: Run behavioral and recovery tests
+        run: uv run --locked --group dev python -m pytest
+
+      - name: Build the source distribution and wheel
+        run: uv build
+
+      - name: Verify the exact wheel outside the checkout
+        shell: bash
+        env:
+          XEVO_SMOKE_PYTHON: ${{ matrix.python-version }}
+        run: |
+          smoke_root="$(mktemp -d "$RUNNER_TEMP/xevolution-wheel-XXXXXX")"
+          trap 'rm -rf -- "$smoke_root"' EXIT
+          wheel_paths=("$GITHUB_WORKSPACE"/dist/xevolution-*.whl)
+          test "${#wheel_paths[@]}" -eq 1
+          uv venv --python "$XEVO_SMOKE_PYTHON" "$smoke_root/.venv"
+          uv pip install --python "$smoke_root/.venv/bin/python" --no-deps "${wheel_paths[0]}"
+          cd "$smoke_root"
+          "$smoke_root/.venv/bin/python" -I - <<'PY'
+          import sys
+          from importlib.resources import files
+          from pathlib import Path
+
+          import xevolution
+          from xevolution.engine import Engine
+
+          package_path = Path(xevolution.__file__).resolve()
+          assert sys.prefix != sys.base_prefix
+          assert package_path.is_relative_to(Path(sys.prefix).resolve()), package_path
+          assert files("xevolution").joinpath("py.typed").is_file()
+          assert callable(Engine.create)
+          print(f"Installed wheel: {package_path}")
+          print(f"Version: {xevolution.__version__}")
+          PY
+          "$smoke_root/.venv/bin/xevolution" --version
+          "$smoke_root/.venv/bin/xevolution" --help
+          "$smoke_root/.venv/bin/python" -I -m xevolution --version
+          "$smoke_root/.venv/bin/python" -I -m xevolution --help
+
+  neural:
+    name: Digits example / Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13", "3.14"]
+    env:
+      UV_PROJECT_ENVIRONMENT: .venv
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install reviewed uv and select the matrix interpreter
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: "0.12.23"
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+      - name: Install locked numerical example dependencies
+        run: uv sync --locked --group dev --group neural
+      - name: Verify interpreter isolation
+        run: |
+          uv run --locked --group dev --group neural python - <<'PY'
+          import sys
+          from pathlib import Path
+
+          assert sys.prefix != sys.base_prefix
+          assert Path(sys.prefix).resolve() == Path(".venv").resolve()
+          print(sys.executable)
+          print(sys.version)
+          PY
+      - name: Test accuracy scoring, operators, final reports, and fresh-process resume
+        run: uv run --locked --group dev --group neural python -m pytest -m neural
+      - name: Run the documented quick preset and held-out report
+        run: |
+          uv run --locked --group neural python -m xevolution run --config examples/neural_digits_quick.json --output runs/digits-ci
+          uv run --locked --group neural python -m examples.digits_report runs/digits-ci --output reports/digits-ci.json

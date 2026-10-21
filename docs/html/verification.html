@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Verification report: xevolution 0.1.1 This is the preserved Python release verification, recorded before the documentation was reorganized into Markdown and HTML editions. Its whee">
+<title>Verification report: xevolution 0.1.1 · xevolution documentation</title>
+<link rel="stylesheet" href="assets/docs.css">
+<script defer src="assets/search-index.js"></script>
+<script defer src="assets/docs.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#xevo-main">Skip to content</a>
+<header class="site-header"><div class="header-inner">
+<a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">x</span><span class="brand-name">xevolution<span class="brand-note">Evolutionary computation · Python</span></span></a>
+<div class="header-right"><span class="version">v0.1.1</span>
+<div class="search-wrap" id="xevo-search" role="search" hidden>
+<label class="sr-only" for="xevo-search-input">Search documentation</label>
+<input id="xevo-search-input" type="search" placeholder="Search the documentation" autocomplete="off" aria-controls="xevo-search-results" aria-expanded="false">
+<kbd class="search-key" aria-hidden="true">/</kbd>
+<div id="xevo-search-results" class="search-results" role="region" aria-label="Search results" aria-live="polite" hidden></div>
+</div></div></div></header>
+<div class="layout">
+<details class="sidebar" id="xevo-navigation" open><summary>Browse documentation</summary>
+<nav aria-label="Documentation"><section class="nav-group"><h2 class="nav-heading">Start here</h2><ul><li><a href="index.html">Documentation home</a></li><li><a href="overview.html">Package overview</a></li><li><a href="examples.html">Choose an example</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Example projects</h2><ul><li><a href="arithmetic_demo.html">Arithmetic expressions</a></li><li><a href="batch_demo.html">Shared resources</a></li><li><a href="digits_demo.html">Digits MLP</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Reference</h2><ul><li><a href="configuration.html">JSON configuration</a></li><li><a href="cli.html">Command line</a></li><li><a href="extensions.html">Application extensions</a></li><li><a href="architecture.html">Architecture &amp; ownership</a></li><li><a href="checkpointing.html">Checkpoints &amp; recovery</a></li></ul></section><section class="nav-group"><h2 class="nav-heading">Project</h2><ul><li><a href="porting_notes.html">Porting notes</a></li><li><a href="verification.html" aria-current="page">Release verification</a></li><li><a href="port_specification.html">Port specification</a></li><li><a href="contributing.html">Contributing</a></li><li><a href="building_docs.html">Building these docs</a></li></ul></section></nav>
+<div class="sidebar-footer">Version 0.1.1<br>Offline reference documentation.<br>Markdown is the editable source.</div>
+</details>
+<main class="content" id="xevo-main"><div class="document-grid">
+<div class="article-column">
+<div class="page-meta"><div class="breadcrumb"><a href="index.html">Docs</a><span>/</span>Project</div><a class="source-link" href="../markdown/verification.md">Markdown source</a></div>
+<details class="compact-toc"><summary>On this page</summary><ul class="toc-list"><li><a href="#executed-release-checks">Executed release checks</a></li><li class="subsection"><a href="#interpreter-scope-and-prior-verification">Interpreter scope and prior verification</a></li><li><a href="#exact-installed-wheel-verification">Exact installed-wheel verification</a></li><li><a href="#digits-cpu-measurements">Digits CPU measurements</a></li><li class="subsection"><a href="#method-and-numerical-environment">Method and numerical environment</a></li><li class="subsection"><a href="#complete-preset-runs">Complete preset runs</a></li><li><a href="#checkpoint-and-acceptance-evidence">Checkpoint and acceptance evidence</a></li><li><a href="#tools-and-reproduction">Tools and reproduction</a></li></ul></details>
+<article class="document"><h1 id="verification-report-xevolution-011">Verification report: xevolution 0.1.1</h1>
+<p>This is the preserved <strong>Python release verification</strong>, recorded before the documentation was reorganized into Markdown and HTML editions. Its wheel, source, and lockfile hashes describe that tested release. New documentation build and link checks are recorded separately in the <a href="building_docs.html">documentation build guide</a>; they do not replace or rerun the release checks below.</p>
+<p>Verified on <strong>2026-10-21 (UTC)</strong> using <strong>CPython 3.12.14 on Linux x86-64</strong>. This report records executed local checks for version 0.1.1. The accompanying <a href="verification.json">verification.json</a> contains the test counts, environment, wheel identity, source hashes, and complete Digits measurements. See the <a href="digits_demo.html">Digits walkthrough</a> for installation and run instructions.</p>
+<h2 id="executed-release-checks">Executed release checks</h2>
+<p>All three test runs below completed with zero failures and zero errors.</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Test environment</th>
+<th style="text-align: right;">Passed</th>
+<th style="text-align: right;">Skipped</th>
+<th style="text-align: right;">Elapsed time</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Source checkout, development and neural dependencies</td>
+<td style="text-align: right;">246</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">11.96 s</td>
+</tr>
+<tr class="even">
+<td>Installed wheel, without numerical dependencies</td>
+<td style="text-align: right;">196</td>
+<td style="text-align: right;">2 modules</td>
+<td style="text-align: right;">4.36 s</td>
+</tr>
+<tr class="odd">
+<td>Installed wheel, with neural dependencies</td>
+<td style="text-align: right;">246</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">13.87 s</td>
+</tr>
+</tbody>
+</table></div>
+<p>The two collection skips are the optional neural example and reporting test modules. The core suite runs successfully without NumPy, scikit-learn, SciPy, or threadpoolctl. With the optional group installed, all 50 additional neural and reporting tests run.</p>
+<p>Ruff formatting passed for 47 Python files, and Ruff linting was clean. Strict mypy passed for 21 files: the core package and both neural example modules. <code>uv build --offline</code> produced the version 0.1.1 wheel and source distribution. Both complete Digits presets and their final reports ran through the public command-line interfaces; their measured results appear below.</p>
+<h3 id="interpreter-scope-and-prior-verification">Interpreter scope and prior verification</h3>
+<p>The current release was exercised locally on CPython 3.12.14 only. Version <strong>0.1.0</strong> had previously passed its then-complete 196-test suite on CPython 3.12.14, 3.13.16, 3.14.8, and the 3.15.0rc3 release candidate. Those historical checks predate this release's neural example and do not establish that the 0.1.1 suite has run on those other interpreters.</p>
+<p>The included <a href="resources/ci.yml">reference GitHub Actions workflow</a> configures core jobs for Python 3.12, 3.13, 3.14, and the named 3.15 release-candidate preview, plus neural jobs for Python 3.12, 3.13, and 3.14. <strong>Hosted CI was not executed for this delivery.</strong> macOS and Windows were not exercised locally. Support for several Python versions does not imply that checkpoints can be transferred between them with identical continuation.</p>
+<h2 id="exact-installed-wheel-verification">Exact installed-wheel verification</h2>
+<p>The built wheel was installed into a disposable environment created with uv. The test working directory, outside the original checkout, contained copies of <code>tests/</code>, <code>examples/</code>, and <code>pyproject.toml</code>, with no <code>src/</code> package. Tests ran through that environment's interpreter directly. They first ran without the optional numerical dependencies and then with the neural dependencies installed. Both runs exercised the installed core wheel.</p>
+<p>The checks confirmed:</p>
+<ul>
+<li><code>import xevolution</code> resolved inside that environment's <code>site-packages</code>.</li>
+<li>The wheel contained <code>py.typed</code> and declared no core runtime dependencies.</li>
+<li>The console entry point and <code>python -m xevolution</code> passed both <code>--help</code> and <code>--version</code>.</li>
+<li>All 196 core tests passed without the numerical stack; all 246 tests passed once the neural dependencies were present.</li>
+<li>All 20 package files, including <code>py.typed</code>, were byte-identical between the delivered source package and the tested wheel.</li>
+</ul>
+<p>The tested wheel is <code>xevolution-0.1.1-py3-none-any.whl</code>, with SHA-256:</p>
+<pre class="text"><code>f8f498f503f4742303ffde8c006c3352bd99812ccffdadc017244c1cfd8bd9a6</code></pre>
+<p>Example applications are included in the source distribution and project archive. They are not installed inside the core wheel; the copied examples above provide application factories for the installed-wheel tests.</p>
+<h2 id="digits-cpu-measurements">Digits CPU measurements</h2>
+<h3 id="method-and-numerical-environment">Method and numerical environment</h3>
+<p>Measurements used the Linux environment above, with glibc 2.39, NumPy 2.5.4, SciPy 1.18.1, scikit-learn 1.9.1, and threadpoolctl 3.7.0. The recorded OpenBLAS backends reported versions <code>0.3.31.dev</code> and <code>0.3.34.106.0</code>, both with the <code>SkylakeX</code> dispatch architecture. Each BLAS backend was limited to one thread during numerical work. This backend label is not a measurement of a particular laptop's processor performance.</p>
+<p>For each fixed architecture below, three fresh complete evaluator calls were timed sequentially with a monotonic performance counter. Data and epoch orders were prepared beforehand. Each call included model construction, training, validation prediction, accuracy calculation, and returned metrics. There was no warmup fit, fitted-model cache, or concurrent project test run. Imports, evaluator setup, and checkpoint I/O are outside these per-candidate timings; data preparation was timed separately at about <strong>0.014 seconds</strong>.</p>
+<p>These calls used the normal recipe: 1,000 training images, 400 validation images, 30 epochs, batch size 128, learning rate 0.001, regularization 0.0001, split seed 17, and training seed 23. The architectures were fixed timing probes measured independently of the two evolutionary presets.</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Hidden layers and activation</th>
+<th style="text-align: right;">Parameters</th>
+<th style="text-align: right;">Median of 3 calls</th>
+<th style="text-align: right;">Largest observed call</th>
+<th style="text-align: right;">Validation accuracy on all 3 calls</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>[32]</code>, ReLU</td>
+<td style="text-align: right;">2,410</td>
+<td style="text-align: right;">0.105 s</td>
+<td style="text-align: right;">0.105 s</td>
+<td style="text-align: right;">86.75%</td>
+</tr>
+<tr class="even">
+<td><code>[64, 64, 64]</code>, ReLU</td>
+<td style="text-align: right;">13,130</td>
+<td style="text-align: right;">0.217 s</td>
+<td style="text-align: right;">0.223 s</td>
+<td style="text-align: right;">94.75%</td>
+</tr>
+<tr class="odd">
+<td><code>[64, 64, 64]</code>, tanh</td>
+<td style="text-align: right;">13,130</td>
+<td style="text-align: right;">0.210 s</td>
+<td style="text-align: right;">0.235 s</td>
+<td style="text-align: right;">95.00%</td>
+</tr>
+</tbody>
+</table></div>
+<p>The largest observed time is the largest of three measurements, not a runtime bound. These results describe this execution environment; they do not guarantee a time limit on another machine or under another workload.</p>
+<h3 id="complete-preset-runs">Complete preset runs</h3>
+<p>Each preset was run once with its recorded evolutionary seed of 42. Search timing covered a fresh CLI process, including interpreter/library startup, data preparation, every candidate evaluation, and generation checkpoint I/O. The report was timed as a separate fresh process, including startup, its two new model fits, validation/test scoring, and JSON output. Dependency installation was outside both timers.</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Preset</th>
+<th>Evaluated generations</th>
+<th style="text-align: right;">Candidate fits</th>
+<th style="text-align: right;">Epochs per fit</th>
+<th style="text-align: right;">Search time</th>
+<th style="text-align: right;">Additional report time</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Quick</td>
+<td>0 through 3</td>
+<td style="text-align: right;">24</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">2.64 s</td>
+<td style="text-align: right;">1.45 s</td>
+</tr>
+<tr class="even">
+<td>Normal</td>
+<td>0 through 5</td>
+<td style="text-align: right;">48</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">7.95 s</td>
+<td style="text-align: right;">1.38 s</td>
+</tr>
+</tbody>
+</table></div>
+<p>Generation 0 and reevaluated elites are included in the candidate-fit counts. The report's two fits are separate from evolutionary evaluation accounting. It reproduced each selected architecture's saved validation accuracy before scoring the selected model and fixed baseline on the 397 held-out test images.</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Preset and model</th>
+<th>Hidden layers and activation</th>
+<th>Validation correct / total</th>
+<th>Test correct / total</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Quick: selected</td>
+<td><code>[64, 64]</code>, tanh</td>
+<td>354 / 400 (88.50%)</td>
+<td>360 / 397 (90.68%)</td>
+</tr>
+<tr class="even">
+<td>Quick: fixed baseline</td>
+<td><code>[32]</code>, ReLU</td>
+<td>260 / 400 (65.00%)</td>
+<td>267 / 397 (67.25%)</td>
+</tr>
+<tr class="odd">
+<td>Normal: selected</td>
+<td><code>[64, 32, 64]</code>, tanh</td>
+<td>378 / 400 (94.50%)</td>
+<td>385 / 397 (96.98%)</td>
+</tr>
+<tr class="even">
+<td>Normal: fixed baseline</td>
+<td><code>[32]</code>, ReLU</td>
+<td>347 / 400 (86.75%)</td>
+<td>366 / 397 (92.19%)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Each baseline used the same training partition and epoch budget as its preset. Test scores did not select the architectures. These are demonstration results from one fixed split and one evolutionary seed per preset, not an estimate of expected search quality across seeds or datasets. Short training budgets affect which architectures perform well; the measurements do not establish general architecture-search superiority. Complete unrounded timings, fingerprints, and report fields are retained under <code>digits_demo</code> in <a href="verification.json">verification.json</a>.</p>
+<h2 id="checkpoint-and-acceptance-evidence">Checkpoint and acceptance evidence</h2>
+<p><code>tests/test_resume.py</code> launches independent processes and compares uninterrupted execution with restoration at generations 0 and 3. It compares the complete logical checkpoint body, committed scientific history, and attachment bytes, excluding only operational run IDs. Processes use different <code>PYTHONHASHSEED</code> values. The application exercises opaque mutable genotypes, explicit binary codecs and cloning, shared stateful components, application RNG state, managed RNG Gaussian caches, sampled construction settings, adaptive operator weights, changing population sizes, elitism, and a stateful stopping window.</p>
+<p>A separate process exits abruptly during generation 2. Recovery restores generation 1, removes an injected uncommitted journal tail, and reaches the same final state and history. Other tests confirm that saved-generation evaluation, adaptive callbacks, and stopping are not repeated, and that terminal resume does not change scientific files.</p>
+<p>The neural suite adds real small MLP fits and fresh-process restoration from generations 0 and 1, comparing all logical state and scientific history. It checks deterministic repeated training, strict architecture/settings/state validation, parent independence, disjoint data splits, and a sentinel that fails if search accesses test arrays. Reporting tests verify the saved validation score, two fixed test evaluations, repeatable reports, and unchanged run files.</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr class="header">
+<th>Specification cases</th>
+<th>Executed evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A01–A02: installation and evaluation hooks</td>
+<td>Exact-wheel checks, arithmetic and joint population evaluation, and CLI tests.</td>
+</tr>
+<tr class="even">
+<td>A03–A04: population construction and ownership</td>
+<td>Parent/survivor separation, monotonic IDs, age, full reevaluation, and next-transition settings.</td>
+</tr>
+<tr class="odd">
+<td>A05–A06: corrected algorithms</td>
+<td>Signed/all-zero/extreme weights, explicit fallbacks, bounded retries, route validation, and programming-error propagation.</td>
+</tr>
+<tr class="even">
+<td>A07: retained observations</td>
+<td>Independent best clones, immutable journal records, and per-metric contributing counts.</td>
+</tr>
+<tr class="odd">
+<td>A08–A09: restoration boundary</td>
+<td>New-process comparisons, saved callback/stopping state, and abrupt mid-generation exit.</td>
+</tr>
+<tr class="even">
+<td>A10–A11: persistence and recovery</td>
+<td>Real files, writer exclusion, synchronization/replacement failure injection, tail truncation, and corrupt/missing history or attachments.</td>
+</tr>
+<tr class="odd">
+<td>A12: repeatable analysis</td>
+<td>Repeated analysis without duplicate generations, births, or genealogy edges.</td>
+</tr>
+<tr class="even">
+<td>A13: complete explicit state</td>
+<td>RNG/configuration restoration, original factory construction state, shared-component alias topology, codec identity, and incompatibility rejection.</td>
+</tr>
+<tr class="odd">
+<td>A14: distinct CLI operations</td>
+<td>Fresh-output protection, explicit/terminal resume, inspection without application imports, analysis, and a real signal during generation-0 evaluation.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Component tests also reject obvious hidden mutable or unregistered stateful captures, unmanaged RNG references, and payload decoding that changes restored component state. Exact continuation still depends on complete application state and compatible code, data, and numerical execution. It does not promise exactly-once external side effects for uncommitted work or numerical equality across platforms. See <a href="checkpointing.html">checkpointing.md</a> and <a href="extensions.html">extensions.md</a> for the application contracts.</p>
+<h2 id="tools-and-reproduction">Tools and reproduction</h2>
+<p>The verified development tools were uv 0.12.23, pytest 9.1.1, Ruff 0.17.1, and mypy 2.4.0. All Python dependencies were installed in environments managed by uv. To repeat the complete source checks from the project root:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> sync <span class="at">--locked</span> <span class="at">--group</span> dev <span class="at">--group</span> neural</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> <span class="at">--group</span> dev <span class="at">--group</span> neural ruff format <span class="at">--check</span> .</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> <span class="at">--group</span> dev <span class="at">--group</span> neural ruff check .</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> <span class="at">--group</span> dev <span class="at">--group</span> neural mypy src/xevolution examples/neural_digits.py examples/digits_report.py</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run <span class="at">--locked</span> <span class="at">--group</span> dev <span class="at">--group</span> neural python <span class="at">-m</span> pytest</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> build</span></code></pre></div>
+<p>The executed build used <code>uv build --offline</code> after uv had populated its isolated build cache. Build requirements are declared in <code>pyproject.toml</code>; the lockfile records project and development dependency resolution. Isolated build dependencies are managed by uv and are not claimed to be fully pinned by <code>uv.lock</code>. Full preset and pause/resume commands are in <a href="digits_demo.html">digits_demo.md</a>.</p>
+<p>The generic port follows the included specification and Java baseline commit <code>509c673e502f0c27daa6b91f39cc298404b59ae2</code>. Source mappings, deliberate corrections, and retained licensing are described in <a href="porting_notes.html">porting_notes.md</a>. NEAT, graphical/workbench components, and Java file/run compatibility remain outside the agreed port.</p>
+</article>
+<nav class="pagination" aria-label="Previous and next articles"><a class="previous" href="porting_notes.html"><small>Previous</small><strong>Porting notes</strong></a><a class="next" href="port_specification.html"><small>Next</small><strong>Port specification</strong></a></nav>
+<footer class="page-footer">xevolution 0.1.1 documentation · <a href="building_docs.html">Build and edit these docs</a><br>Framework behavior is documented for the supplied Python port. See <a href="verification.html">release verification</a> for the scope of executed checks.</footer>
+</div>
+<aside class="page-toc"><nav aria-label="On this page"><div class="toc-title">On this page</div><ul class="toc-list"><li><a href="#executed-release-checks">Executed release checks</a></li><li class="subsection"><a href="#interpreter-scope-and-prior-verification">Interpreter scope and prior verification</a></li><li><a href="#exact-installed-wheel-verification">Exact installed-wheel verification</a></li><li><a href="#digits-cpu-measurements">Digits CPU measurements</a></li><li class="subsection"><a href="#method-and-numerical-environment">Method and numerical environment</a></li><li class="subsection"><a href="#complete-preset-runs">Complete preset runs</a></li><li><a href="#checkpoint-and-acceptance-evidence">Checkpoint and acceptance evidence</a></li><li><a href="#tools-and-reproduction">Tools and reproduction</a></li></ul></nav></aside>
+</div></main></div>
+</body></html>
